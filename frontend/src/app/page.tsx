@@ -1,0 +1,107 @@
+"use client";
+
+import { useEffect } from "react";
+import { useNavigation, initHashRouter, type PageId } from "@/stores/navigation";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { FloatingButtons } from "@/components/layout/FloatingButtons";
+import { HomePage } from "@/components/home/HomePage";
+import { BuyPage } from "@/components/pages/BuyPage";
+import { SellPage } from "@/components/pages/SellPage";
+import { VehicleDetailsPage } from "@/components/pages/VehicleDetailsPage";
+import { ComparisonPage } from "@/components/pages/ComparisonPage";
+import { InstantSalePage } from "@/components/pages/InstantSalePage";
+import { SpecialSalePage } from "@/components/pages/SpecialSalePage";
+import { BrandsPage } from "@/components/pages/BrandsPage";
+import { DealershipsPage } from "@/components/pages/DealershipsPage";
+import { DealershipDetailPage } from "@/components/pages/DealershipDetailPage";
+import { GalleriesPage } from "@/components/pages/GalleriesPage";
+import { GalleryDetailPage } from "@/components/pages/GalleryDetailPage";
+import { ServicesPage } from "@/components/pages/ServicesPage";
+import { VideosPage } from "@/components/pages/VideosPage";
+import { BlogPage } from "@/components/pages/BlogPage";
+import { ArticleDetailPage } from "@/components/pages/ArticleDetailPage";
+import { VideoDetailPage } from "@/components/pages/VideoDetailPage";
+import { FAQPage } from "@/components/pages/FAQPage";
+import { AboutPage } from "@/components/pages/AboutPage";
+import { ContactPage } from "@/components/pages/ContactPage";
+import { LoginPage } from "@/components/pages/LoginPage";
+import { RegisterPage } from "@/components/pages/RegisterPage";
+import { ForgotPasswordPage } from "@/components/pages/ForgotPasswordPage";
+import { AccountTypePage } from "@/components/pages/AccountTypePage";
+import { BuyerDashboardPage } from "@/components/pages/BuyerDashboardPage";
+import { SellerDashboardPage } from "@/components/pages/SellerDashboardPage";
+import { GalleryDashboardPage } from "@/components/pages/GalleryDashboardPage";
+import { ExpertDashboardPage } from "@/components/pages/ExpertDashboardPage";
+import { AdminDashboardPage } from "@/components/pages/AdminDashboardPage";
+import { TariffsPage } from "@/components/pages/TariffsPage";
+import { FavoritesPage } from "@/components/pages/FavoritesPage";
+import { OrgPanelPage } from "@/components/pages/OrgPanelPage";
+import { SmartVehicleIDPage } from "@/components/pages/SmartVehicleIDPage";
+import { TermsPage } from "@/components/pages/TermsPage";
+import { PrivacyPage } from "@/components/pages/PrivacyPage";
+
+const pageComponents: Record<PageId, React.ComponentType> = {
+  home: HomePage,
+  buy: BuyPage,
+  sell: SellPage,
+  'post-listing': SellPage,
+  'vehicle-details': VehicleDetailsPage,
+  comparison: ComparisonPage,
+  'instant-sale': InstantSalePage,
+  'special-sale': SpecialSalePage,
+  favorites: FavoritesPage,
+  brands: BrandsPage,
+  'brand-detail': BrandsPage,
+  dealerships: DealershipsPage,
+  'dealership-detail': DealershipDetailPage,
+  galleries: GalleriesPage,
+  'gallery-detail': GalleryDetailPage,
+  services: ServicesPage,
+  'ownership-transfer': ServicesPage,
+  transportation: ServicesPage,
+  inspection: ServicesPage,
+  consultation: ServicesPage,
+  videos: VideosPage,
+  blog: BlogPage,
+  'article-detail': ArticleDetailPage,
+  'video-detail': VideoDetailPage,
+  faq: FAQPage,
+  about: AboutPage,
+  contact: ContactPage,
+  login: LoginPage,
+  register: RegisterPage,
+  'forgot-password': ForgotPasswordPage,
+  'account-type': AccountTypePage,
+  'buyer-dashboard': BuyerDashboardPage,
+  'seller-dashboard': SellerDashboardPage,
+  'gallery-dashboard': GalleryDashboardPage,
+  'expert-dashboard': ExpertDashboardPage,
+  'admin-dashboard': AdminDashboardPage,
+  tariffs: TariffsPage,
+  'org-panel': OrgPanelPage,
+  'smart-id': SmartVehicleIDPage,
+  terms: TermsPage,
+  privacy: PrivacyPage,
+};
+
+export default function Page() {
+  const { currentPage } = useNavigation();
+
+  useEffect(() => {
+    initHashRouter();
+  }, []);
+
+  const PageComponent = pageComponents[currentPage] || HomePage;
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background" dir="rtl">
+      <Header />
+      <main className="flex-1">
+        <PageComponent key={currentPage} />
+      </main>
+      <Footer />
+      <FloatingButtons />
+    </div>
+  );
+}

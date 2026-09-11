@@ -1,0 +1,67 @@
+x-test-environment: &test-environment
+  DJANGO_SETTINGS_MODULE: config.settings_test
+  DJANGO_SECRET_KEY: karvo-test-only-secret-key-not-for-production
+  DJANGO_DEBUG: "0"
+  DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend,test
+  POSTGRES_DB: karvo_test_db
+  POSTGRES_USER: karvo_test_user
+  POSTGRES_PASSWORD: karvo_test_password
+  POSTGRES_HOST: db
+  POSTGRES_PORT: "5432"
+  CELERY_BROKER_URL: redis://redis:6379/0
+  CELERY_RESULT_BACKEND: redis://redis:6379/1
+  REDIS_CACHE_URL: redis://redis:6379/2
+  OTP_EXPIRATION_SECONDS: "120"
+  OTP_RESEND_COOLDOWN_SECONDS: "60"
+  OTP_MAX_VERIFY_ATTEMPTS: "5"
+  OTP_MAX_REQUESTS_PER_HOUR: "5"
+  OTP_CONSOLE_MODE: "1"
+  CORS_ALLOWED_ORIGINS: http://localhost:3000
+  CSRF_TRUSTED_ORIGINS: http://localhost:3000
+  REFERRAL_REWARD_VALUE: "500000"
+
+services:
+  db:
+    environment:
+      POSTGRES_DB: karvo_test_db
+      POSTGRES_USER: karvo_test_user
+      POSTGRES_PASSWORD: karvo_test_password
+
+  test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    environment:
+      <<: *test-environment
+      PYTHONPATH: /app
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      <<: *test-environment
+      PYTHONPATH: /app
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8001:8000"
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    command: celery -A config worker --loglevel=info
+    environment:
+      <<: *test-environment
+      PYTHONPATH: /app
+    volumes:
+      - ./backend:/app
