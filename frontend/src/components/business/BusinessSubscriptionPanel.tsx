@@ -55,6 +55,7 @@ export function BusinessSubscriptionPanel() {
   const subscription = dashboard?.subscription;
   return (
     <div className="space-y-5">
+      <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">در این بخش فقط درخواست بررسی ارتقا ثبت می‌شود؛ درگاه پرداخت و خرید اشتراک هنوز فعال نیستند.</p>
       {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <Card>
         <CardHeader><CardTitle className="text-lg">وضعیت احراز کسب‌وکار</CardTitle></CardHeader>

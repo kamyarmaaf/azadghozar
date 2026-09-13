@@ -210,11 +210,12 @@ export function TermsPage() {
     },
   ];
 
-  const lastUpdated = '۱۴۰۳/۰۹/۱۵';
+  const lastUpdated = 'در انتظار تأیید';
 
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-6">
+        <p role="status" className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950">پیش‌نویس: متن قوانین و اشاره‌ها به پرداخت و اشتراک هنوز نهایی و تأیید نشده‌اند. پیش از راه‌اندازی عمومی باید بازبینی شوند.</p>
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>

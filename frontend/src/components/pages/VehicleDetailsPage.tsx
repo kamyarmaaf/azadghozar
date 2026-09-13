@@ -7,7 +7,7 @@ import {
   MessageSquare, Palette, Phone, RefreshCw, SearchCheck, Share2,
   ShieldCheck, Zap,
 } from 'lucide-react';
-import { VisitRequestSection } from '@/components/vehicle/VisitRequestSection';
+import { ComingSoonNotice } from '@/components/ui/coming-soon';
 import {
   fetchVehicleListing, fetchVehicleListings, listingImageUrl,
   type PublicListingSummary,
@@ -278,7 +278,7 @@ export function VehicleDetailsPage() {
             <Separator />
             <section><h2 className="text-lg font-semibold mb-3">توضیحات فروشنده</h2><p className="text-sm text-muted-foreground leading-7 whitespace-pre-line">{vehicle.description || 'توضیحی ثبت نشده است.'}</p></section>
             <Separator />
-            <VisitRequestSection vehicleBrand={vehicle.brand_name} vehicleModel={vehicle.model_name} sellerName={vehicle.owner_name} city={vehicle.city} />
+            <ComingSoonNotice title="درخواست بازدید حضوری" detail="تقویم و ثبت نوبت هنوز به سرویس واقعی متصل نشده‌اند؛ فرم نمایشی حذف شده تا درخواست ثبت‌نشده موفق نشان داده نشود." />
 
             <div className="lg:hidden flex flex-wrap gap-2">
               <Button className="flex-1" disabled={isFavoriteLoading} onClick={() => void handleFavorite()}>{isFavoriteLoading ? <Loader2 className="size-4 animate-spin" /> : <Heart className={`size-4 ${isFavorite ? 'fill-destructive' : ''}`} />}{isFavorite ? 'حذف از علاقه‌مندی' : 'افزودن به علاقه‌مندی'}</Button>
@@ -297,7 +297,7 @@ export function VehicleDetailsPage() {
                 <Separator />
                 <div className="space-y-2">
                   {vehicle.contact_preference !== 'chat' && <Button asChild className="w-full gap-2" size="lg"><a href={`tel:${vehicle.contact_number}`} dir="ltr"><Phone className="size-4" />{vehicle.contact_number}</a></Button>}
-                  {vehicle.contact_preference !== 'phone' && <Button variant="outline" className="w-full gap-2" size="lg"><MessageSquare className="size-4" />ارسال پیام</Button>}
+                  {vehicle.contact_preference !== 'phone' && <Button variant="outline" className="w-full gap-2" size="lg" disabled title="سامانه پیام‌رسانی هنوز راه‌اندازی نشده است"><MessageSquare className="size-4" />پیام (به‌زودی)</Button>}
                 </div>
               </CardContent>
             </Card>
@@ -306,7 +306,7 @@ export function VehicleDetailsPage() {
               <Button className="w-full gap-2" disabled={isFavoriteLoading} variant={isFavorite ? 'secondary' : 'outline'} onClick={() => void handleFavorite()}>{isFavoriteLoading ? <Loader2 className="size-4 animate-spin" /> : <Heart className={`size-4 ${isFavorite ? 'fill-destructive text-destructive' : ''}`} />}{isFavorite ? 'حذف از علاقه‌مندی' : 'افزودن به علاقه‌مندی'}</Button>
               <Button variant="outline" className="w-full gap-2" onClick={handleComparison}><GitCompareArrows className="size-4" />{isCompared ? 'مشاهده مقایسه' : 'افزودن به مقایسه'}</Button>
               <Button variant="outline" className="w-full gap-2" onClick={() => void navigator.share?.({ title, url: window.location.href })}><Share2 className="size-4" />اشتراک‌گذاری</Button>
-              <Button variant="outline" className="w-full gap-2"><SearchCheck className="size-4" />درخواست بازرسی</Button>
+              <Button variant="outline" className="w-full gap-2" disabled title="اتصال درخواست بازرسی به این آگهی هنوز انجام نشده است"><SearchCheck className="size-4" />بازرسی این آگهی (به‌زودی)</Button>
             </CardContent></Card>
 
             <Card className="py-0 hidden lg:block"><CardContent className="p-4 space-y-3">

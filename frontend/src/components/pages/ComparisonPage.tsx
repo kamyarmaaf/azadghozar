@@ -126,6 +126,7 @@ export function ComparisonPage() {
   const [isLoadingCandidates, setIsLoadingCandidates] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [candidateError, setCandidateError] = useState('');
+  const [candidateReloadVersion, setCandidateReloadVersion] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -198,7 +199,7 @@ export function ComparisonPage() {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [pickerOpen, search]);
+  }, [candidateReloadVersion, pickerOpen, search]);
 
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const searchTooShort = search.trim().length === 1;
@@ -461,7 +462,7 @@ export function ComparisonPage() {
               <div className="py-12 text-center">
                 <p className="text-destructive mb-4">{candidateError}</p>
                 {!searchTooShort && (
-                  <Button variant="outline" onClick={() => setSearch((value) => `${value} `)}>
+                  <Button variant="outline" onClick={() => setCandidateReloadVersion((version) => version + 1)}>
                     تلاش دوباره
                   </Button>
                 )}

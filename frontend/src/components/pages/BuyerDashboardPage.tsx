@@ -19,26 +19,15 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import {
-  Bell, Heart, GitCompare, History, FileText, MessageSquare,
-  Settings, Eye, MapPin, Calendar, UserPlus, UserCog, Loader2
+  Heart, GitCompare, History, FileText, MessageSquare,
+  Settings, Eye, MapPin, UserPlus, UserCog, Loader2
 } from 'lucide-react';
 import { ReferralTab } from '@/components/dashboard/ReferralTab';
 import { RoleChangeTab } from '@/components/dashboard/RoleChangeTab';
 import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-
-const mockConversations = [
-  { id: 'c1', name: 'نمایشگاه رویال موتورز', lastMessage: 'سلام، خودرو هنوز موجود است. می‌تونید بیایید ببینید.', time: '۱۰ دقیقه پیش', unread: 2, avatar: 'ر' },
-  { id: 'c2', name: 'نمایندگی آلفا اتو', lastMessage: 'قیمت قابل مذاکره هست. لطفا تماس بگیرید.', time: '۲ ساعت پیش', unread: 0, avatar: 'آ' },
-  { id: 'c3', name: 'نمایندگی تویوتا خلیج', lastMessage: 'بازرسی خودرو تا فردا انجام می‌شود.', time: '۱ روز پیش', unread: 1, avatar: 'ت' },
-];
-
-const historyItems = [
-  { id: 'h1', name: 'مرسدس بنز کلاس E', date: '۱۴۰۳/۰۹/۱۵', action: 'مشاهده آگهی' },
-  { id: 'h2', name: 'پورشه کاین S', date: '۱۴۰۳/۰۹/۱۴', action: 'درخواست بازرسی' },
-  { id: 'h3', name: 'تویوتا کمری XSE', date: '۱۴۰۳/۰۹/۱۳', action: 'اضافه به مقایسه' },
-  { id: 'h4', name: 'هیوندای توسان Ultimate', date: '۱۴۰۳/۰۹/۱۲', action: 'مشاهده آگهی' },
-];
+import { ComingSoonNotice } from '@/components/ui/coming-soon';
+import { MyServiceRequestsPanel } from '@/components/services/MyServiceRequestsPanel';
 
 export function BuyerDashboardPage() {
   const navigateTo = useNavigation((s) => s.navigateTo);
@@ -99,16 +88,14 @@ export function BuyerDashboardPage() {
   const stats = [
     { label: 'آگهی ذخیره شده', value: toPersianNumber(favoriteListings.length), icon: Heart, color: 'text-rose-500 bg-rose-50' },
     { label: 'مقایسه‌ها', value: toPersianNumber(comparisonIds.length), icon: GitCompare, color: 'text-gold-dark bg-gold/10' },
-    { label: 'بازرسی‌ها', value: '۱', icon: FileText, color: 'text-emerald-600 bg-emerald-50' },
-    { label: 'پیام‌ها', value: '۸', icon: MessageSquare, color: 'text-amber-600 bg-amber-50' },
   ];
 
   const tabs = [
     { value: 'saved', label: 'آگهی‌های ذخیره شده', icon: Heart },
     { value: 'compare', label: 'لیست مقایسه', icon: GitCompare },
-    { value: 'history', label: 'تاریخچه بازدید', icon: History },
+    { value: 'history', label: 'تاریخچه (به‌زودی)', icon: History },
     { value: 'requests', label: 'درخواست‌های من', icon: FileText },
-    { value: 'messages', label: 'پیام‌ها', icon: MessageSquare },
+    { value: 'messages', label: 'پیام‌ها (به‌زودی)', icon: MessageSquare },
     { value: 'referral', label: 'دعوت از دوستان', icon: UserPlus },
     { value: 'role-change', label: 'تغییر نقش', icon: UserCog },
     { value: 'settings', label: 'تنظیمات', icon: Settings },
@@ -128,10 +115,7 @@ export function BuyerDashboardPage() {
               <p className="text-sm text-muted-foreground">{currentUser?.name || 'کاربر آزادگذر'}، خوش آمدید</p>
             </div>
           </div>
-          <Button variant="outline" size="icon" className="relative">
-            <Bell className="size-5" />
-            <span className="absolute -top-1 -left-1 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center">۳</span>
-          </Button>
+          <span className="text-xs text-muted-foreground">اعلان‌ها: به‌زودی</span>
         </div>
 
         {/* Stats Row */}
@@ -279,71 +263,17 @@ export function BuyerDashboardPage() {
 
           {/* History Tab */}
           <TabsContent value="history" className="mt-6">
-            <Card>
-              <CardContent className="p-0">
-                {historyItems.map((item, i) => (
-                  <div key={item.id}>
-                    <div className="flex items-center justify-between p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                          <Eye className="size-4 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">{item.name}</p>
-                          <p className="text-xs text-muted-foreground">{item.action}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar className="size-3" />
-                        {item.date}
-                      </div>
-                    </div>
-                    {i < historyItems.length - 1 && <Separator />}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            <ComingSoonNotice title="تاریخچه بازدید" detail="ثبت و نمایش تاریخچه واقعی هنوز راه‌اندازی نشده است؛ رویدادهای نمونه نمایش داده نمی‌شوند." />
           </TabsContent>
 
           {/* Requests Tab */}
           <TabsContent value="requests" className="mt-6">
-            <Card>
-              <CardContent className="p-8 text-center">
-                <FileText className="size-12 text-muted-foreground mx-auto mb-3" />
-                <p className="font-medium">درخواستی ثبت نشده است</p>
-                <p className="text-sm text-muted-foreground mt-1">با مشاهده آگهی‌ها می‌توانید درخواست بازرسی یا مشاوره ثبت کنید.</p>
-              </CardContent>
-            </Card>
+            <MyServiceRequestsPanel />
           </TabsContent>
 
           {/* Messages Tab */}
           <TabsContent value="messages" className="mt-6">
-            <Card>
-              <CardContent className="p-0">
-                {mockConversations.map((conv, i) => (
-                  <div key={conv.id}>
-                    <div className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                      <Avatar className="size-11 shrink-0">
-                        <AvatarFallback className="bg-brand-light text-white text-sm">{conv.avatar}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-semibold text-sm">{conv.name}</p>
-                          <span className="text-xs text-muted-foreground whitespace-nowrap mr-2">{conv.time}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-1">{conv.lastMessage}</p>
-                      </div>
-                      {conv.unread > 0 && (
-                        <span className="w-5 h-5 bg-gold-dark text-white text-xs rounded-full flex items-center justify-center shrink-0">
-                          {toPersianNumber(conv.unread)}
-                        </span>
-                      )}
-                    </div>
-                    {i < mockConversations.length - 1 && <Separator />}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            <ComingSoonNotice title="پیام‌ها" detail="گفت‌وگوی خریدار و فروشنده هنوز به سامانهٔ پیام متصل نیست." />
           </TabsContent>
 
           {/* Referral Tab */}

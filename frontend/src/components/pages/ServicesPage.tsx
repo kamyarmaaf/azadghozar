@@ -25,7 +25,7 @@ const services = [
     id: 'transfer',
     title: 'انتقال مالکیت',
     icon: FileText,
-    description: 'انتقال مالکیت خودروهای منطقه آزاد و واردات موقت به صورت قانونی و سریع. تیم متخصص ما تمامی مراحل اداری را برای شما انجام می‌دهد.',
+    description: 'درخواست بررسی خدمات انتقال مالکیت را ثبت کنید. انجام خدمت پس از بررسی و هماهنگی جداگانه مشخص می‌شود.',
     color: 'text-blue-500',
     bgColor: 'bg-blue-500/10',
   },
@@ -33,7 +33,7 @@ const services = [
     id: 'transport',
     title: 'حمل و نقل',
     icon: Truck,
-    description: 'حمل و نقل ایمن خودرو از مناطق آزاد به سراسر کشور با بیمه کامل و ردیابی آنلاین. حمل با تریلی تخصصی و پوشش کامل بیمه‌ای.',
+    description: 'درخواست حمل خودرو را ثبت کنید. هزینه، بیمه و زمان‌بندی هنوز در سامانه تعیین یا رزرو نمی‌شوند.',
     color: 'text-emerald-500',
     bgColor: 'bg-emerald-500/10',
   },
@@ -41,7 +41,7 @@ const services = [
     id: 'inspection',
     title: 'درخواست بازرسی',
     icon: ClipboardCheck,
-    description: 'بازرسی تخصصی خودرو قبل از خرید توسط کارشناسان معتبر. شامل بررسی فنی، بدنه، شاسی، رنگ و مدارک با ارائه گزارش کامل.',
+    description: 'درخواست بازرسی خودرو را ثبت کنید تا در صف بررسی قرار بگیرد؛ نوبت و نتیجه بعداً توسط مسئول مربوط بررسی می‌شوند.',
     color: 'text-orange-500',
     bgColor: 'bg-orange-500/10',
   },
@@ -49,7 +49,7 @@ const services = [
     id: 'consultation',
     title: 'مشاوره تخصصی',
     icon: MessageSquare,
-    description: 'مشاوره رایگان با کارشناسان خودرو در زمینه خرید، فروش، قوانین منطقه آزاد و بهترین انتخاب‌ها بر اساس بودجه و نیاز شما.',
+    description: 'درخواست مشاوره را در سامانه ثبت کنید؛ قیمت و زمان پاسخگویی هنوز نهایی نشده‌اند.',
     color: 'text-violet-500',
     bgColor: 'bg-violet-500/10',
   },
@@ -57,7 +57,7 @@ const services = [
     id: 'document-check',
     title: 'استعلام مدارک',
     icon: FileSearch,
-    description: 'استعلام اصالت مدارک خودرو شامل برگه معاینه فنی، بیمه‌نامه، سند مالکیت و وضعیت قانونی خودرو قبل از خرید.',
+    description: 'درخواست بررسی مدارک ثبت می‌شود؛ استعلام خودکار اصالت مدارک هنوز به سرویس‌های بیرونی متصل نیست.',
     color: 'text-pink-500',
     bgColor: 'bg-pink-500/10',
   },
@@ -65,7 +65,7 @@ const services = [
     id: 'status-check',
     title: 'استعلام وضعیت',
     icon: Search,
-    description: 'استعلام وضعیت قانونی خودرو شامل خلافی، وضعیت پلاک، محدودیت‌های تردد و هرگونه مشکلات حقوقی مرتبط با خودرو.',
+    description: 'درخواست استعلام وضعیت ثبت می‌شود؛ استعلام آنی خلافی و وضعیت پلاک هنوز فعال نیست.',
     color: 'text-cyan-500',
     bgColor: 'bg-cyan-500/10',
   },
@@ -73,7 +73,7 @@ const services = [
     id: 'buy-assist',
     title: 'همراهی در خرید',
     icon: Handshake,
-    description: 'همراهی کامل در فرآیند خرید خودرو از انتخاب تا تحویل. کارشناسان ما در تمام مراحل کنار شما خواهند بود.',
+    description: 'درخواست همراهی در خرید را ثبت کنید؛ فرایند ارائه خدمت پس از بررسی و هماهنگی مشخص می‌شود.',
     color: 'text-amber-500',
     bgColor: 'bg-amber-500/10',
   },
@@ -81,7 +81,7 @@ const services = [
     id: 'sell-assist',
     title: 'همراهی در فروش',
     icon: Send,
-    description: 'کمک به فروش سریع خودرو با قیمت منصفانه. از عکاسی حرفه‌ای تا قیمت‌گذاری و معرفی به خریداران واقعی.',
+    description: 'درخواست همراهی در فروش را ثبت کنید؛ قیمت‌گذاری و عکاسی خودکار هنوز متصل نیستند.',
     color: 'text-red-500',
     bgColor: 'bg-red-500/10',
   },
@@ -124,7 +124,7 @@ function ServiceForm({ serviceId }: { serviceId: string }) {
       <div className="p-6">
         <h3 className="font-bold text-base mb-1">درخواست {services.find((s) => s.id === serviceId)?.title}</h3>
         <p className="text-sm text-muted-foreground mb-5">
-          فرم زیر را تکمیل کنید تا کارشناسان ما در اسرع وقت با شما تماس بگیرند
+          فرم زیر درخواست را واقعاً در صف بررسی ثبت می‌کند؛ زمان ارائه خدمت هنوز رزرو نمی‌شود.
         </p>
 
         {submittedId ? (
@@ -133,7 +133,7 @@ function ServiceForm({ serviceId }: { serviceId: string }) {
               <svg className="size-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
             <h4 className="font-bold text-lg mb-1">درخواست شما ثبت شد</h4>
-            <p className="text-sm text-muted-foreground">کارشناسان ما به زودی با شما تماس خواهند گرفت</p>
+            <p className="text-sm text-muted-foreground">درخواست در سامانه ثبت شد؛ وضعیت آن را می‌توانید در پنل کاربری بررسی کنید.</p>
             <p className="mt-3 rounded-md bg-muted px-3 py-2 text-xs">کد پیگیری: <span dir="ltr">{submittedId.slice(0, 8)}</span></p>
             <Button variant="outline" className="mt-4" onClick={() => { setSubmittedId(''); setVehicleType(''); setDetails(''); }}>ثبت درخواست دیگر</Button>
           </div>
@@ -230,6 +230,8 @@ export function ServicesPage() {
           </p>
         </div>
 
+        <p role="status" className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950">ثبت درخواست خدمات فعال است؛ رزرو قطعی نوبت، انجام خدمت، استعلام آنی، بیمه و پرداخت هنوز به سامانه‌های اجرایی متصل نشده‌اند.</p>
+
         <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="flex flex-wrap h-auto gap-1 p-1 bg-secondary">
             {services.map((service) => {
@@ -263,32 +265,6 @@ export function ServicesPage() {
                       </div>
                     </div>
                     <p className="text-muted-foreground leading-7">{service.description}</p>
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                      <Card className="py-0 shadow-card">
-                        <div className="p-4 text-center">
-                          <p className="text-2xl font-bold text-gradient">۲۴ ساعته</p>
-                          <p className="text-xs text-muted-foreground mt-1">پاسخگویی</p>
-                        </div>
-                      </Card>
-                      <Card className="py-0 shadow-card">
-                        <div className="p-4 text-center">
-                          <p className="text-2xl font-bold text-gradient">رایگان</p>
-                          <p className="text-xs text-muted-foreground mt-1">مشاوره اولیه</p>
-                        </div>
-                      </Card>
-                      <Card className="py-0 shadow-card">
-                        <div className="p-4 text-center">
-                          <p className="text-2xl font-bold text-gradient">تضمینی</p>
-                          <p className="text-xs text-muted-foreground mt-1">کیفیت خدمات</p>
-                        </div>
-                      </Card>
-                      <Card className="py-0 shadow-card">
-                        <div className="p-4 text-center">
-                          <p className="text-2xl font-bold text-gradient">حرفه‌ای</p>
-                          <p className="text-xs text-muted-foreground mt-1">تیم کارشناسان</p>
-                        </div>
-                      </Card>
-                    </div>
                   </div>
                   <ServiceForm serviceId={service.id} />
                 </div>

@@ -99,19 +99,19 @@ export function GalleryDashboardPage() {
   };
 
   const stats = [
-    { label: 'خودروهای فعال', value: toPersianNumber(businessDashboard?.stats.active_listing_count ?? listingStats.active), icon: Car, color: 'text-emerald-600 bg-emerald-50' },
-    { label: 'در انتظار تأیید', value: toPersianNumber(businessDashboard?.stats.pending_listing_count ?? listingStats.pending), icon: Bell, color: 'text-amber-600 bg-amber-50' },
-    { label: 'کل آگهی‌ها', value: toPersianNumber(businessDashboard?.stats.listing_count ?? galleryVehicles.length), icon: BarChart3, color: 'text-violet-600 bg-violet-50' },
-    { label: 'بازدید کل', value: toPersianNumber(businessDashboard?.stats.total_views ?? listingStats.views), icon: Eye, color: 'text-gold-dark bg-gold/10' },
-    { label: 'فروخته شده', value: toPersianNumber(businessDashboard?.stats.sold_listing_count ?? listingStats.sold), icon: Star, color: 'text-blue-600 bg-blue-50' },
-    { label: 'رد شده', value: toPersianNumber(listingStats.rejected), icon: RefreshCw, color: 'text-red-600 bg-red-50' },
+    { label: 'خودروهای فعال', value: businessDashboard ? toPersianNumber(businessDashboard.stats.active_listing_count) : '—', icon: Car, color: 'text-emerald-600 bg-emerald-50' },
+    { label: 'در انتظار تأیید', value: businessDashboard ? toPersianNumber(businessDashboard.stats.pending_listing_count) : '—', icon: Bell, color: 'text-amber-600 bg-amber-50' },
+    { label: 'کل آگهی‌ها', value: businessDashboard ? toPersianNumber(businessDashboard.stats.listing_count) : '—', icon: BarChart3, color: 'text-violet-600 bg-violet-50' },
+    { label: 'بازدید کل', value: businessDashboard ? toPersianNumber(businessDashboard.stats.total_views) : '—', icon: Eye, color: 'text-gold-dark bg-gold/10' },
+    { label: 'فروخته شده', value: businessDashboard ? toPersianNumber(businessDashboard.stats.sold_listing_count) : '—', icon: Star, color: 'text-blue-600 bg-blue-50' },
+    { label: 'ردشده در این صفحه', value: toPersianNumber(listingStats.rejected), icon: RefreshCw, color: 'text-red-600 bg-red-50' },
   ];
 
   const tabs = [
     { value: 'vehicles', label: 'مدیریت خودروها', icon: Car },
     { value: 'add', label: 'افزودن خودرو', icon: Plus },
     { value: 'team', label: 'کارمندان', icon: Users },
-    { value: 'subscription', label: 'اشتراک', icon: CreditCard },
+    { value: 'subscription', label: 'درخواست ارتقا', icon: CreditCard },
     { value: 'stats', label: 'آمار', icon: BarChart3 },
     { value: 'settings', label: 'تنظیمات نمایشگاه', icon: Settings },
   ];
@@ -130,10 +130,7 @@ export function GalleryDashboardPage() {
               <p className="text-sm text-muted-foreground">{currentUser?.businessAccess?.name || currentUser?.businessName || currentUser?.name || 'نمایشگاه آزادگذر'}</p>
             </div>
           </div>
-          <Button variant="outline" size="icon" className="relative">
-            <Bell className="size-5" />
-            <span className="absolute -top-1 -left-1 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center">۵</span>
-          </Button>
+          <span className="text-xs text-muted-foreground">اعلان‌ها: به‌زودی</span>
         </div>
 
         {/* Stats Row - 6 cards */}
@@ -287,14 +284,15 @@ export function GalleryDashboardPage() {
 
           {/* Stats Tab */}
           <TabsContent value="stats" className="mt-6">
+            {!businessDashboard && <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">آمار کسب‌وکار دریافت نشد؛ عدد پیش‌فرض نمایش داده نمی‌شود.</p>}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
-                { label: 'کل بازدید آگهی‌ها', value: toPersianNumber(businessDashboard?.stats.total_views ?? 0) },
-                { label: 'کل آگهی‌ها', value: toPersianNumber(businessDashboard?.stats.listing_count ?? 0) },
-                { label: 'آگهی فعال', value: toPersianNumber(businessDashboard?.stats.active_listing_count ?? 0) },
-                { label: 'در انتظار تأیید', value: toPersianNumber(businessDashboard?.stats.pending_listing_count ?? 0) },
-                { label: 'فروخته‌شده', value: toPersianNumber(businessDashboard?.stats.sold_listing_count ?? 0) },
-                { label: 'کارمندان فعال', value: toPersianNumber(businessDashboard?.stats.member_count ?? 0) },
+                { label: 'کل بازدید آگهی‌ها', value: businessDashboard ? toPersianNumber(businessDashboard.stats.total_views) : '—' },
+                { label: 'کل آگهی‌ها', value: businessDashboard ? toPersianNumber(businessDashboard.stats.listing_count) : '—' },
+                { label: 'آگهی فعال', value: businessDashboard ? toPersianNumber(businessDashboard.stats.active_listing_count) : '—' },
+                { label: 'در انتظار تأیید', value: businessDashboard ? toPersianNumber(businessDashboard.stats.pending_listing_count) : '—' },
+                { label: 'فروخته‌شده', value: businessDashboard ? toPersianNumber(businessDashboard.stats.sold_listing_count) : '—' },
+                { label: 'کارمندان فعال', value: businessDashboard ? toPersianNumber(businessDashboard.stats.member_count) : '—' },
               ].map((item) => (
                 <Card key={item.label} className="hover-lift shadow-card">
                   <CardContent className="p-5">

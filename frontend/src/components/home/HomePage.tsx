@@ -78,11 +78,15 @@ import {
   type PublicListingSummary,
 } from '@/lib/listing-api';
 import { PublicListingCard } from '@/components/vehicle/PublicListingCard';
+import { ComingSoonNotice } from '@/components/ui/coming-soon';
 import {
   fetchBusinesses,
   type BusinessKind,
   type BusinessProfile,
 } from '@/lib/business-api';
+
+// Editorial sections still use sample fixtures. Never show them as live data.
+const editorialContentReady = false;
 
 /* ------------------------------------------------------------------ */
 /*  Horizontal Scroll Hook                                             */
@@ -251,26 +255,10 @@ function HeroSlider() {
                 <span className="text-gradient">شفافیت و اعتماد</span>
               </h1>
               <p className="text-white/60 text-sm md:text-base leading-7 mb-8 max-w-md">
-                خرید و فروش امن خودروهای وارداتی و منطقه آزاد با تضمین سلامت و اصالت مدارک
+                آگهی‌های واقعی خودروهای وارداتی و منطقه آزاد را جست‌وجو و بررسی کنید
               </p>
 
-              {/* Stats */}
-              <div className="flex items-center gap-8 mt-10">
-                <div>
-                  <p className="text-2xl font-bold text-white">{toPersianNumber('12,500+')}</p>
-                  <p className="text-white/40 text-xs mt-0.5">خودرو ثبت شده</p>
-                </div>
-                <div className="w-px h-10 bg-white/20" />
-                <div>
-                  <p className="text-2xl font-bold text-white">{toPersianNumber('850+')}</p>
-                  <p className="text-white/40 text-xs mt-0.5">نمایشگاه فعال</p>
-                </div>
-                <div className="w-px h-10 bg-white/20" />
-                <div>
-                  <p className="text-2xl font-bold text-white">{toPersianNumber('98%')}</p>
-                  <p className="text-white/40 text-xs mt-0.5">رضایت کاربران</p>
-                </div>
-              </div>
+              <p className="mt-8 text-xs text-white/70">آمار سامانه بعد از اتصال گزارش‌گیری واقعی نمایش داده می‌شود.</p>
             </div>
           </div>
         </div>
@@ -621,6 +609,8 @@ function FilterTag({ label, onRemove }: { label: string; onRemove: () => void })
 function BrandsSection() {
   const { navigateTo } = useNavigation();
   const { ref, scroll } = useHorizontalScroll();
+
+  if (!editorialContentReady) return <Section><ComingSoonNotice title="برندهای خودرو" detail="فهرست برندها هنوز به بانک اطلاعات خودرو متصل نشده است؛ برای جست‌وجوی آگهی واقعی از بخش خرید خودرو استفاده کنید." /></Section>;
 
   return (
     <Section>
@@ -1012,6 +1002,8 @@ function EducationalVideos() {
   const { navigateTo } = useNavigation();
   const { ref, scroll } = useHorizontalScroll();
 
+  if (!editorialContentReady) return <Section><ComingSoonNotice title="ویدیوهای آموزشی" detail="ویدیوهای نمونه از صفحه اصلی حذف شده‌اند تا فقط محتوای منتشرشدهٔ واقعی نمایش داده شود." /></Section>;
+
   return (
     <Section>
       <div className="flex items-center justify-between mb-8">
@@ -1069,6 +1061,8 @@ function EducationalVideos() {
 /*  12. FAQ Section                                                     */
 /* ================================================================== */
 function FAQSection() {
+  if (!editorialContentReady) return <Section><ComingSoonNotice title="سؤالات متداول" detail="پاسخ‌های این بخش هنوز نهایی و تأیید نشده‌اند." /></Section>;
+
   return (
     <Section className="bg-warm-gray">
       <div className="max-w-3xl mx-auto">
@@ -1099,6 +1093,8 @@ function FAQSection() {
 /* ================================================================== */
 function BlogSection() {
   const { navigateTo } = useNavigation();
+
+  if (!editorialContentReady) return <Section><ComingSoonNotice title="مجله خودرو" detail="سامانه مقاله‌ها هنوز آماده انتشار محتوا نیست؛ مطالب نمونه نمایش داده نمی‌شوند." /></Section>;
 
   return (
     <Section>

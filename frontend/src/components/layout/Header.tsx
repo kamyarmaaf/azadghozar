@@ -32,6 +32,7 @@ import { useAuth, roleLabels } from '@/stores/auth';
 import { useComparison } from '@/stores/comparison';
 import { cn } from '@/lib/utils';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { isUpcomingPage } from '@/lib/feature-status';
 
 interface NavItem {
   label: string;
@@ -131,7 +132,7 @@ export function Header() {
                           onClick={() => navigateTo(child.pageId)}
                           className="text-text-secondary hover:text-text-primary hover:bg-muted cursor-pointer focus:bg-muted focus:text-text-primary justify-end"
                         >
-                          {child.label}
+                          {child.label}{isUpcomingPage(child.pageId) && <span className="mr-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-800">به‌زودی</span>}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -141,7 +142,7 @@ export function Header() {
                     onClick={() => item.pageId && navigateTo(item.pageId)}
                     className="px-3 py-2 text-sm text-text-secondary hover:text-text-primary rounded-lg hover:bg-muted transition-colors whitespace-nowrap"
                   >
-                    {item.label}
+                    {item.label}{item.pageId && isUpcomingPage(item.pageId) && <span className="mr-1 text-[10px] text-amber-700">به‌زودی</span>}
                   </button>
                 )}
               </div>
@@ -311,7 +312,7 @@ export function Header() {
                             onClick={() => { navigateTo(child.pageId); setMobileOpen(false); }}
                             className="text-right pr-6 pl-3 py-2 text-sm text-text-muted hover:text-text-primary hover:bg-muted rounded-lg transition-colors"
                           >
-                            {child.label}
+                            {child.label}{isUpcomingPage(child.pageId) && <span className="mr-2 text-[10px] text-amber-700">به‌زودی</span>}
                           </button>
                         ))}
                       </Fragment>
@@ -328,7 +329,7 @@ export function Header() {
                         }}
                         className="flex items-center justify-between w-full px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-muted rounded-lg transition-colors"
                       >
-                        <span>{item.label}</span>
+                        <span>{item.label}{item.pageId && isUpcomingPage(item.pageId) && <span className="mr-2 text-[10px] text-amber-700">به‌زودی</span>}</span>
                       </button>
                     )
                   )}
@@ -414,7 +415,7 @@ function MobileSubmenu({
               }}
               className="text-right px-3 py-2 text-sm text-text-muted hover:text-text-primary hover:bg-muted rounded-lg transition-colors"
             >
-              {child.label}
+              {child.label}{isUpcomingPage(child.pageId) && <span className="mr-2 text-[10px] text-amber-700">به‌زودی</span>}
             </button>
           ))}
         </div>

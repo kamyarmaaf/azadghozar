@@ -12,19 +12,11 @@ import { VehicleDetailsPage } from "@/components/pages/VehicleDetailsPage";
 import { ComparisonPage } from "@/components/pages/ComparisonPage";
 import { InstantSalePage } from "@/components/pages/InstantSalePage";
 import { SpecialSalePage } from "@/components/pages/SpecialSalePage";
-import { BrandsPage } from "@/components/pages/BrandsPage";
 import { DealershipsPage } from "@/components/pages/DealershipsPage";
 import { DealershipDetailPage } from "@/components/pages/DealershipDetailPage";
 import { GalleriesPage } from "@/components/pages/GalleriesPage";
 import { GalleryDetailPage } from "@/components/pages/GalleryDetailPage";
 import { ServicesPage } from "@/components/pages/ServicesPage";
-import { VideosPage } from "@/components/pages/VideosPage";
-import { BlogPage } from "@/components/pages/BlogPage";
-import { ArticleDetailPage } from "@/components/pages/ArticleDetailPage";
-import { VideoDetailPage } from "@/components/pages/VideoDetailPage";
-import { FAQPage } from "@/components/pages/FAQPage";
-import { AboutPage } from "@/components/pages/AboutPage";
-import { ContactPage } from "@/components/pages/ContactPage";
 import { LoginPage } from "@/components/pages/LoginPage";
 import { RegisterPage } from "@/components/pages/RegisterPage";
 import { ForgotPasswordPage } from "@/components/pages/ForgotPasswordPage";
@@ -34,10 +26,8 @@ import { SellerDashboardPage } from "@/components/pages/SellerDashboardPage";
 import { GalleryDashboardPage } from "@/components/pages/GalleryDashboardPage";
 import { ExpertDashboardPage } from "@/components/pages/ExpertDashboardPage";
 import { AdminDashboardPage } from "@/components/pages/AdminDashboardPage";
-import { TariffsPage } from "@/components/pages/TariffsPage";
 import { FavoritesPage } from "@/components/pages/FavoritesPage";
-import { OrgPanelPage } from "@/components/pages/OrgPanelPage";
-import { SmartVehicleIDPage } from "@/components/pages/SmartVehicleIDPage";
+import { ComingSoonPage } from "@/components/ui/coming-soon";
 import { TermsPage } from "@/components/pages/TermsPage";
 import { PrivacyPage } from "@/components/pages/PrivacyPage";
 
@@ -51,8 +41,8 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   'instant-sale': InstantSalePage,
   'special-sale': SpecialSalePage,
   favorites: FavoritesPage,
-  brands: BrandsPage,
-  'brand-detail': BrandsPage,
+  brands: ComingSoonPage,
+  'brand-detail': ComingSoonPage,
   dealerships: DealershipsPage,
   'dealership-detail': DealershipDetailPage,
   galleries: GalleriesPage,
@@ -62,13 +52,13 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   transportation: ServicesPage,
   inspection: ServicesPage,
   consultation: ServicesPage,
-  videos: VideosPage,
-  blog: BlogPage,
-  'article-detail': ArticleDetailPage,
-  'video-detail': VideoDetailPage,
-  faq: FAQPage,
-  about: AboutPage,
-  contact: ContactPage,
+  videos: ComingSoonPage,
+  blog: ComingSoonPage,
+  'article-detail': ComingSoonPage,
+  'video-detail': ComingSoonPage,
+  faq: ComingSoonPage,
+  about: ComingSoonPage,
+  contact: ComingSoonPage,
   login: LoginPage,
   register: RegisterPage,
   'forgot-password': ForgotPasswordPage,
@@ -78,9 +68,9 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   'gallery-dashboard': GalleryDashboardPage,
   'expert-dashboard': ExpertDashboardPage,
   'admin-dashboard': AdminDashboardPage,
-  tariffs: TariffsPage,
-  'org-panel': OrgPanelPage,
-  'smart-id': SmartVehicleIDPage,
+  tariffs: ComingSoonPage,
+  'org-panel': ComingSoonPage,
+  'smart-id': ComingSoonPage,
   terms: TermsPage,
   privacy: PrivacyPage,
 };

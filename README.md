@@ -1,5 +1,9 @@
 # Karvo Backend
 
+برای وضعیت بخش‌های آماده/ناتمام و دستورهای نصب V9: [V9-STATUS-FA.md](V9-STATUS-FA.md).
+
+برای تغییرات نسخه V8 و دستورهای امن نصب/تست روی PowerShell، [V8-NOTES-FA.md](V8-NOTES-FA.md) را ببینید.
+
 بک‌اند Django/DRF پروژه آزادگذر با PostgreSQL، Redis، Celery، JWT و ورود/ثبت‌نام OTP.
 
 ## اجرای محیط توسعه با Docker

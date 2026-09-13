@@ -197,11 +197,12 @@ export function PrivacyPage() {
     },
   ];
 
-  const lastUpdated = '۱۴۰۳/۰۹/۱۵';
+  const lastUpdated = 'در انتظار تأیید';
 
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-6">
+        <p role="status" className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950">پیش‌نویس: این متن هنوز با شیوهٔ واقعی جمع‌آوری و نگهداری اطلاعات سامانه تطبیق و تأیید نشده است.</p>
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>

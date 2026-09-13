@@ -36,6 +36,8 @@ interface ListingCampaignPageProps {
   kind: 'instant' | 'special';
 }
 
+const CAMPAIGN_PAGE_SIZE = 24;
+
 function priceValue(value: string): number | undefined {
   const normalized = value
     .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
@@ -52,6 +54,7 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
   const loadFavorites = useFavorites((state) => state.loadFavorites);
   const [listings, setListings] = useState<PublicListingSummary[]>([]);
   const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [brand, setBrand] = useState('all');
   const [bodyType, setBodyType] = useState('all');
   const [priceMin, setPriceMin] = useState('');
@@ -72,7 +75,8 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
     const timer = window.setTimeout(() => {
       setIsLoading(true);
       void fetchVehicleListings({
-        pageSize: 100,
+        page: currentPage,
+        pageSize: CAMPAIGN_PAGE_SIZE,
         brand: brand === 'all' ? undefined : brand,
         bodyType: bodyType === 'all' ? undefined : bodyType,
         priceMin: priceValue(priceMin),
@@ -101,7 +105,13 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [bodyType, brand, isInstant, priceMax, priceMin, reloadVersion]);
+  }, [bodyType, brand, currentPage, isInstant, priceMax, priceMin, reloadVersion]);
+
+  const totalPages = Math.ceil(total / CAMPAIGN_PAGE_SIZE);
+  const updateFilter = <T,>(setter: (value: T) => void, value: T) => {
+    setCurrentPage(1);
+    setter(value);
+  };
 
   const title = isInstant ? 'فروش فوری خودروها' : 'پیشنهادات ویژه آزاد گذر';
   const description = isInstant
@@ -136,7 +146,7 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
           <div className="p-4 flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[180px]">
               <Label className="text-sm font-medium mb-2 block">برند</Label>
-              <Select value={brand} onValueChange={setBrand}>
+              <Select value={brand} onValueChange={(value) => updateFilter(setBrand, value)}>
                 <SelectTrigger className="w-full"><SelectValue placeholder="همه برندها" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">همه برندها</SelectItem>
@@ -146,7 +156,7 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
             </div>
             <div className="flex-1 min-w-[180px]">
               <Label className="text-sm font-medium mb-2 block">نوع بدنه</Label>
-              <Select value={bodyType} onValueChange={setBodyType}>
+              <Select value={bodyType} onValueChange={(value) => updateFilter(setBodyType, value)}>
                 <SelectTrigger className="w-full"><SelectValue placeholder="همه" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">همه</SelectItem>
@@ -156,16 +166,19 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
             </div>
             <div className="flex-1 min-w-[140px]">
               <Label className="text-sm font-medium mb-2 block">قیمت از (میلیون)</Label>
-              <Input placeholder="مثلاً ۵۰۰۰" value={priceMin} onChange={(event) => setPriceMin(event.target.value)} />
+              <Input placeholder="مثلاً ۵۰۰۰" value={priceMin} onChange={(event) => updateFilter(setPriceMin, event.target.value)} />
             </div>
             <div className="flex-1 min-w-[140px]">
               <Label className="text-sm font-medium mb-2 block">قیمت تا (میلیون)</Label>
-              <Input placeholder="مثلاً ۳۰۰۰۰" value={priceMax} onChange={(event) => setPriceMax(event.target.value)} />
+              <Input placeholder="مثلاً ۳۰۰۰۰" value={priceMax} onChange={(event) => updateFilter(setPriceMax, event.target.value)} />
             </div>
           </div>
         </Card>
 
-        <p className="text-sm text-muted-foreground mb-4">{toPersianNumber(total)} آگهی یافت شد</p>
+        <p className="text-sm text-muted-foreground mb-4">
+          {toPersianNumber(total)} آگهی یافت شد
+          {totalPages > 1 && ` · صفحه ${toPersianNumber(currentPage)} از ${toPersianNumber(totalPages)}`}
+        </p>
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -186,15 +199,30 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
             <p className="text-muted-foreground text-sm">فیلترها را تغییر دهید یا بعداً دوباره بررسی کنید.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {listings.map((listing) => (
-              <PublicListingCard
-                key={listing.id}
-                listing={listing}
-                emphasis={isInstant ? 'instant' : 'special'}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {listings.map((listing) => (
+                <PublicListingCard
+                  key={listing.id}
+                  listing={listing}
+                  emphasis={isInstant ? 'instant' : 'special'}
+                />
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <nav aria-label="صفحه‌بندی آگهی‌ها" className="mt-8 flex items-center justify-center gap-4">
+                <Button variant="outline" disabled={currentPage <= 1} onClick={() => setCurrentPage((page) => page - 1)}>
+                  صفحهٔ قبل
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {toPersianNumber(currentPage)} از {toPersianNumber(totalPages)}
+                </span>
+                <Button variant="outline" disabled={currentPage >= totalPages} onClick={() => setCurrentPage((page) => page + 1)}>
+                  صفحهٔ بعد
+                </Button>
+              </nav>
+            )}
+          </>
         )}
       </div>
     </main>

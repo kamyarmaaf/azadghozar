@@ -18,13 +18,14 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import {
-  Car, Eye, PhoneCall, ArrowLeftRight, BarChart3, MessageSquare,
+  Car, Eye, ArrowLeftRight, BarChart3, MessageSquare,
   Settings, Pencil, Trash2, Plus, TrendingUp, DollarSign, UserPlus, Loader2, RefreshCw
 } from 'lucide-react';
 import { ReferralTab } from '@/components/dashboard/ReferralTab';
 import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { MyServiceRequestsPanel } from '@/components/services/MyServiceRequestsPanel';
+import { ComingSoonNotice } from '@/components/ui/coming-soon';
 
 const statusMap: Record<string, { label: string; className: string }> = {
   active: { label: 'فعال', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
@@ -84,17 +85,17 @@ export function SellerDashboardPage() {
   };
 
   const stats = [
-    { label: 'آگهی فعال', value: toPersianNumber(listingStats.active), icon: Car, color: 'text-emerald-600 bg-emerald-50' },
-    { label: 'در انتظار تأیید', value: toPersianNumber(listingStats.pending), icon: RefreshCw, color: 'text-amber-600 bg-amber-50' },
-    { label: 'بازدید کل', value: toPersianNumber(listingStats.views), icon: Eye, color: 'text-gold-dark bg-gold/10' },
-    { label: 'کل آگهی‌ها', value: toPersianNumber(sellerVehicles.length), icon: ArrowLeftRight, color: 'text-violet-600 bg-violet-50' },
+    { label: 'آگهی فعال در این صفحه', value: toPersianNumber(listingStats.active), icon: Car, color: 'text-emerald-600 bg-emerald-50' },
+    { label: 'در انتظار تأیید در این صفحه', value: toPersianNumber(listingStats.pending), icon: RefreshCw, color: 'text-amber-600 bg-amber-50' },
+    { label: 'بازدید آگهی‌های این صفحه', value: toPersianNumber(listingStats.views), icon: Eye, color: 'text-gold-dark bg-gold/10' },
+    { label: 'آگهی‌های بارگیری‌شده', value: toPersianNumber(sellerVehicles.length), icon: ArrowLeftRight, color: 'text-violet-600 bg-violet-50' },
   ];
 
   const tabs = [
     { value: 'listings', label: 'آگهی‌های من', icon: Car },
     { value: 'inspections', label: 'درخواست‌های بازرسی', icon: BarChart3 },
-    { value: 'stats', label: 'آمار و گزارش', icon: TrendingUp },
-    { value: 'messages', label: 'پیام‌ها', icon: MessageSquare },
+    { value: 'stats', label: 'آمار محدود', icon: TrendingUp },
+    { value: 'messages', label: 'پیام‌ها (به‌زودی)', icon: MessageSquare },
     { value: 'referral', label: 'دعوت از دوستان', icon: UserPlus },
     { value: 'settings', label: 'تنظیمات', icon: Settings },
   ];
@@ -158,6 +159,7 @@ export function SellerDashboardPage() {
 
           {/* My Listings Tab */}
           <TabsContent value="listings" className="mt-6">
+            <p role="status" className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">در این پنل فعلاً حداکثر ۱۰۰ آگهی بارگیری می‌شود؛ نمایش همه آگهی‌ها با صفحه‌بندی هنوز در دست توسعه است.</p>
             <Card>
               <CardContent className="p-0">
                 <Table>
@@ -238,45 +240,26 @@ export function SellerDashboardPage() {
 
           {/* Stats Tab */}
           <TabsContent value="stats" className="mt-6">
+            <ComingSoonNotice title="گزارش عملکرد" detail="بازدید روزانه و تماس‌های امروز هنوز ثبت نمی‌شوند؛ مقادیر نمایشی حذف شده‌اند. اعداد زیر فقط از آگهی‌های بارگیری‌شده در این صفحه محاسبه می‌شوند." />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="hover-lift shadow-card">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm text-muted-foreground">بازدید امروز</p>
-                    <Eye className="size-5 text-gold-dark" />
-                  </div>
-                  <p className="text-3xl font-bold">{toPersianNumber(156)}</p>
-                  <p className="text-xs text-success mt-1">۱۲٪ نسبت به دیروز</p>
-                </CardContent>
-              </Card>
-              <Card className="hover-lift shadow-card">
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm text-muted-foreground">تماس‌های امروز</p>
-                    <PhoneCall className="size-5 text-amber-600" />
-                  </div>
-                  <p className="text-3xl font-bold">{toPersianNumber(8)}</p>
-                  <p className="text-xs text-success mt-1">۵٪ نسبت به دیروز</p>
-                </CardContent>
-              </Card>
-              <Card className="hover-lift shadow-card">
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm text-muted-foreground">میانگین قیمت آگهی‌ها</p>
+                    <p className="text-sm text-muted-foreground">میانگین قیمت آگهی‌های بارگیری‌شده</p>
                     <DollarSign className="size-5 text-emerald-600" />
                   </div>
                   <p className="text-xl font-bold">{listingStats.averagePrice ? formatPrice(listingStats.averagePrice) : 'بدون داده'}</p>
-                  <p className="text-xs text-muted-foreground mt-1">بر اساس آگهی‌های فعال</p>
+                  <p className="text-xs text-muted-foreground mt-1">بر اساس آگهی‌های بارگیری‌شده</p>
                 </CardContent>
               </Card>
               <Card className="hover-lift shadow-card">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm text-muted-foreground">آگهی‌های فعال</p>
+                    <p className="text-sm text-muted-foreground">آگهی‌های فعال این صفحه</p>
                     <Car className="size-5 text-violet-600" />
                   </div>
                   <p className="text-3xl font-bold">{toPersianNumber(listingStats.active)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">از مجموع {toPersianNumber(sellerVehicles.length)} آگهی</p>
+                  <p className="text-xs text-muted-foreground mt-1">از {toPersianNumber(sellerVehicles.length)} آگهی بارگیری‌شده</p>
                 </CardContent>
               </Card>
             </div>
@@ -287,8 +270,8 @@ export function SellerDashboardPage() {
             <Card>
               <CardContent className="p-8 text-center">
                 <MessageSquare className="size-12 text-muted-foreground mx-auto mb-3" />
-                <p className="font-medium">پیام جدیدی ندارید</p>
-                <p className="text-sm text-muted-foreground mt-1">پیام‌های دریافتی از خریداران در اینجا نمایش داده می‌شود.</p>
+                <p className="font-medium">پیام‌ها: به‌زودی</p>
+                <p className="text-sm text-muted-foreground mt-1">اتصال به سامانه پیام‌رسانی هنوز انجام نشده است.</p>
               </CardContent>
             </Card>
           </TabsContent>
