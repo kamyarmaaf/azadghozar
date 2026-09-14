@@ -294,6 +294,31 @@ class VehicleListingSummarySerializer(
         read_only_fields = fields
 
 
+class AdminPendingListingSerializer(
+    ListingCoverMixin,
+    serializers.ModelSerializer,
+):
+    """Only the fields needed to render a moderation row."""
+
+    owner_name = serializers.CharField(source="owner.display_name", read_only=True)
+    cover_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = VehicleListing
+        fields = (
+            "id",
+            "owner_name",
+            "brand_name",
+            "model_name",
+            "trim_name",
+            "production_year",
+            "price",
+            "created_at",
+            "cover_image",
+        )
+        read_only_fields = fields
+
+
 class VehicleListingComparisonSerializer(
     ListingCoverMixin,
     serializers.ModelSerializer,

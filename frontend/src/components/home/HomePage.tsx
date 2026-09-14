@@ -111,18 +111,15 @@ function useHomeListings(kind: 'instant' | 'special' | 'latest') {
   useEffect(() => {
     let cancelled = false;
     void fetchVehicleListings({
-      pageSize: kind === 'latest' ? 20 : 8,
-      instantSale: kind === 'instant',
-      specialSale: kind === 'special',
+      pageSize: kind === 'latest' ? 6 : 8,
+      instantSale: kind === 'latest' ? false : kind === 'instant' ? true : undefined,
+      specialSale: kind === 'latest' ? false : kind === 'special' ? true : undefined,
       ordering: 'newest',
       summary: true,
     })
       .then((response) => {
         if (cancelled) return;
-        const results = kind === 'latest'
-          ? response.results.filter((listing) => !listing.is_instant_sale && !listing.is_special_sale).slice(0, 6)
-          : response.results.slice(0, 8);
-        setListings(results);
+        setListings(response.results);
       })
       .catch(() => {
         if (!cancelled) setListings([]);
@@ -257,6 +254,11 @@ function HeroSlider() {
               <p className="text-white/60 text-sm md:text-base leading-7 mb-8 max-w-md">
                 آگهی‌های واقعی خودروهای وارداتی و منطقه آزاد را جست‌وجو و بررسی کنید
               </p>
+
+              <Button onClick={() => navigateTo('buy')} className="bg-gold text-brand hover:bg-gold/90">
+                مشاهده همه آگهی‌ها
+                <ArrowLeft className="size-4" />
+              </Button>
 
               <p className="mt-8 text-xs text-white/70">آمار سامانه بعد از اتصال گزارش‌گیری واقعی نمایش داده می‌شود.</p>
             </div>
@@ -931,7 +933,7 @@ function BodyStylesSection() {
     <Section>
       <div className="flex items-center justify-between mb-8">
         <SectionTitle>نوع بدنه خودرو</SectionTitle>
-        <button className="text-sm text-gold-dark hover:text-gold font-medium flex items-center gap-1 transition-colors">
+        <button onClick={() => navigateTo('buy')} className="text-sm text-gold-dark hover:text-gold font-medium flex items-center gap-1 transition-colors">
           مشاهده همه
           <ArrowLeft className="size-4" />
         </button>

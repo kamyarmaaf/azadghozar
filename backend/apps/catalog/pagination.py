@@ -14,3 +14,12 @@ class ComparisonCandidatePagination(CursorPagination):
     page_size_query_param = "page_size"
     max_page_size = 24
     ordering = ("-created_at", "-id")
+
+
+class AdminPendingListingPagination(CursorPagination):
+    """Bounded, count-free moderation queue for a large pending table."""
+
+    page_size = 20
+    page_size_query_param = "page_size"
+    max_page_size = 50
+    ordering = ("-created_at", "-id")

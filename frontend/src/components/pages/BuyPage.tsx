@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Heart, SlidersHorizontal, X, Search, ChevronRight, ChevronLeft, Loader2, RefreshCw } from 'lucide-react';
 import { brands, bodyTypes } from '@/lib/mock-data';
+import { homeListingFilters } from '@/lib/home-listing-filters.mjs';
 import { formatPrice, formatMileage, toPersianNumber } from '@/lib/utils';
 import {
   fetchVehicleListings,
@@ -101,11 +102,15 @@ function optionalPositiveNumber(value: string, multiplier = 1): number | undefin
     .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
     .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
     .replace(/[,٬\s]/g, '');
+  if (!normalized) return undefined;
   const parsed = Number(normalized);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed * multiplier : undefined;
 }
 
 interface FilterProps {
+  selectedBrands: string[];
+  selectedBodyTypes: string[];
+  city: string;
   plateType: string;
   brand: string;
   model: string;
@@ -126,6 +131,9 @@ interface FilterProps {
   inspected: boolean;
   activeFilterCount: number;
   onClearFilters: () => void;
+  onRemoveBrand: (value: string) => void;
+  onRemoveBodyType: (value: string) => void;
+  setCity: (value: string) => void;
   setPlateType: (v: string) => void;
   setBrand: (v: string) => void;
   setModel: (v: string) => void;
@@ -148,6 +156,7 @@ interface FilterProps {
 }
 
 function FilterSidebar({
+  selectedBrands, selectedBodyTypes, city, onRemoveBrand, onRemoveBodyType, setCity,
   plateType, brand, model, yearMin, yearMax, priceMin, priceMax,
   mileageMin, mileageMax, body, color, transmission, fuel, condition,
   sellerTypeFilter, instantSale, specialSale, inspected,
@@ -184,6 +193,13 @@ function FilterSidebar({
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">برند</Label>
+        {selectedBrands.length > 0 && (
+          <div className="flex flex-wrap gap-1" aria-label="برندهای انتخاب‌شده">
+            {selectedBrands.map((name) => (
+              <button type="button" key={name} onClick={() => onRemoveBrand(name)} className="rounded-lg bg-muted px-2 py-1 text-xs">{name} ×</button>
+            ))}
+          </div>
+        )}
         <Select value={brand} onValueChange={setBrand}>
           <SelectTrigger className="w-full"><SelectValue placeholder="همه برندها" /></SelectTrigger>
           <SelectContent>
@@ -224,6 +240,13 @@ function FilterSidebar({
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">نوع بدنه</Label>
+        {selectedBodyTypes.length > 0 && (
+          <div className="flex flex-wrap gap-1" aria-label="انواع بدنه انتخاب‌شده">
+            {selectedBodyTypes.map((name) => (
+              <button type="button" key={name} onClick={() => onRemoveBodyType(name)} className="rounded-lg bg-muted px-2 py-1 text-xs">{name} ×</button>
+            ))}
+          </div>
+        )}
         <Select value={body} onValueChange={setBody}>
           <SelectTrigger className="w-full"><SelectValue placeholder="همه" /></SelectTrigger>
           <SelectContent>
@@ -231,6 +254,11 @@ function FilterSidebar({
             {bodyTypes.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="listing-city" className="text-sm font-medium">شهر</Label>
+        <Input id="listing-city" placeholder="همه شهرها" value={city} onChange={(event) => setCity(event.target.value)} />
       </div>
 
       <div className="space-y-2">
@@ -317,7 +345,8 @@ function FilterSidebar({
 }
 
 export function BuyPage() {
-  const { navigateTo } = useNavigation();
+  const { navigateTo, pageData } = useNavigation();
+  const [homeFilters] = useState(() => homeListingFilters(pageData));
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
   const hasHydrated = useAuth((state) => state._hasHydrated);
   const favoriteIds = useFavorites((state) => state.favoriteIds);
@@ -333,15 +362,19 @@ export function BuyPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [search, setSearch] = useState(homeFilters.search);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(homeFilters.brands);
+  const [selectedBodyTypes, setSelectedBodyTypes] = useState<string[]>(homeFilters.bodyTypes);
+  const [city, setCity] = useState(homeFilters.city);
   const [plateType, setPlateType] = useState('all');
   const [brand, setBrand] = useState('all');
   const [model, setModel] = useState('');
-  const [yearMin, setYearMin] = useState('');
-  const [yearMax, setYearMax] = useState('');
-  const [priceMin, setPriceMin] = useState('');
-  const [priceMax, setPriceMax] = useState('');
-  const [mileageMin, setMileageMin] = useState('');
-  const [mileageMax, setMileageMax] = useState('');
+  const [yearMin, setYearMin] = useState(homeFilters.yearMin);
+  const [yearMax, setYearMax] = useState(homeFilters.yearMax);
+  const [priceMin, setPriceMin] = useState(homeFilters.priceMin);
+  const [priceMax, setPriceMax] = useState(homeFilters.priceMax);
+  const [mileageMin, setMileageMin] = useState(homeFilters.mileageMin);
+  const [mileageMax, setMileageMax] = useState(homeFilters.mileageMax);
   const [body, setBody] = useState('all');
   const [color, setColor] = useState('all');
   const [transmission, setTransmission] = useState('all');
@@ -355,6 +388,7 @@ export function BuyPage() {
     setter: React.Dispatch<React.SetStateAction<T>>,
     value: T,
   ) => {
+    setIsLoading(true);
     setCurrentPage(1);
     setter(value);
   };
@@ -362,7 +396,7 @@ export function BuyPage() {
   const totalPages = Math.ceil(totalListings / VEHICLES_PER_PAGE);
   const paginatedVehicles = listings;
 
-  const filterVersion = [plateType, brand, model, yearMin, yearMax, priceMin, priceMax, mileageMin, mileageMax, body, color, transmission, fuel, condition, sellerTypeFilter, instantSale, specialSale, inspected, sortBy].join(',');
+  const filterVersion = [search, selectedBrands.join('|'), selectedBodyTypes.join('|'), city, plateType, brand, model, yearMin, yearMax, priceMin, priceMax, mileageMin, mileageMax, body, color, transmission, fuel, condition, sellerTypeFilter, instantSale, specialSale, inspected, sortBy].join(',');
 
   useEffect(() => {
     let cancelled = false;
@@ -371,8 +405,10 @@ export function BuyPage() {
       void fetchVehicleListings({
         page: currentPage,
         pageSize: VEHICLES_PER_PAGE,
+        q: search.trim() || undefined,
         plateType: plateType === 'all' ? undefined : plateTypeApiMap[plateType],
         brand: brand === 'all' ? undefined : brand,
+        brands: selectedBrands.length ? selectedBrands : undefined,
         model: model.trim() || undefined,
         yearMin: optionalPositiveNumber(yearMin),
         yearMax: optionalPositiveNumber(yearMax),
@@ -381,13 +417,15 @@ export function BuyPage() {
         mileageMin: optionalPositiveNumber(mileageMin, 1_000),
         mileageMax: optionalPositiveNumber(mileageMax, 1_000),
         bodyType: body === 'all' ? undefined : body,
+        bodyTypes: selectedBodyTypes.length ? selectedBodyTypes : undefined,
+        city: city.trim() || undefined,
         color: color === 'all' ? undefined : color,
         transmission: transmission === 'all' ? undefined : transmissionApiMap[transmission],
         fuelType: fuel === 'all' ? undefined : fuelApiMap[fuel],
         condition: condition === 'all' ? undefined : conditionApiMap[condition],
         sellerType: sellerTypeFilter === 'dealership' ? 'agency' : sellerTypeFilter === 'all' ? undefined : sellerTypeFilter,
-        instantSale,
-        specialSale,
+        instantSale: instantSale || undefined,
+        specialSale: specialSale || undefined,
         inspected,
         ordering: sortBy as 'newest' | 'cheapest' | 'priciest' | 'lowest-mileage',
         summary: true,
@@ -410,10 +448,10 @@ export function BuyPage() {
       window.clearTimeout(timer);
     };
   }, [
-    body, brand, color, condition, currentPage, filterVersion, fuel,
+    body, brand, city, color, condition, currentPage, filterVersion, fuel,
     inspected, instantSale, mileageMax, mileageMin, model, plateType,
-    priceMax, priceMin, reloadVersion, sellerTypeFilter, sortBy,
-    specialSale, transmission, yearMax, yearMin,
+    priceMax, priceMin, reloadVersion, search, selectedBrands, selectedBodyTypes,
+    sellerTypeFilter, sortBy, specialSale, transmission, yearMax, yearMin,
   ]);
 
   useEffect(() => {
@@ -463,7 +501,9 @@ export function BuyPage() {
   };
 
   const clearFilters = () => {
+    setIsLoading(true);
     setCurrentPage(1);
+    setSearch(''); setSelectedBrands([]); setSelectedBodyTypes([]); setCity('');
     setPlateType('all'); setBrand('all'); setModel('');
     setYearMin(''); setYearMax(''); setPriceMin(''); setPriceMax('');
     setMileageMin(''); setMileageMax(''); setBody('all'); setColor('all');
@@ -472,15 +512,25 @@ export function BuyPage() {
     setInspected(false);
   };
 
-  const activeFilterCount = [plateType !== 'all', brand !== 'all', model !== '', yearMin !== '', yearMax !== '', priceMin !== '', priceMax !== '', mileageMin !== '', mileageMax !== '', body !== 'all', color !== 'all', transmission !== 'all', fuel !== 'all', condition !== 'all', sellerTypeFilter !== 'all', instantSale, specialSale, inspected].filter(Boolean).length;
+  const activeFilterCount = [search.trim() !== '', selectedBrands.length > 0, selectedBodyTypes.length > 0, city.trim() !== '', plateType !== 'all', brand !== 'all', model !== '', yearMin !== '', yearMax !== '', priceMin !== '', priceMax !== '', mileageMin !== '', mileageMax !== '', body !== 'all', color !== 'all', transmission !== 'all', fuel !== 'all', condition !== 'all', sellerTypeFilter !== 'all', instantSale, specialSale, inspected].filter(Boolean).length;
+  const goToPage = (page: number) => {
+    if (page === currentPage || page < 1 || page > totalPages) return;
+    setIsLoading(true);
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const filterProps: FilterProps = {
+    selectedBrands, selectedBodyTypes, city,
+    onRemoveBrand: (value) => updateFilter(setSelectedBrands, selectedBrands.filter((item) => item !== value)),
+    onRemoveBodyType: (value) => updateFilter(setSelectedBodyTypes, selectedBodyTypes.filter((item) => item !== value)),
+    setCity: (value) => updateFilter(setCity, value),
     plateType, brand, model, yearMin, yearMax, priceMin, priceMax,
     mileageMin, mileageMax, body, color, transmission, fuel, condition,
     sellerTypeFilter, instantSale, specialSale, inspected,
     activeFilterCount, onClearFilters: clearFilters,
     setPlateType: (value) => updateFilter(setPlateType, value),
-    setBrand: (value) => updateFilter(setBrand, value),
+    setBrand: (value) => { setSelectedBrands([]); updateFilter(setBrand, value); },
     setModel: (value) => updateFilter(setModel, value),
     setYearMin: (value) => updateFilter(setYearMin, value),
     setYearMax: (value) => updateFilter(setYearMax, value),
@@ -488,7 +538,7 @@ export function BuyPage() {
     setPriceMax: (value) => updateFilter(setPriceMax, value),
     setMileageMin: (value) => updateFilter(setMileageMin, value),
     setMileageMax: (value) => updateFilter(setMileageMax, value),
-    setBody: (value) => updateFilter(setBody, value),
+    setBody: (value) => { setSelectedBodyTypes([]); updateFilter(setBody, value); },
     setColor: (value) => updateFilter(setColor, value),
     setTransmission: (value) => updateFilter(setTransmission, value),
     setFuel: (value) => updateFilter(setFuel, value),
@@ -513,6 +563,11 @@ export function BuyPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
+        <div className="mb-5">
+          <Label htmlFor="listing-search" className="sr-only">جست‌وجوی آگهی</Label>
+          <Input id="listing-search" placeholder="نام خودرو، برند یا مدل را جست‌وجو کنید" value={search} onChange={(event) => updateFilter(setSearch, event.target.value)} className="max-w-lg" />
+        </div>
 
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -665,8 +720,9 @@ export function BuyPage() {
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationLink
-                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          onClick={() => goToPage(currentPage - 1)}
                           aria-label="صفحه قبلی"
+                          aria-disabled={currentPage === 1}
                           className={`gap-1 px-2.5 sm:pr-2.5 ${currentPage === 1 ? 'pointer-events-none opacity-40' : 'cursor-pointer'}`}
                         >
                           <ChevronRight className="size-4" />
@@ -683,7 +739,7 @@ export function BuyPage() {
                           <PaginationItem key={page}>
                             <PaginationLink
                               isActive={currentPage === page}
-                              onClick={() => setCurrentPage(page)}
+                              onClick={() => goToPage(page)}
                               className="cursor-pointer"
                             >
                               {toPersianNum(page)}
@@ -694,8 +750,9 @@ export function BuyPage() {
 
                       <PaginationItem>
                         <PaginationLink
-                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                          onClick={() => goToPage(currentPage + 1)}
                           aria-label="صفحه بعدی"
+                          aria-disabled={currentPage === totalPages}
                           className={`gap-1 px-2.5 sm:pl-2.5 ${currentPage === totalPages ? 'pointer-events-none opacity-40' : 'cursor-pointer'}`}
                         >
                           <span className="hidden sm:inline">بعدی</span>

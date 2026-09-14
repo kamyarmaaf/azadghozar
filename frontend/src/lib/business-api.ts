@@ -189,14 +189,27 @@ export function requestAgencySubscription(
 export function fetchAdminBusinesses(input: {
   kind?: BusinessKind;
   status?: VerificationStatus;
+  nextUrl?: string;
 } = {}): Promise<CursorPage<BusinessProfile>> {
   const params = new URLSearchParams();
   if (input.kind) params.set('kind', input.kind);
   if (input.status) params.set('status', input.status);
+  const path = input.nextUrl
+    ? adminBusinessPagePath(input.nextUrl, '/businesses/admin/profiles/')
+    : `/businesses/admin/profiles/?${params.toString()}`;
   return apiRequest<CursorPage<BusinessProfile>>(
-    `/businesses/admin/profiles/?${params.toString()}`,
+    path,
     { authenticated: true },
   );
+}
+
+function adminBusinessPagePath(nextUrl: string, path: string): string {
+  const base = new URL(API_BASE_URL);
+  const cursor = new URL(nextUrl, base);
+  if (cursor.origin !== base.origin || cursor.pathname !== `${base.pathname.replace(/\/$/, '')}${path}`) {
+    throw new Error('نشانی صفحه بعدی مدیریت معتبر نیست.');
+  }
+  return `${path}${cursor.search}`;
 }
 
 export function reviewBusiness(
@@ -213,9 +226,13 @@ export function reviewBusiness(
 
 export function fetchAdminSubscriptions(
   status = 'pending',
+  nextUrl?: string,
 ): Promise<CursorPage<BusinessSubscription>> {
+  const path = nextUrl
+    ? adminBusinessPagePath(nextUrl, '/businesses/admin/subscriptions/')
+    : `/businesses/admin/subscriptions/?status=${encodeURIComponent(status)}`;
   return apiRequest<CursorPage<BusinessSubscription>>(
-    `/businesses/admin/subscriptions/?status=${encodeURIComponent(status)}`,
+    path,
     { authenticated: true },
   );
 }

@@ -345,6 +345,45 @@ def test_staff_can_approve_role_change(
     assert buyer_user.role == User.Role.SELLER
 
 
+@pytest.mark.api
+@pytest.mark.django_db
+def test_pending_role_requests_use_bounded_cursor_pages(
+    api_client, buyer_user, staff_user, django_assert_max_num_queries
+) -> None:
+    applicants = User.objects.bulk_create(
+        [User(username=f"role-applicant-{index}", role=User.Role.BUYER)
+         for index in range(54)]
+    )
+    RoleChangeRequest.objects.bulk_create(
+        [RoleChangeRequest(
+            user=applicant,
+            from_role=User.Role.BUYER,
+            to_role=User.Role.SELLER,
+            reason="فروش خودرو",
+        ) for applicant in applicants]
+    )
+    url = reverse("accounts:role-change-pending")
+    api_client.force_authenticate(user=buyer_user)
+    assert api_client.get(url).status_code == 403
+
+    api_client.force_authenticate(user=staff_user)
+    with django_assert_max_num_queries(1):
+        first = api_client.get(url)
+    assert first.status_code == 200
+    assert len(first.data["requests"]) == 20
+    assert first.data["next"]
+    assert "count" not in first.data
+
+    with django_assert_max_num_queries(1):
+        second = api_client.get(first.data["next"])
+    assert second.status_code == 200
+    assert len(second.data["requests"]) == 20
+    assert set(item["id"] for item in first.data["requests"]).isdisjoint(
+        item["id"] for item in second.data["requests"]
+    )
+    assert len(api_client.get(url, {"page_size": 5000}).data["requests"]) == 50
+
+
 @pytest.mark.security
 @pytest.mark.django_db
 def test_non_staff_cannot_review_role_change(

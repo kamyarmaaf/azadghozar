@@ -1,4 +1,5 @@
 import {
+  API_BASE_URL,
   apiRequest,
   clearAuthTokens,
   resolveMediaUrl,
@@ -472,13 +473,25 @@ export async function createRoleChange(input: {
   return mapRoleChange(response);
 }
 
-export async function fetchPendingRoleChanges(): Promise<
-  RoleChangeRequest[]
-> {
+export async function fetchPendingRoleChanges(input: {
+  nextUrl?: string;
+  signal?: AbortSignal;
+} = {}): Promise<{ requests: RoleChangeRequest[]; next: string | null }> {
+  let path = "/auth/role-changes/pending/";
+  if (input.nextUrl) {
+    const apiUrl = new URL(API_BASE_URL);
+    const nextUrl = new URL(input.nextUrl, apiUrl);
+    const basePath = apiUrl.pathname.replace(/\/$/, "");
+    if (nextUrl.origin !== apiUrl.origin || nextUrl.pathname !== `${basePath}${path}`) {
+      throw new Error("نشانی صفحه بعدی درخواست‌ها نامعتبر است.");
+    }
+    path += nextUrl.search;
+  }
   const response = await apiRequest<{
     requests: BackendRoleChangeRequest[];
-  }>("/auth/role-changes/pending/", { authenticated: true });
-  return response.requests.map(mapRoleChange);
+    next: string | null;
+  }>(path, { authenticated: true, signal: input.signal });
+  return { requests: response.requests.map(mapRoleChange), next: response.next };
 }
 
 export async function reviewRoleChange(

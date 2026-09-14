@@ -307,6 +307,131 @@ def test_listing_filters_mine_and_staff_can_moderate(
 
 @pytest.mark.api
 @pytest.mark.django_db
+def test_public_listing_search_honors_home_filters_and_bounded_pages(
+    api_client, buyer_user
+) -> None:
+    owner = buyer_user
+    entries = [
+        create_active_listing(owner, brand_name="Toyota", body_type="سدان", city="کیش"),
+        create_active_listing(owner, brand_name="BMW", body_type="شاسی‌بلند", city="کیش"),
+        create_active_listing(owner, brand_name="Honda", body_type="سدان", city="تهران"),
+    ]
+    create_active_listing(owner, brand_name="BMW", status=VehicleListing.Status.PENDING)
+    url = reverse("catalog:vehicle-listing-list")
+
+    response = api_client.get(url, {
+        "brands": ["toyota", "bmw"], "body_types": ["سدان", "شاسی‌بلند"],
+        "city": "کیش", "page_size": 1, "summary": "true",
+    })
+    assert response.status_code == 200
+    assert response.data["count"] == 2
+    assert len(response.data["results"]) == 1
+    assert response.data["results"][0]["id"] in {entries[0].id, entries[1].id}
+    assert response.data["next"] is not None
+    next_response = api_client.get(response.data["next"])
+    assert next_response.status_code == 200
+    assert next_response.data["count"] == 2
+    assert {response.data["results"][0]["id"], next_response.data["results"][0]["id"]} == {entries[0].id, entries[1].id}
+
+    search = api_client.get(url, {"q": "honda", "city": "تهران", "summary": "true"})
+    assert search.status_code == 200
+    assert search.data["results"][0]["id"] == entries[2].id
+    assert search.data["count"] == 1
+
+    invalid = api_client.get(url, {"brands": ["BMW"] * 21})
+    assert invalid.status_code == 400
+
+    create_active_listing(owner, brand_name="Toyota", is_instant_sale=True)
+    create_active_listing(owner, brand_name="BMW", is_special_sale=True)
+    latest_regular = api_client.get(url, {
+        "is_instant_sale": "False", "is_special_sale": "False",
+        "page_size": 6, "summary": "true",
+    })
+    assert latest_regular.status_code == 200
+    assert latest_regular.data["count"] == 3
+    assert len(latest_regular.data["results"]) == 3
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_admin_pending_queue_is_staff_only_count_free_and_bounded(
+    api_client, buyer_user, staff_user, django_assert_num_queries
+) -> None:
+    seller = User.objects.create_user(
+        username="moderation-seller", role=User.Role.SELLER,
+    )
+    pending = []
+    for index in range(45):
+        pending.append(create_active_listing(
+            seller,
+            model_name=f"Pending {index}",
+            status=VehicleListing.Status.PENDING,
+            published_at=None,
+        ))
+    VehicleListingImage.objects.create(
+        listing=pending[-1], file="listings/moderation/cover.webp",
+        sort_order=0, file_size=123, mime_type="image/webp",
+    )
+    create_active_listing(seller, model_name="Active listing")
+    url = reverse("catalog:vehicle-listing-pending-queue")
+    assert api_client.get(url).status_code == 401
+    api_client.force_authenticate(user=buyer_user)
+    assert api_client.get(url).status_code == 403
+
+    api_client.force_authenticate(user=staff_user)
+    with django_assert_num_queries(1):
+        first = api_client.get(url)
+    assert first.status_code == 200
+    assert set(first.data) == {"next", "previous", "results"}
+    assert len(first.data["results"]) == 20
+    assert first.data["next"]
+    assert first.data["results"][0]["cover_image"].endswith("cover.webp")
+    assert set(first.data["results"][0]) == {
+        "id", "owner_name", "brand_name", "model_name", "trim_name",
+        "production_year", "price", "created_at", "cover_image",
+    }
+
+    with django_assert_num_queries(1):
+        second = api_client.get(first.data["next"])
+    assert second.status_code == 200
+    assert len(second.data["results"]) == 20
+    assert second.data["previous"]
+    assert set(item["id"] for item in first.data["results"]).isdisjoint(
+        item["id"] for item in second.data["results"]
+    )
+
+    third = api_client.get(second.data["next"])
+    assert len(third.data["results"]) == 5
+    assert third.data["next"] is None
+    assert len(api_client.get(url, {"page_size": 5000}).data["results"]) == 45
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_internal_listing_reviews_do_not_inflate_public_view_count(
+    api_client, buyer_user, staff_user
+) -> None:
+    pending = create_active_listing(
+        buyer_user, status=VehicleListing.Status.PENDING, published_at=None,
+    )
+    active = create_active_listing(buyer_user)
+    api_client.force_authenticate(user=staff_user)
+    assert api_client.get(reverse("catalog:vehicle-listing-detail", args=[pending.pk])).status_code == 200
+    assert api_client.get(reverse("catalog:vehicle-listing-detail", args=[active.pk])).status_code == 200
+    api_client.force_authenticate(user=buyer_user)
+    assert api_client.get(reverse("catalog:vehicle-listing-detail", args=[active.pk])).status_code == 200
+    active.refresh_from_db()
+    pending.refresh_from_db()
+    assert active.view_count == pending.view_count == 0
+
+    api_client.force_authenticate(user=None)
+    assert api_client.get(reverse("catalog:vehicle-listing-detail", args=[active.pk])).status_code == 200
+    active.refresh_from_db()
+    assert active.view_count == 1
+
+
+@pytest.mark.api
+@pytest.mark.django_db
 def test_listing_images_are_server_compressed_to_webp(
     api_client,
     buyer_user,

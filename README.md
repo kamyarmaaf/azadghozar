@@ -1,5 +1,11 @@
 # Karvo Backend
 
+برای اتصال «مشاهده همه آگهی‌ها» به فهرست واقعی و راهنمای نصب V12: [V12-HOME-LISTINGS-FA.md](V12-HOME-LISTINGS-FA.md).
+
+برای صف تأیید سریع آگهی‌ها و راه‌اندازی نسخه V11: [V11-ADMIN-CURSOR-FA.md](V11-ADMIN-CURSOR-FA.md).
+
+برای صف‌های صفحه‌بندی‌شده و راهنمای نصب پنل مدیر نسخه V10: [V10-ADMIN-FA.md](V10-ADMIN-FA.md).
+
 برای وضعیت بخش‌های آماده/ناتمام و دستورهای نصب V9: [V9-STATUS-FA.md](V9-STATUS-FA.md).
 
 برای تغییرات نسخه V8 و دستورهای امن نصب/تست روی PowerShell، [V8-NOTES-FA.md](V8-NOTES-FA.md) را ببینید.
@@ -11,7 +17,7 @@
 در PowerShell و از ریشه پروژه:
 
 ```powershell
-Copy-Item .env.dev.example .env.dev
+if (-not (Test-Path .env.dev)) { Copy-Item .env.dev.example .env.dev }
 docker compose -f compose.yaml -f compose.dev.yaml build
 docker compose -f compose.yaml -f compose.dev.yaml up -d db redis
 docker compose -f compose.yaml -f compose.dev.yaml run --rm backend python manage.py migrate

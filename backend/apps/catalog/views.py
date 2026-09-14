@@ -24,7 +24,11 @@ from apps.catalog.models import (
     VehicleModel,
     VehicleTrim,
 )
-from apps.catalog.pagination import CatalogPagination, ComparisonCandidatePagination
+from apps.catalog.pagination import (
+    AdminPendingListingPagination,
+    CatalogPagination,
+    ComparisonCandidatePagination,
+)
 from apps.catalog.permissions import IsListingOwnerOrReadOnly, IsStaffOrReadOnly
 from apps.catalog.selectors import (
     get_brands_queryset,
@@ -32,6 +36,7 @@ from apps.catalog.selectors import (
     get_vehicle_trims_queryset,
 )
 from apps.catalog.serializers import (
+    AdminPendingListingSerializer,
     BrandSerializer,
     ListingFavoriteSerializer,
     VehicleModelSerializer,
@@ -240,6 +245,27 @@ class VehicleListingViewSet(ModelViewSet):
             if value not in (None, ""):
                 queryset = queryset.filter(**{lookup: value})
 
+        for parameter, lookup in (
+            ("brands", "brand_name__iexact"),
+            ("body_types", "body_type__iexact"),
+        ):
+            values = self.request.query_params.getlist(parameter)
+            if values:
+                if len(values) > 20 or any(
+                    not value.strip() or len(value) > 80 for value in values
+                ):
+                    raise ValidationError({parameter: "Provide 1 to 20 short values."})
+                choices = Q()
+                for value in values:
+                    choices |= Q(**{lookup: value.strip()})
+                queryset = queryset.filter(choices)
+
+        city = self.request.query_params.get("city", "").strip()
+        if city:
+            if len(city) > 80:
+                raise ValidationError({"city": "City must be at most 80 characters."})
+            queryset = queryset.filter(city__iexact=city)
+
         range_filters = {
             "year_min": "production_year__gte",
             "year_max": "production_year__lte",
@@ -338,11 +364,49 @@ class VehicleListingViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        VehicleListing.objects.filter(pk=instance.pk).update(
-            view_count=F("view_count") + 1
-        )
-        instance.refresh_from_db(fields=["view_count"])
+        if instance.status == VehicleListing.Status.ACTIVE and not (
+            request.user.is_authenticated
+            and (request.user.is_staff or instance.owner_id == request.user.pk)
+        ):
+            VehicleListing.objects.filter(pk=instance.pk).update(
+                view_count=F("view_count") + 1
+            )
+            instance.refresh_from_db(fields=["view_count"])
         return Response(self.get_serializer(instance).data)
+
+    @action(
+        detail=False,
+        methods=("get",),
+        url_path="pending-queue",
+        permission_classes=(IsAdminUser,),
+        pagination_class=AdminPendingListingPagination,
+    )
+    def pending_queue(self, request):
+        queryset = self._with_cover_image(
+            VehicleListing.objects.filter(
+                status=VehicleListing.Status.PENDING,
+            ).select_related("owner")
+        ).only(
+            "id",
+            "owner_id",
+            "owner__username",
+            "owner__first_name",
+            "owner__last_name",
+            "owner__phone_number",
+            "brand_name",
+            "model_name",
+            "trim_name",
+            "production_year",
+            "price",
+            "created_at",
+        ).order_by("-created_at", "-id")
+        page = self.paginate_queryset(queryset)
+        serializer = AdminPendingListingSerializer(
+            page,
+            many=True,
+            context=self.get_serializer_context(),
+        )
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=False,

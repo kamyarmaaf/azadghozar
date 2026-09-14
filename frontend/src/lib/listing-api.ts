@@ -195,6 +195,22 @@ export interface PaginatedListings {
   results: VehicleListing[];
 }
 
+export interface AdminPendingListing {
+  id: number;
+  owner_name: string;
+  brand_name: string;
+  model_name: string;
+  trim_name: string;
+  production_year: number;
+  price: number | null;
+  created_at: string;
+  cover_image: string | null;
+}
+
+export function pendingListingImageUrl(listing: AdminPendingListing): string {
+  return resolveMediaUrl(listing.cover_image) || '/images/car-1.jpg';
+}
+
 export interface ListingFavorite {
   id: number;
   listing: VehicleListing;
@@ -299,6 +315,7 @@ export interface ListingQuery {
   q?: string;
   plateType?: string;
   brand?: string;
+  brands?: string[];
   model?: string;
   yearMin?: number;
   yearMax?: number;
@@ -307,6 +324,8 @@ export interface ListingQuery {
   mileageMin?: number;
   mileageMax?: number;
   bodyType?: string;
+  bodyTypes?: string[];
+  city?: string;
   color?: string;
   transmission?: string;
   fuelType?: string;
@@ -346,6 +365,7 @@ export async function fetchVehicleListings(
   addQueryValue(params, 'q', query.q);
   addQueryValue(params, 'plate_type', query.plateType);
   addQueryValue(params, 'brand', query.brand);
+  query.brands?.forEach((brand) => params.append('brands', brand));
   addQueryValue(params, 'model', query.model);
   addQueryValue(params, 'year_min', query.yearMin);
   addQueryValue(params, 'year_max', query.yearMax);
@@ -354,14 +374,16 @@ export async function fetchVehicleListings(
   addQueryValue(params, 'mileage_min', query.mileageMin);
   addQueryValue(params, 'mileage_max', query.mileageMax);
   addQueryValue(params, 'body_type', query.bodyType);
+  query.bodyTypes?.forEach((bodyType) => params.append('body_types', bodyType));
+  addQueryValue(params, 'city', query.city);
   addQueryValue(params, 'color', query.color);
   addQueryValue(params, 'transmission', query.transmission);
   addQueryValue(params, 'fuel_type', query.fuelType);
   addQueryValue(params, 'condition', query.condition);
   addQueryValue(params, 'seller_type', query.sellerType);
   addQueryValue(params, 'business', query.business);
-  if (query.instantSale) addQueryValue(params, 'is_instant_sale', 'True');
-  if (query.specialSale) addQueryValue(params, 'is_special_sale', 'True');
+  if (query.instantSale !== undefined) addQueryValue(params, 'is_instant_sale', query.instantSale ? 'True' : 'False');
+  if (query.specialSale !== undefined) addQueryValue(params, 'is_special_sale', query.specialSale ? 'True' : 'False');
   if (query.inspected) addQueryValue(params, 'is_inspected', 'True');
   addQueryValue(params, 'ordering', query.ordering);
   if (query.summary) addQueryValue(params, 'summary', 'true');
@@ -369,6 +391,26 @@ export async function fetchVehicleListings(
   const suffix = params.size ? `?${params.toString()}` : '';
   return apiRequest<PaginatedListings | PaginatedListingSummaries>(`/catalog/listings/${suffix}`, {
     authenticated: query.authenticated ?? query.mine ?? false,
+  });
+}
+
+export function fetchAdminPendingListings(input: {
+  nextUrl?: string | null;
+  signal?: AbortSignal;
+} = {}): Promise<CursorPage<AdminPendingListing>> {
+  const path = '/catalog/listings/pending-queue/';
+  let suffix = '';
+  if (input.nextUrl) {
+    const base = new URL(API_BASE_URL);
+    const cursor = new URL(input.nextUrl, base);
+    if (cursor.origin !== base.origin || cursor.pathname !== `${base.pathname.replace(/\/$/, '')}${path}`) {
+      throw new Error('نشانی صفحهٔ صف تأیید نامعتبر است.');
+    }
+    suffix = cursor.search;
+  }
+  return apiRequest<CursorPage<AdminPendingListing>>(`${path}${suffix}`, {
+    authenticated: true,
+    signal: input.signal,
   });
 }
 

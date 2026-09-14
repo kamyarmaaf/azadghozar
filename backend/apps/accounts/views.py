@@ -13,6 +13,7 @@ from rest_framework.permissions import (
     IsAuthenticated,
 )
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.pagination import CursorPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -584,6 +585,13 @@ class RoleChangeRequestView(APIView):
         )
 
 
+class RoleChangePendingPagination(CursorPagination):
+    page_size = 20
+    page_size_query_param = "page_size"
+    max_page_size = 50
+    ordering = ("-created_at", "-id")
+
+
 class RoleChangePendingView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -591,10 +599,13 @@ class RoleChangePendingView(APIView):
         requests = RoleChangeRequest.objects.filter(
             status=RoleChangeRequest.Status.PENDING,
         ).select_related("user", "reviewed_by")
+        paginator = RoleChangePendingPagination()
+        page = paginator.paginate_queryset(requests, request, view=self)
         return Response(
             {
+                "next": paginator.get_next_link(),
                 "requests": RoleChangeRequestSerializer(
-                    requests,
+                    page,
                     many=True,
                 ).data
             }
