@@ -7,6 +7,7 @@ import {
   pendingListingImageUrl,
   rejectVehicleListing,
   type AdminPendingListing,
+  type ListingCampaign,
 } from '@/lib/listing-api';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   fetchPendingRoleChanges,
@@ -32,8 +40,74 @@ import {
   Users, Car, FileText,
   LayoutDashboard, Store, Building2, Settings, ClipboardList,
   CheckCircle, XCircle, Clock, Shield,
-  UserCog, ArrowLeftRight, Loader2
+  UserCog, ArrowLeftRight, Loader2, ChevronDown, Flame, Sparkles
 } from 'lucide-react';
+
+function ListingApprovalMenu({
+  listing,
+  disabled,
+  loading,
+  compact = false,
+  onApprove,
+}: {
+  listing: AdminPendingListing;
+  disabled: boolean;
+  loading: boolean;
+  compact?: boolean;
+  onApprove: (id: number, campaign: ListingCampaign) => Promise<void>;
+}) {
+  return (
+    <DropdownMenu dir="rtl">
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant={compact ? 'ghost' : 'default'}
+          size={compact ? 'icon' : 'sm'}
+          aria-label={`انتخاب نوع تأیید ${listing.brand_name} ${listing.model_name}`}
+          className={compact
+            ? 'size-7 text-success'
+            : 'gap-1 bg-success text-white hover:bg-success/90'}
+          disabled={disabled}
+        >
+          {loading ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <CheckCircle className="size-3.5" />
+          )}
+          {!compact && (
+            <>
+              تأیید
+              <ChevronDown className="size-3.5" />
+            </>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-48 text-right">
+        <DropdownMenuLabel>تأیید به‌عنوان</DropdownMenuLabel>
+        <DropdownMenuItem
+          className="cursor-pointer justify-start"
+          onSelect={() => void onApprove(listing.id, 'regular')}
+        >
+          <CheckCircle className="size-4 text-success" />
+          آگهی عادی
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer justify-start"
+          onSelect={() => void onApprove(listing.id, 'instant')}
+        >
+          <Flame className="size-4 text-destructive" />
+          فروش فوری
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer justify-start"
+          onSelect={() => void onApprove(listing.id, 'special')}
+        >
+          <Sparkles className="size-4 text-gold-dark" />
+          فروش ویژه
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export function AdminDashboardPage() {
   const navigateTo = useNavigation((state) => state.navigateTo);
@@ -127,10 +201,13 @@ export function AdminDashboardPage() {
     };
   }, [canManage, listingCursorUrl, loadPendingListings]);
 
-  const handleListingApprove = async (id: number) => {
+  const handleListingApprove = async (
+    id: number,
+    campaign: ListingCampaign,
+  ) => {
     setListingActionId(id);
     try {
-      await approveVehicleListing(id);
+      await approveVehicleListing(id, campaign);
       setPendingListings((items) => items.filter((item) => item.id !== id));
       if (pendingListings.length === 1 && (listingNext || listingPrevious)) {
         setListingCursorUrl(listingNext || listingPrevious);
@@ -194,7 +271,7 @@ export function AdminDashboardPage() {
     { value: 'dashboard', label: 'داشبورد', icon: LayoutDashboard },
     { value: 'users', label: 'کاربران', icon: Users },
     { value: 'listings', label: 'آگهی‌ها', icon: Car },
-    { value: 'dealers', label: 'نمایندگی‌ها', icon: Store },
+    { value: 'agencies', label: 'نمایندگی‌ها', icon: Store },
     { value: 'galleries', label: 'نمایشگاه‌ها', icon: Building2 },
     { value: 'services', label: 'خدمات', icon: ClipboardList },
     { value: 'role-requests', label: 'درخواست نقش', icon: UserCog },
@@ -284,9 +361,13 @@ export function AdminDashboardPage() {
                             <p className="text-xs text-muted-foreground">{v.owner_name}</p>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
-                            <Button variant="ghost" size="icon" aria-label={`تأیید ${v.brand_name} ${v.model_name}`} className="size-7 text-success" disabled={listingActionId !== null} onClick={() => void handleListingApprove(v.id)}>
-                              {listingActionId === v.id ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle className="size-4" />}
-                            </Button>
+                            <ListingApprovalMenu
+                              listing={v}
+                              compact
+                              disabled={listingActionId !== null}
+                              loading={listingActionId === v.id}
+                              onApprove={handleListingApprove}
+                            />
                             <Button variant="ghost" size="icon" aria-label={`رد ${v.brand_name} ${v.model_name}`} className="size-7 text-danger" disabled={listingActionId !== null} onClick={() => void handleListingReject(v.id)}>
                               <XCircle className="size-4" />
                             </Button>
@@ -309,7 +390,7 @@ export function AdminDashboardPage() {
 
           {/* Listings Tab */}
           <TabsContent value="listings" className="mt-6">
-            <p role="status" className="mb-4 rounded-lg border bg-muted/30 p-3 text-sm text-muted-foreground">آگهی‌ها با cursor در صفحه‌های ۲۰تایی و بدون شمارش کل جدول بارگیری می‌شوند. پیش از تأیید یا رد، جزئیات هر آگهی را بررسی کنید.</p>
+            <p role="status" className="mb-4 rounded-lg border bg-muted/30 p-3 text-sm leading-7 text-muted-foreground">آگهی‌ها با cursor در صفحه‌های ۲۰تایی و بدون شمارش کل جدول بارگیری می‌شوند. پس از بررسی جزئیات، از منوی «تأیید» مشخص کنید آگهی عادی، فروش فوری یا فروش ویژه باشد.</p>
             <Card>
               <CardHeader className="flex-row items-center justify-between">
                 <CardTitle className="text-lg">آگهی‌های در انتظار تایید</CardTitle>
@@ -336,10 +417,12 @@ export function AdminDashboardPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <Button size="sm" variant="outline" onClick={() => navigateTo('vehicle-details', { vehicleId: v.id })}>جزئیات</Button>
-                        <Button size="sm" className="gap-1 bg-success hover:bg-success/90 text-white" disabled={listingActionId !== null} onClick={() => void handleListingApprove(v.id)}>
-                          {listingActionId === v.id ? <Loader2 className="size-3.5 animate-spin" /> : <CheckCircle className="size-3.5" />}
-                          تایید
-                        </Button>
+                        <ListingApprovalMenu
+                          listing={v}
+                          disabled={listingActionId !== null}
+                          loading={listingActionId === v.id}
+                          onApprove={handleListingApprove}
+                        />
                         <Button size="sm" variant="outline" className="gap-1 text-danger border-danger/30 hover:bg-danger/10" disabled={listingActionId !== null} onClick={() => void handleListingReject(v.id)}>
                           <XCircle className="size-3.5" />
                           رد
@@ -450,7 +533,7 @@ export function AdminDashboardPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="dealers" className="mt-6">
+          <TabsContent value="agencies" className="mt-6">
             <AdminBusinessPanel kind="agency" />
           </TabsContent>
 
@@ -463,7 +546,7 @@ export function AdminDashboardPage() {
           </TabsContent>
 
           <TabsContent value="content" className="mt-6">
-            <ComingSoonNotice title="مدیریت محتوا" detail="ایجاد و انتشار مقاله، ویدیو، پرسش‌های متداول و بنر هنوز به API متصل نشده است." />
+            <ComingSoonNotice title="مدیریت محتوا" detail="مدیریت و انتشار ویدیوهای آموزشی از پنل مدیریت Django فعال است؛ مقاله‌ها، پرسش‌های متداول و بنرهای عمومی هنوز به API متصل نشده‌اند." />
           </TabsContent>
 
           {/* Admin Settings Tab */}

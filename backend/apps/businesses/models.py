@@ -58,6 +58,61 @@ class BusinessProfile(models.Model):
         blank=True,
         verbose_name="شناسه ملی",
     )
+    postal_code = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="کد پستی",
+    )
+    license_issuer = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="مرجع صادرکننده مجوز",
+    )
+    license_expires_at = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="تاریخ اعتبار مجوز",
+    )
+    company_registration_number = models.CharField(
+        max_length=80,
+        blank=True,
+        verbose_name="شماره ثبت شرکت",
+    )
+    economic_code = models.CharField(
+        max_length=32,
+        blank=True,
+        verbose_name="کد اقتصادی",
+    )
+    authorized_representative_name = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="نماینده قانونی شرکت",
+    )
+    import_license_number = models.CharField(
+        max_length=80,
+        blank=True,
+        verbose_name="شماره مجوز واردات",
+    )
+    import_license_issuer = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="مرجع صادرکننده مجوز واردات",
+    )
+    import_license_expires_at = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="تاریخ اعتبار مجوز واردات",
+    )
+    business_card_number = models.CharField(
+        max_length=80,
+        blank=True,
+        verbose_name="شماره کارت بازرگانی",
+    )
+    represented_brands = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="برندهای وارداتی",
+    )
     verification_status = models.CharField(
         max_length=16,
         choices=VerificationStatus.choices,
@@ -100,6 +155,23 @@ class BusinessProfile(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def save(self, *args, **kwargs):
+        """Keep gallery and importer-agency documents mutually exclusive."""
+        if self.kind == self.Kind.GALLERY:
+            self.company_registration_number = ""
+            self.economic_code = ""
+            self.authorized_representative_name = ""
+            self.import_license_number = ""
+            self.import_license_issuer = ""
+            self.import_license_expires_at = None
+            self.business_card_number = ""
+            self.represented_brands = []
+        elif self.kind == self.Kind.AGENCY:
+            self.license_number = ""
+            self.license_issuer = ""
+            self.license_expires_at = None
+        super().save(*args, **kwargs)
 
 
 class BusinessMembership(models.Model):
@@ -173,8 +245,10 @@ class BusinessMembership(models.Model):
 
 class BusinessSubscription(models.Model):
     class Plan(models.TextChoices):
-        AGENCY_MONTHLY = "agency_monthly", "نمایندگی یک‌ماهه"
-        AGENCY_YEARLY = "agency_yearly", "نمایندگی یک‌ساله"
+        GALLERY_MONTHLY = "gallery_monthly", "اشتراک نمایشگاه یک‌ماهه"
+        GALLERY_YEARLY = "gallery_yearly", "اشتراک نمایشگاه یک‌ساله"
+        AGENCY_MONTHLY = "agency_monthly", "اشتراک نمایندگی یک‌ماهه"
+        AGENCY_YEARLY = "agency_yearly", "اشتراک نمایندگی یک‌ساله"
 
     class Status(models.TextChoices):
         PENDING = "pending", "در انتظار بررسی"

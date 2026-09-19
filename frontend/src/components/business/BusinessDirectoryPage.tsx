@@ -150,6 +150,9 @@ export function BusinessDirectoryPage({
                     <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs text-emerald-700">
                       <ShieldCheck className="size-3.5" /> تأیید شده
                     </div>
+                    <div className="absolute left-3 top-3 rounded-full bg-slate-950/75 px-2.5 py-1 text-xs text-white">
+                      {kind === 'agency' ? 'شرکت واردکننده' : 'نمایشگاه خودرو'}
+                    </div>
                     <div className="absolute bottom-3 right-3 flex items-center gap-3 text-white">
                       <div className="flex size-12 items-center justify-center overflow-hidden rounded-xl bg-white shadow">
                         {business.logo ? (

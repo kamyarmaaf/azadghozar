@@ -18,13 +18,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import {
   Car, Eye, BarChart3, Settings,
-  Bell, Pencil, Trash2, Plus, Star, Loader2, RefreshCw, Users, CreditCard
+  Bell, Pencil, Trash2, Plus, Star, Loader2, RefreshCw, Users, CreditCard,
+  CheckCircle2, Crown,
 } from 'lucide-react';
-import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
 import { BusinessMediaUploader } from '@/components/dashboard/BusinessMediaUploader';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { BusinessTeamPanel } from '@/components/business/BusinessTeamPanel';
 import { BusinessSubscriptionPanel } from '@/components/business/BusinessSubscriptionPanel';
+import { BusinessVerificationForm } from '@/components/business/BusinessVerificationForm';
+import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
 import {
   fetchBusinessDashboard,
   type BusinessDashboard,
@@ -38,7 +40,11 @@ const statusMap: Record<string, { label: string; className: string }> = {
   expired: { label: 'منقضی', className: 'bg-red-100 text-red-700 border-red-200' },
 };
 
-export function GalleryDashboardPage() {
+export function BusinessDashboardPage({
+  expectedKind,
+}: {
+  expectedKind: 'gallery' | 'agency';
+}) {
   const navigateTo = useNavigation((state) => state.navigateTo);
   const currentUser = useAuth((state) => state.currentUser);
   const [galleryVehicles, setGalleryVehicles] = useState<VehicleListing[]>([]);
@@ -48,6 +54,7 @@ export function GalleryDashboardPage() {
   const [businessDashboard, setBusinessDashboard] = useState<BusinessDashboard | null>(null);
   const [listingPage, setListingPage] = useState(1);
   const [listingCount, setListingCount] = useState(0);
+  const [registrationNotice, setRegistrationNotice] = useState<'gallery' | 'agency' | null>(null);
 
   const loadListings = useCallback(async () => {
     setIsLoadingListings(true);
@@ -74,6 +81,14 @@ export function GalleryDashboardPage() {
         .then(setBusinessDashboard)
         .catch(() => undefined);
     }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const notice = window.sessionStorage.getItem('azadgozar-business-registration-notice');
+    if (notice !== 'gallery' && notice !== 'agency') return;
+    window.sessionStorage.removeItem('azadgozar-business-registration-notice');
+    const timer = window.setTimeout(() => setRegistrationNotice(notice), 0);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -107,13 +122,17 @@ export function GalleryDashboardPage() {
     { label: 'ردشده در این صفحه', value: toPersianNumber(listingStats.rejected), icon: RefreshCw, color: 'text-red-600 bg-red-50' },
   ];
 
+  const isAgencyAccount = (
+    businessDashboard?.business.kind ?? currentUser?.businessAccess?.kind ?? expectedKind
+  ) === 'agency';
+
   const tabs = [
     { value: 'vehicles', label: 'مدیریت خودروها', icon: Car },
     { value: 'add', label: 'افزودن خودرو', icon: Plus },
     { value: 'team', label: 'کارمندان', icon: Users },
-    { value: 'subscription', label: 'درخواست ارتقا', icon: CreditCard },
+    { value: 'subscription', label: 'وضعیت اشتراک', icon: CreditCard },
     { value: 'stats', label: 'آمار', icon: BarChart3 },
-    { value: 'settings', label: 'تنظیمات نمایشگاه', icon: Settings },
+    { value: 'settings', label: isAgencyAccount ? 'تنظیمات نمایندگی' : 'تنظیمات نمایشگاه', icon: Settings },
   ];
 
   return (
@@ -126,12 +145,36 @@ export function GalleryDashboardPage() {
               <AvatarFallback className="bg-gradient-brand text-white text-sm font-bold">{currentUser?.avatar || 'ک'}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-xl font-bold">پنل نمایشگاه</h1>
-              <p className="text-sm text-muted-foreground">{currentUser?.businessAccess?.name || currentUser?.businessName || currentUser?.name || 'نمایشگاه آزادگذر'}</p>
+              <h1 className="flex items-center gap-2 text-xl font-bold">
+                {isAgencyAccount && <Crown className="size-5 text-indigo-600" />}
+                {isAgencyAccount ? 'پنل نمایندگی' : 'پنل نمایشگاه'}
+              </h1>
+              <p className="text-sm text-muted-foreground">{currentUser?.businessAccess?.name || currentUser?.businessName || currentUser?.name || (isAgencyAccount ? 'شرکت واردکننده آزادگذر' : 'نمایشگاه آزادگذر')}</p>
             </div>
           </div>
           <span className="text-xs text-muted-foreground">اعلان‌ها: به‌زودی</span>
         </div>
+
+        {registrationNotice && (
+          <div
+            role="status"
+            className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900"
+          >
+            <CheckCircle2 className="mt-0.5 size-5 shrink-0" />
+            <div>
+              <p className="text-sm font-bold">
+                {registrationNotice === 'agency'
+                  ? 'درخواست ثبت نمایندگی شما با موفقیت ثبت شد.'
+                  : 'نمایشگاه شما با موفقیت ثبت شد.'}
+              </p>
+              <p className="mt-1 text-xs leading-6">
+                {registrationNotice === 'agency'
+                  ? 'اطلاعات حقوقی شرکت واردکننده در صف نمایندگی‌ها بررسی می‌شود. تا قبل از تأیید، پروفایل عمومی و امکان ثبت آگهی فعال نخواهد بود.'
+                  : 'اطلاعات در صف بررسی مدیریت است و پس از تأیید، پروفایل نمایشگاه برای کاربران نمایش داده می‌شود.'}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Stats Row - 6 cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
@@ -162,7 +205,7 @@ export function GalleryDashboardPage() {
                     <Icon className="size-4" />
                     <span className="hidden sm:inline">{tab.label}</span>
                     <span className="sm:hidden">
-                      {tab.label === 'مدیریت خودروها' ? 'خودروها' : tab.label === 'تنظیمات نمایشگاه' ? 'تنظیمات' : tab.label}
+                      {tab.value === 'vehicles' ? 'خودروها' : tab.value === 'settings' ? 'تنظیمات' : tab.label}
                     </span>
                   </TabsTrigger>
                 );
@@ -308,20 +351,33 @@ export function GalleryDashboardPage() {
           {/* Gallery Settings Tab */}
           <TabsContent value="settings" className="mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">اطلاعات نمایشگاه</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ProfileSettingsForm mode="business" />
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      {isAgencyAccount ? 'اطلاعات نمایندگی' : 'اطلاعات نمایشگاه'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <BusinessVerificationForm />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">اطلاعات مالک حساب</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ProfileSettingsForm />
+                  </CardContent>
+                </Card>
+              </div>
 
               <div className="flex flex-col gap-6">
                 {/* Logo Upload */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">لوگوی نمایشگاه</CardTitle>
+                    <CardTitle className="text-lg">لوگوی کسب‌وکار</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <BusinessMediaUploader kind="logo" />
@@ -344,4 +400,8 @@ export function GalleryDashboardPage() {
       </div>
     </div>
   );
+}
+
+export function GalleryDashboardPage() {
+  return <BusinessDashboardPage expectedKind="gallery" />;
 }

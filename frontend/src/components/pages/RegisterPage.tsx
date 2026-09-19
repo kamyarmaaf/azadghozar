@@ -2,15 +2,22 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigation } from '@/stores/navigation';
-import { useAuth, type UserRole } from '@/stores/auth';
+import { useAuth } from '@/stores/auth';
 import { verifyReferralCode as verifyReferralCodeApi } from '@/lib/account-api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { toPersianNumber } from '@/lib/utils';
+import {
+  isBusinessRegistration,
+  isRegistrationAccountType,
+  signupRoleFor,
+  type RegistrationAccountType,
+} from '@/lib/business-registration';
 import {
   Phone,
   Lock,
@@ -28,13 +35,16 @@ import {
   Tag,
   X,
   Loader2,
+  Crown,
+  MapPin,
+  FileText,
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
 /*  Role definitions                                                  */
 /* ------------------------------------------------------------------ */
 const roles: {
-  id: UserRole;
+  id: RegistrationAccountType;
   icon: React.ElementType;
   title: string;
   subtitle: string;
@@ -68,6 +78,15 @@ const roles: {
     color: 'text-amber-600',
     activeBorder: 'border-amber-500',
     activeBg: 'bg-amber-500/10',
+  },
+  {
+    id: 'agency',
+    icon: Crown,
+    title: 'نمایندگی',
+    subtitle: 'ویژه شرکت واردکننده خودرو',
+    color: 'text-indigo-600',
+    activeBorder: 'border-indigo-500',
+    activeBg: 'bg-indigo-500/10',
   },
 ];
 
@@ -171,6 +190,7 @@ function OtpInput({ length = 6, onComplete }: { length?: number; onComplete: (co
 /* ------------------------------------------------------------------ */
 export function RegisterPage() {
   const navigateTo = useNavigation((s) => s.navigateTo);
+  const pageData = useNavigation((s) => s.pageData);
   const {
     requestRegistrationOtp,
     confirmRegistrationOtp,
@@ -179,9 +199,28 @@ export function RegisterPage() {
   } = useAuth();
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [selectedRole, setSelectedRole] = useState<RegistrationAccountType | null>(null);
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [businessPhone, setBusinessPhone] = useState('');
+  const [province, setProvince] = useState('');
+  const [city, setCity] = useState('');
+  const [address, setAddress] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [licenseIssuer, setLicenseIssuer] = useState('');
+  const [licenseExpiresAt, setLicenseExpiresAt] = useState('');
+  const [nationalId, setNationalId] = useState('');
+  const [companyRegistrationNumber, setCompanyRegistrationNumber] = useState('');
+  const [economicCode, setEconomicCode] = useState('');
+  const [authorizedRepresentativeName, setAuthorizedRepresentativeName] = useState('');
+  const [importLicenseNumber, setImportLicenseNumber] = useState('');
+  const [importLicenseIssuer, setImportLicenseIssuer] = useState('');
+  const [importLicenseExpiresAt, setImportLicenseExpiresAt] = useState('');
+  const [businessCardNumber, setBusinessCardNumber] = useState('');
+  const [representedBrands, setRepresentedBrands] = useState('');
+  const [businessDescription, setBusinessDescription] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -196,29 +235,44 @@ export function RegisterPage() {
   const [registrationError, setRegistrationError] = useState('');
 
   const otpTimer = useOtpTimer(120);
+  const businessRegistration = isBusinessRegistration(selectedRole);
+  const agencyRegistration = selectedRole === 'agency';
 
-  /* --- auto-detect referral code from URL --- */
+  /* --- auto-detect registration type and referral code from URL --- */
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.hash.split('?')[1]);
-    const ref = params.get('ref');
-    if (ref) {
-      verifyReferralCodeApi(ref)
-        .then((data) => {
-          setReferralCode(ref);
-          if (data.valid) {
-            setReferralVerified(true);
-            setReferralName(data.referrerName || 'کاربر آزادگذر');
-          } else {
-            setReferralError('کد دعوت معتبر نیست');
-          }
-        })
-        .catch(() => {
-          setReferralCode(ref);
-          setReferralError('خطا در بررسی کد دعوت');
-        });
-    }
-  }, []);
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      const params = new URLSearchParams(window.location.hash.split('?')[1]);
+      const requestedType = pageData?.registrationType ?? params.get('type');
+      if (isRegistrationAccountType(requestedType)) {
+        setSelectedRole(requestedType);
+      }
+      const ref = String(pageData?.referralCode ?? params.get('ref') ?? '');
+      if (ref) {
+        void verifyReferralCodeApi(ref)
+          .then((data) => {
+            if (cancelled) return;
+            setReferralCode(ref);
+            if (data.valid) {
+              setReferralVerified(true);
+              setReferralName(data.referrerName || 'کاربر آزادگذر');
+            } else {
+              setReferralError('کد دعوت معتبر نیست');
+            }
+          })
+          .catch(() => {
+            if (cancelled) return;
+            setReferralCode(ref);
+            setReferralError('خطا در بررسی کد دعوت');
+          });
+      }
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [pageData]);
 
   /* --- verify referral code manually --- */
   const verifyReferralCode = async () => {
@@ -259,7 +313,7 @@ export function RegisterPage() {
     try {
       await requestRegistrationOtp(
         phone,
-        selectedRole,
+        signupRoleFor(selectedRole),
         referralVerified ? referralCode : undefined,
       );
       otpTimer.start();
@@ -303,13 +357,102 @@ export function RegisterPage() {
       setRegistrationError('رمز عبور و تکرار آن یکسان نیست');
       return;
     }
+    if (!acceptTerms) {
+      setRegistrationError('پذیرش قوانین و مقررات الزامی است');
+      return;
+    }
+    if (businessRegistration) {
+      if (businessName.trim().length < 2) {
+        setRegistrationError(
+          agencyRegistration
+            ? 'نام حقوقی شرکت واردکننده را وارد کنید'
+            : 'نام نمایشگاه را وارد کنید',
+        );
+        return;
+      }
+      if (businessPhone.replace(/\D/g, '').length < 7) {
+        setRegistrationError('تلفن ثابت معتبر کسب‌وکار را وارد کنید');
+        return;
+      }
+      if (!province.trim() || !city.trim()) {
+        setRegistrationError('استان و شهر محل فعالیت را کامل کنید');
+        return;
+      }
+      if (address.trim().length < 5) {
+        setRegistrationError('آدرس کامل کسب‌وکار را وارد کنید');
+        return;
+      }
+      if (postalCode.replace(/\D/g, '').length !== 10) {
+        setRegistrationError('کد پستی ۱۰ رقمی کسب‌وکار را وارد کنید');
+        return;
+      }
+      if (!agencyRegistration && (!licenseNumber.trim() || !licenseIssuer.trim())) {
+        setRegistrationError('شماره و مرجع صادرکننده پروانه کسب نمایشگاه را وارد کنید');
+        return;
+      }
+      if (agencyRegistration) {
+        if (!nationalId.trim() || !companyRegistrationNumber.trim()) {
+          setRegistrationError('شناسه ملی و شماره ثبت شرکت را وارد کنید');
+          return;
+        }
+        if (!authorizedRepresentativeName.trim()) {
+          setRegistrationError('نام نماینده قانونی شرکت را وارد کنید');
+          return;
+        }
+        if (!importLicenseNumber.trim() || !importLicenseIssuer.trim()) {
+          setRegistrationError('اطلاعات مجوز واردات شرکت را کامل کنید');
+          return;
+        }
+        if (!representedBrands.split(/[,،\n]/).some((brand) => brand.trim())) {
+          setRegistrationError('حداقل یک برند وارداتی را وارد کنید');
+          return;
+        }
+      }
+    }
     try {
       const user = await finishRegistration({
         fullName: name.trim(),
         password,
         passwordConfirmation: confirmPassword,
         acceptTerms,
+        ...(businessRegistration && {
+          businessKind: agencyRegistration ? 'agency' : 'gallery',
+          businessName: businessName.trim(),
+          businessPhone: businessPhone.trim(),
+          province: province.trim(),
+          city: city.trim(),
+          address: address.trim(),
+          postalCode: postalCode.trim(),
+          businessDescription: businessDescription.trim(),
+          ...(agencyRegistration
+            ? {
+                nationalId: nationalId.trim(),
+                companyRegistrationNumber: companyRegistrationNumber.trim(),
+                economicCode: economicCode.trim(),
+                authorizedRepresentativeName: authorizedRepresentativeName.trim(),
+                importLicenseNumber: importLicenseNumber.trim(),
+                importLicenseIssuer: importLicenseIssuer.trim(),
+                importLicenseExpiresAt: importLicenseExpiresAt || null,
+                businessCardNumber: businessCardNumber.trim(),
+                representedBrands: representedBrands
+                  .split(/[,،\n]/)
+                  .map((brand) => brand.trim())
+                  .filter(Boolean),
+              }
+            : {
+                licenseNumber: licenseNumber.trim(),
+                licenseIssuer: licenseIssuer.trim(),
+                licenseExpiresAt: licenseExpiresAt || null,
+                nationalId: nationalId.trim(),
+              }),
+        }),
       });
+      if (businessRegistration && typeof window !== 'undefined') {
+        window.sessionStorage.setItem(
+          'azadgozar-business-registration-notice',
+          agencyRegistration ? 'agency' : 'gallery',
+        );
+      }
       navigateTo(user.dashboardPage);
     } catch (error) {
       setRegistrationError(error instanceof Error ? error.message : 'خطا در تکمیل ثبت‌نام');
@@ -330,16 +473,16 @@ export function RegisterPage() {
   const goToPhone = () => setStep(2);
 
   /* --- step 3 → 4 (form) --- */
-  const goToForm = () => {
-    if (!otpVerified) return;
-    setStep(4);
-  };
-
   const currentStep = step === 4 ? 3 : step;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
-      <Card className="w-full max-w-md shadow-premium">
+      <Card
+        className={cn(
+          'w-full shadow-premium transition-[max-width]',
+          businessRegistration && step === 3 && otpVerified ? 'max-w-2xl' : 'max-w-md',
+        )}
+      >
         <CardHeader className="text-center pb-2">
           <div className="text-2xl font-bold text-gradient mb-2">آزاد گذر</div>
 
@@ -437,6 +580,12 @@ export function RegisterPage() {
                   </button>
                 );
               })}
+              {agencyRegistration && (
+                <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-xs leading-6 text-indigo-800">
+                  این حساب مخصوص شرکت‌های حقوقی واردکننده خودرو است و از ابتدا به‌عنوان نمایندگی ثبت می‌شود.
+                  فعال‌سازی پس از بررسی اطلاعات ثبتی و مجوز واردات توسط مدیریت انجام خواهد شد.
+                </div>
+              )}
               <Button onClick={goToStep2} disabled={!selectedRole} className="w-full h-11 text-base mt-3">
                 ادامه
                 <ChevronLeft className="size-4" />
@@ -648,6 +797,268 @@ export function RegisterPage() {
                 </div>
               </div>
 
+              {businessRegistration && (
+                <div className="space-y-4 rounded-2xl border border-border bg-muted/20 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className={cn(
+                      'flex size-10 shrink-0 items-center justify-center rounded-xl',
+                      agencyRegistration ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700',
+                    )}>
+                      {agencyRegistration ? <Crown className="size-5" /> : <Building2 className="size-5" />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">
+                        {agencyRegistration ? 'اطلاعات شرکت واردکننده خودرو' : 'اطلاعات نمایشگاه خودرو'}
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                        این اطلاعات برای احراز کسب‌وکار بررسی می‌شود و تا زمان تأیید عمومی نخواهد شد.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="flex flex-col gap-2 sm:col-span-2">
+                      <Label htmlFor="business-name">
+                        {agencyRegistration ? 'نام حقوقی شرکت' : 'نام نمایشگاه'}
+                      </Label>
+                      <div className="relative">
+                        <Building2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="business-name"
+                          value={businessName}
+                          onChange={(e) => setBusinessName(e.target.value)}
+                          placeholder={agencyRegistration ? 'شرکت واردکننده خودروی پارس' : 'نمایشگاه خودروی پارس'}
+                          className="pr-10"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="business-phone">تلفن ثابت کسب‌وکار</Label>
+                      <div className="relative">
+                        <Phone className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="business-phone"
+                          value={businessPhone}
+                          onChange={(e) => setBusinessPhone(e.target.value.replace(/[^0-9+\-() ]/g, ''))}
+                          placeholder="۰۲۱۸۸۷۷۶۶۵۵"
+                          className="pr-10 text-left"
+                          dir="ltr"
+                          inputMode="tel"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="business-province">استان</Label>
+                        <Input
+                          id="business-province"
+                          value={province}
+                          onChange={(e) => setProvince(e.target.value)}
+                          placeholder="تهران"
+                          required
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="business-city">شهر</Label>
+                        <Input
+                          id="business-city"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          placeholder="تهران"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 sm:col-span-2">
+                      <Label htmlFor="business-address">آدرس کامل</Label>
+                      <div className="relative">
+                        <MapPin className="absolute right-3 top-3 size-4 text-muted-foreground" />
+                        <Textarea
+                          id="business-address"
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          placeholder="خیابان، کوچه، پلاک و کد پستی"
+                          className="min-h-20 pr-10"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="postal-code">کد پستی *</Label>
+                      <Input
+                        id="postal-code"
+                        value={postalCode}
+                        onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        placeholder="کد پستی ۱۰ رقمی"
+                        className="text-left"
+                        dir="ltr"
+                        inputMode="numeric"
+                        required
+                      />
+                    </div>
+
+                    {!agencyRegistration ? (
+                      <>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="license-number">شماره پروانه کسب نمایشگاه *</Label>
+                          <div className="relative">
+                            <FileText className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                              id="license-number"
+                              value={licenseNumber}
+                              onChange={(e) => setLicenseNumber(e.target.value)}
+                              placeholder="شماره پروانه کسب"
+                              className="pr-10"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="license-issuer">مرجع صادرکننده پروانه *</Label>
+                          <Input
+                            id="license-issuer"
+                            value={licenseIssuer}
+                            onChange={(e) => setLicenseIssuer(e.target.value)}
+                            placeholder="اتحادیه نمایشگاه‌داران خودرو"
+                            required
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="license-expires-at">تاریخ اعتبار پروانه</Label>
+                          <Input
+                            id="license-expires-at"
+                            type="date"
+                            value={licenseExpiresAt}
+                            onChange={(e) => setLicenseExpiresAt(e.target.value)}
+                            dir="ltr"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="national-id">شناسه ملی (در صورت حقوقی بودن)</Label>
+                          <Input
+                            id="national-id"
+                            value={nationalId}
+                            onChange={(e) => setNationalId(e.target.value.replace(/\D/g, ''))}
+                            className="text-left"
+                            dir="ltr"
+                            inputMode="numeric"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="national-id">شناسه ملی شرکت *</Label>
+                          <Input
+                            id="national-id"
+                            value={nationalId}
+                            onChange={(e) => setNationalId(e.target.value.replace(/\D/g, ''))}
+                            className="text-left"
+                            dir="ltr"
+                            inputMode="numeric"
+                            required
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="company-registration-number">شماره ثبت شرکت *</Label>
+                          <Input
+                            id="company-registration-number"
+                            value={companyRegistrationNumber}
+                            onChange={(e) => setCompanyRegistrationNumber(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="economic-code">کد اقتصادی</Label>
+                          <Input
+                            id="economic-code"
+                            value={economicCode}
+                            onChange={(e) => setEconomicCode(e.target.value.replace(/\D/g, ''))}
+                            className="text-left"
+                            dir="ltr"
+                            inputMode="numeric"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="authorized-representative">نام نماینده قانونی شرکت *</Label>
+                          <Input
+                            id="authorized-representative"
+                            value={authorizedRepresentativeName}
+                            onChange={(e) => setAuthorizedRepresentativeName(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="import-license-number">شماره مجوز واردات *</Label>
+                          <Input
+                            id="import-license-number"
+                            value={importLicenseNumber}
+                            onChange={(e) => setImportLicenseNumber(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="import-license-issuer">مرجع صادرکننده مجوز واردات *</Label>
+                          <Input
+                            id="import-license-issuer"
+                            value={importLicenseIssuer}
+                            onChange={(e) => setImportLicenseIssuer(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="import-license-expires-at">تاریخ اعتبار مجوز واردات</Label>
+                          <Input
+                            id="import-license-expires-at"
+                            type="date"
+                            value={importLicenseExpiresAt}
+                            onChange={(e) => setImportLicenseExpiresAt(e.target.value)}
+                            dir="ltr"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="business-card-number">شماره کارت بازرگانی</Label>
+                          <Input
+                            id="business-card-number"
+                            value={businessCardNumber}
+                            onChange={(e) => setBusinessCardNumber(e.target.value)}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 sm:col-span-2">
+                          <Label htmlFor="represented-brands">برندهای وارداتی *</Label>
+                          <Input
+                            id="represented-brands"
+                            value={representedBrands}
+                            onChange={(e) => setRepresentedBrands(e.target.value)}
+                            placeholder="تویوتا، کیا، هیوندای"
+                            required
+                          />
+                          <p className="text-[11px] text-muted-foreground">نام برندها را با ویرگول جدا کنید.</p>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex flex-col gap-2 sm:col-span-2">
+                      <Label htmlFor="business-description">معرفی کوتاه (اختیاری)</Label>
+                      <Textarea
+                        id="business-description"
+                        value={businessDescription}
+                        onChange={(e) => setBusinessDescription(e.target.value)}
+                        placeholder="سابقه فعالیت، خدمات و برندهای تحت پوشش"
+                        className="min-h-20"
+                      />
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
               <div className="flex flex-col gap-2">
                 <Label htmlFor="reg-password">رمز عبور</Label>
                 <div className="relative">
@@ -731,7 +1142,11 @@ export function RegisterPage() {
 
               <Button type="submit" className="w-full h-11 text-base mt-2" disabled={!acceptTerms || isLoading}>
                 {isLoading && <Loader2 className="size-4 animate-spin" />}
-                ثبت‌نام به عنوان {roleData?.title}
+                {agencyRegistration
+                  ? 'ثبت نمایندگی و ارسال برای بررسی'
+                  : businessRegistration
+                    ? 'ثبت نمایشگاه و ارسال برای بررسی'
+                    : `ثبت‌نام به عنوان ${roleData?.title}`}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground mt-2">

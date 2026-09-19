@@ -41,7 +41,7 @@ class User(AbstractUser):
         ORG = "org", "مدیریت سازمان منطقه آزاد"
         FREE_ZONE_SUPERVISOR = (
             "free_zone_supervisor",
-            "نظارت سازمان منطقه آزاد",
+            "پنل نظارت منطقه آزاد",
         )
         SMART_ID_OPERATOR = (
             "smart_id_operator",
@@ -52,6 +52,7 @@ class User(AbstractUser):
         Role.BUYER,
         Role.SELLER,
         Role.GALLERY,
+        Role.AGENCY,
     }
 
     class PreferredContactMethod(models.TextChoices):

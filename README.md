@@ -1,5 +1,9 @@
 # Karvo Backend
 
+برای تفکیک کامل «نمایشگاه» از «نمایندگی/شرکت واردکننده» و رفتار مهاجرت داده‌های قبلی: [BUSINESS_REGISTRATION_CHANGES.md](BUSINESS_REGISTRATION_CHANGES.md).
+
+برای فعال‌سازی کامل «فروش فوری» و «فروش ویژه»، انتخاب کمپین در پنل مدیر و دستورهای Docker/Celery نسخه V14: [V14-CAMPAIGN-SALES-FA.md](V14-CAMPAIGN-SALES-FA.md).
+
 برای اتصال «مشاهده همه آگهی‌ها» به فهرست واقعی و راهنمای نصب V12: [V12-HOME-LISTINGS-FA.md](V12-HOME-LISTINGS-FA.md).
 
 برای صف تأیید سریع آگهی‌ها و راه‌اندازی نسخه V11: [V11-ADMIN-CURSOR-FA.md](V11-ADMIN-CURSOR-FA.md).
@@ -76,7 +80,7 @@ docker compose -f compose.yaml -f compose.dev.yaml down -v
 | POST | `role-changes/<id>/approve/` | مدیر | تأیید و اعمال اتمیک نقش |
 | POST | `role-changes/<id>/reject/` | مدیر | رد درخواست |
 
-نقش‌های ثبت‌نام عمومی فقط `buyer`، `seller` و `gallery` هستند. نقش‌های سازمانی، مدیریتی و عملیاتی باید توسط مدیر تخصیص داده شوند. ارتقای `gallery` به `agency` در فاز اشتراک/صورتحساب انجام می‌شود.
+نقش‌های ثبت‌نام عمومی `buyer`، `seller`، `gallery` و `agency` هستند. `gallery` برای نمایشگاه/بنگاه خودرو و `agency` برای شرکت حقوقی واردکننده خودرو است. هر دو از ابتدا مستقل ثبت می‌شوند و اشتراک هرگز نوع کسب‌وکار یا نقش کاربر را تغییر نمی‌دهد. نقش‌های سازمانی، مدیریتی و عملیاتی باید توسط مدیر تخصیص داده شوند.
 
 لایه API فرانت نگاشت camelCase به snake_case، نگهداری JWT و تمدید خودکار access token را انجام می‌دهد. مبدا مجاز پیش‌فرض فرانت `http://localhost:3000` است و با `CORS_ALLOWED_ORIGINS` قابل تغییر است.
 
@@ -105,10 +109,10 @@ docker compose -f compose.yaml -f compose.dev.yaml logs -f backend celery_worker
 | Method | Path | دسترسی | کاربرد |
 |---|---|---|---|
 | GET | `listings/` | عمومی/JWT | آگهی‌های فعال؛ مالک آگهی‌های در انتظار خودش را هم می‌بیند |
-| POST | `listings/` | فروشنده/نمایشگاه/نمایندگی | ثبت multipart آگهی و ۵ تا ۱۰ تصویر |
+| POST | `listings/` | فروشنده یا کسب‌وکار تأییدشده | ثبت multipart آگهی و ۵ تا ۱۰ تصویر |
 | GET | `listings/<id>/` | عمومی/JWT | مشاهده آگهی مجاز |
 | PATCH/PUT/DELETE | `listings/<id>/` | مالک یا مدیر | ویرایش یا حذف آگهی |
-| POST | `listings/<id>/approve/` | مدیر | تأیید و انتشار آگهی |
+| POST | `listings/<id>/approve/` | مدیر | تأیید و انتشار به‌صورت عادی، فوری یا ویژه با فیلد `campaign` |
 | POST | `listings/<id>/reject/` | مدیر | رد آگهی همراه با دلیل |
 | GET | `favorites/` | JWT | فهرست آگهی‌های ذخیره‌شده کاربر |
 | POST | `favorites/` | JWT | ذخیره آگهی فعال با `listing_id` |

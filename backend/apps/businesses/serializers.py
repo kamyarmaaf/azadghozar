@@ -40,6 +40,7 @@ class PublicBusinessSerializer(serializers.ModelSerializer):
             "listing_count",
             "total_views",
             "brands",
+            "represented_brands",
         )
         read_only_fields = fields
 
@@ -60,6 +61,16 @@ class BusinessProfileSerializer(PublicBusinessSerializer):
         fields = PublicBusinessSerializer.Meta.fields + (
             "license_number",
             "national_id",
+            "postal_code",
+            "license_issuer",
+            "license_expires_at",
+            "company_registration_number",
+            "economic_code",
+            "authorized_representative_name",
+            "import_license_number",
+            "import_license_issuer",
+            "import_license_expires_at",
+            "business_card_number",
             "verification_note",
             "created_at",
             "updated_at",
@@ -80,6 +91,94 @@ class BusinessProfileSerializer(PublicBusinessSerializer):
             "updated_at",
         )
 
+    def validate(self, attrs: dict) -> dict:
+        attrs = super().validate(attrs)
+        instance = self.instance
+        if instance is None:
+            return attrs
+
+        def value(field: str):
+            return attrs.get(field, getattr(instance, field))
+
+        common_fields = {
+            "name": "نام کسب‌وکار الزامی است.",
+            "phone": "تلفن ثابت کسب‌وکار الزامی است.",
+            "province": "استان محل فعالیت الزامی است.",
+            "city": "شهر محل فعالیت الزامی است.",
+            "address": "آدرس کامل کسب‌وکار الزامی است.",
+            "postal_code": "کد پستی کسب‌وکار الزامی است.",
+        }
+        errors = {
+            field: message
+            for field, message in common_fields.items()
+            if not str(value(field) or "").strip()
+        }
+        if instance.kind == BusinessProfile.Kind.GALLERY:
+            agency_only_fields = {
+                "company_registration_number",
+                "economic_code",
+                "authorized_representative_name",
+                "import_license_number",
+                "import_license_issuer",
+                "import_license_expires_at",
+                "business_card_number",
+                "represented_brands",
+            }
+            forbidden = agency_only_fields.intersection(self.initial_data)
+            if forbidden:
+                errors.update(
+                    {
+                        field: "این فیلد فقط برای شرکت واردکننده خودرو است."
+                        for field in forbidden
+                    }
+                )
+            gallery_fields = {
+                "license_number": "شماره پروانه کسب نمایشگاه الزامی است.",
+                "license_issuer": "مرجع صادرکننده پروانه کسب الزامی است.",
+            }
+            errors.update(
+                {
+                    field: message
+                    for field, message in gallery_fields.items()
+                    if not str(value(field) or "").strip()
+                }
+            )
+        else:
+            gallery_only_fields = {
+                "license_number",
+                "license_issuer",
+                "license_expires_at",
+            }
+            forbidden = gallery_only_fields.intersection(self.initial_data)
+            if forbidden:
+                errors.update(
+                    {
+                        field: "این فیلد فقط برای نمایشگاه خودرو است."
+                        for field in forbidden
+                    }
+                )
+            agency_fields = {
+                "national_id": "شناسه ملی شرکت الزامی است.",
+                "company_registration_number": "شماره ثبت شرکت الزامی است.",
+                "authorized_representative_name": "نام نماینده قانونی شرکت الزامی است.",
+                "import_license_number": "شماره مجوز واردات الزامی است.",
+                "import_license_issuer": "مرجع صادرکننده مجوز واردات الزامی است.",
+            }
+            errors.update(
+                {
+                    field: message
+                    for field, message in agency_fields.items()
+                    if not str(value(field) or "").strip()
+                }
+            )
+            if not value("represented_brands"):
+                errors["represented_brands"] = (
+                    "حداقل یک برند وارداتی را وارد کنید."
+                )
+        if errors:
+            raise serializers.ValidationError(errors)
+        return attrs
+
     @transaction.atomic
     def update(
         self,
@@ -94,6 +193,17 @@ class BusinessProfileSerializer(PublicBusinessSerializer):
             "address",
             "license_number",
             "national_id",
+            "postal_code",
+            "license_issuer",
+            "license_expires_at",
+            "company_registration_number",
+            "economic_code",
+            "authorized_representative_name",
+            "import_license_number",
+            "import_license_issuer",
+            "import_license_expires_at",
+            "business_card_number",
+            "represented_brands",
         }
         changed_review_data = any(
             field in validated_data
@@ -101,11 +211,16 @@ class BusinessProfileSerializer(PublicBusinessSerializer):
             for field in review_fields
         )
         profile = super().update(instance, validated_data)
-        if (
-            changed_review_data
-            and profile.verification_status
+        should_return_to_review = (
+            profile.verification_status
+            == BusinessProfile.VerificationStatus.REJECTED
+            and bool(validated_data)
+        ) or (
+            profile.verification_status
             == BusinessProfile.VerificationStatus.VERIFIED
-        ):
+            and changed_review_data
+        )
+        if should_return_to_review:
             profile.verification_status = (
                 BusinessProfile.VerificationStatus.PENDING
             )
@@ -216,6 +331,10 @@ class BusinessMembershipCreateSerializer(serializers.Serializer):
 
 class BusinessSubscriptionSerializer(serializers.ModelSerializer):
     business_name = serializers.CharField(source="business.name", read_only=True)
+    business_verification_status = serializers.CharField(
+        source="business.verification_status",
+        read_only=True,
+    )
     plan_label = serializers.CharField(source="get_plan_display", read_only=True)
     status_label = serializers.CharField(source="get_status_display", read_only=True)
 
@@ -225,6 +344,7 @@ class BusinessSubscriptionSerializer(serializers.ModelSerializer):
             "id",
             "business",
             "business_name",
+            "business_verification_status",
             "plan",
             "plan_label",
             "status",
@@ -247,9 +367,10 @@ class BusinessSubscriptionCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"detail": "ابتدا باید کسب‌وکار تأیید شود."}
             )
-        if business.kind != BusinessProfile.Kind.GALLERY:
+        expected_prefix = f"{business.kind}_"
+        if not validated_data["plan"].startswith(expected_prefix):
             raise serializers.ValidationError(
-                {"detail": "این کسب‌وکار از قبل نمایندگی است."}
+                {"plan": "پلن انتخاب‌شده با نوع کسب‌وکار سازگار نیست."}
             )
         return BusinessSubscription.objects.create(
             business=business,
@@ -262,7 +383,25 @@ class BusinessReviewSerializer(serializers.Serializer):
     action = serializers.ChoiceField(choices=("verify", "reject", "suspend"))
     note = serializers.CharField(required=False, allow_blank=True, max_length=2000)
 
+    def validate(self, attrs: dict) -> dict:
+        note = attrs.get("note", "").strip()
+        if attrs["action"] in {"reject", "suspend"} and not note:
+            raise serializers.ValidationError(
+                {"note": "ثبت علت رد یا تعلیق الزامی است."}
+            )
+        attrs["note"] = note
+        return attrs
+
 
 class SubscriptionReviewSerializer(serializers.Serializer):
     action = serializers.ChoiceField(choices=("approve", "reject", "cancel"))
     note = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
+    def validate(self, attrs: dict) -> dict:
+        note = attrs.get("note", "").strip()
+        if attrs["action"] == "reject" and not note:
+            raise serializers.ValidationError(
+                {"note": "ثبت علت رد درخواست اشتراک الزامی است."}
+            )
+        attrs["note"] = note
+        return attrs

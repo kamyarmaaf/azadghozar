@@ -164,6 +164,117 @@ class SignupCompleteSerializer(serializers.Serializer):
         write_only=True,
     )
     accept_terms = serializers.BooleanField(write_only=True)
+    business_name = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        min_length=2,
+        max_length=200,
+        trim_whitespace=True,
+    )
+    business_phone = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=20,
+        trim_whitespace=True,
+    )
+    province = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=64,
+        trim_whitespace=True,
+    )
+    city = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=64,
+        trim_whitespace=True,
+    )
+    address = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=2000,
+        trim_whitespace=True,
+    )
+    business_description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=3000,
+        trim_whitespace=True,
+    )
+    license_number = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=80,
+        trim_whitespace=True,
+    )
+    national_id = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=32,
+        trim_whitespace=True,
+    )
+    postal_code = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=20,
+        trim_whitespace=True,
+    )
+    license_issuer = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=200,
+        trim_whitespace=True,
+    )
+    license_expires_at = serializers.DateField(
+        required=False,
+        allow_null=True,
+    )
+    company_registration_number = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=80,
+        trim_whitespace=True,
+    )
+    economic_code = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=32,
+        trim_whitespace=True,
+    )
+    authorized_representative_name = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=200,
+        trim_whitespace=True,
+    )
+    import_license_number = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=80,
+        trim_whitespace=True,
+    )
+    import_license_issuer = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=200,
+        trim_whitespace=True,
+    )
+    import_license_expires_at = serializers.DateField(
+        required=False,
+        allow_null=True,
+    )
+    business_card_number = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=80,
+        trim_whitespace=True,
+    )
+    represented_brands = serializers.ListField(
+        child=serializers.CharField(max_length=100, trim_whitespace=True),
+        required=False,
+        allow_empty=True,
+        max_length=30,
+    )
 
     def validate_password(self, value: str) -> str:
         user = self.context["request"].user
@@ -194,6 +305,120 @@ class SignupCompleteSerializer(serializers.Serializer):
                     )
                 }
             )
+
+        business_fields = {
+            "business_name",
+            "business_phone",
+            "province",
+            "city",
+            "address",
+            "business_description",
+            "license_number",
+            "national_id",
+            "postal_code",
+            "license_issuer",
+            "license_expires_at",
+            "company_registration_number",
+            "economic_code",
+            "authorized_representative_name",
+            "import_license_number",
+            "import_license_issuer",
+            "import_license_expires_at",
+            "business_card_number",
+            "represented_brands",
+        }
+        is_business_account = user.role in {
+            User.Role.GALLERY,
+            User.Role.AGENCY,
+        }
+        if not is_business_account and business_fields.intersection(attrs):
+            raise serializers.ValidationError(
+                {
+                    "business_name": (
+                        "اطلاعات کسب‌وکار فقط برای ثبت‌نام "
+                        "نمایشگاه‌دار یا نمایندگی قابل ثبت است."
+                    )
+                }
+            )
+
+        if is_business_account:
+            required_business_fields = {
+                "business_name": "نام کسب‌وکار الزامی است.",
+                "business_phone": "تلفن ثابت کسب‌وکار الزامی است.",
+                "province": "استان محل فعالیت الزامی است.",
+                "city": "شهر محل فعالیت الزامی است.",
+                "address": "آدرس کامل کسب‌وکار الزامی است.",
+                "postal_code": "کد پستی کسب‌وکار الزامی است.",
+            }
+            errors = {
+                field: message
+                for field, message in required_business_fields.items()
+                if not attrs.get(field, "").strip()
+            }
+            if user.role == User.Role.GALLERY:
+                agency_only_fields = {
+                    "company_registration_number",
+                    "economic_code",
+                    "authorized_representative_name",
+                    "import_license_number",
+                    "import_license_issuer",
+                    "import_license_expires_at",
+                    "business_card_number",
+                    "represented_brands",
+                }
+                errors.update(
+                    {
+                        field: "این فیلد فقط برای شرکت واردکننده خودرو است."
+                        for field in agency_only_fields.intersection(
+                            self.initial_data
+                        )
+                    }
+                )
+                gallery_fields = {
+                    "license_number": "شماره پروانه کسب نمایشگاه الزامی است.",
+                    "license_issuer": "مرجع صادرکننده پروانه کسب الزامی است.",
+                }
+                errors.update(
+                    {
+                        field: message
+                        for field, message in gallery_fields.items()
+                        if not attrs.get(field, "").strip()
+                    }
+                )
+            elif user.role == User.Role.AGENCY:
+                gallery_only_fields = {
+                    "license_number",
+                    "license_issuer",
+                    "license_expires_at",
+                }
+                errors.update(
+                    {
+                        field: "این فیلد فقط برای نمایشگاه خودرو است."
+                        for field in gallery_only_fields.intersection(
+                            self.initial_data
+                        )
+                    }
+                )
+                agency_fields = {
+                    "national_id": "شناسه ملی شرکت الزامی است.",
+                    "company_registration_number": "شماره ثبت شرکت الزامی است.",
+                    "authorized_representative_name": "نام نماینده قانونی شرکت الزامی است.",
+                    "import_license_number": "شماره مجوز واردات الزامی است.",
+                    "import_license_issuer": "مرجع صادرکننده مجوز واردات الزامی است.",
+                }
+                errors.update(
+                    {
+                        field: message
+                        for field, message in agency_fields.items()
+                        if not attrs.get(field, "").strip()
+                    }
+                )
+                if not attrs.get("represented_brands"):
+                    errors["represented_brands"] = (
+                        "حداقل یک برند وارداتی را وارد کنید."
+                    )
+            if errors:
+                raise serializers.ValidationError(errors)
         return attrs
 
 

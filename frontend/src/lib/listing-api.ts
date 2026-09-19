@@ -117,6 +117,7 @@ export interface CreatedListing {
 }
 
 export type ListingStatus = 'pending' | 'active' | 'rejected' | 'sold' | 'expired';
+export type ListingCampaign = 'regular' | 'instant' | 'special';
 
 export interface ListingImage {
   id: number;
@@ -332,6 +333,7 @@ export interface ListingQuery {
   condition?: string;
   sellerType?: string;
   business?: string;
+  campaign?: ListingCampaign;
   instantSale?: boolean;
   specialSale?: boolean;
   inspected?: boolean;
@@ -382,6 +384,7 @@ export async function fetchVehicleListings(
   addQueryValue(params, 'condition', query.condition);
   addQueryValue(params, 'seller_type', query.sellerType);
   addQueryValue(params, 'business', query.business);
+  addQueryValue(params, 'campaign', query.campaign);
   if (query.instantSale !== undefined) addQueryValue(params, 'is_instant_sale', query.instantSale ? 'True' : 'False');
   if (query.specialSale !== undefined) addQueryValue(params, 'is_special_sale', query.specialSale ? 'True' : 'False');
   if (query.inspected) addQueryValue(params, 'is_inspected', 'True');
@@ -490,11 +493,14 @@ export async function deleteVehicleListing(id: number): Promise<void> {
   });
 }
 
-export async function approveVehicleListing(id: number): Promise<VehicleListing> {
+export async function approveVehicleListing(
+  id: number,
+  campaign: ListingCampaign = 'regular',
+): Promise<VehicleListing> {
   return apiRequest<VehicleListing>(`/catalog/listings/${id}/approve/`, {
     method: 'POST',
     authenticated: true,
-    body: JSON.stringify({}),
+    body: JSON.stringify({ campaign }),
   });
 }
 

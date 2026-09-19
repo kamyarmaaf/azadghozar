@@ -43,6 +43,7 @@ function priceValue(value: string): number | undefined {
     .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
     .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
     .replace(/[,٬\s]/g, '');
+  if (!normalized) return undefined;
   const number = Number(normalized);
   return Number.isFinite(number) && number >= 0 ? number * 1_000_000 : undefined;
 }
@@ -81,8 +82,7 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
         bodyType: bodyType === 'all' ? undefined : bodyType,
         priceMin: priceValue(priceMin),
         priceMax: priceValue(priceMax),
-        instantSale: isInstant,
-        specialSale: !isInstant,
+        campaign: kind,
         summary: true,
       })
         .then((response) => {
@@ -105,7 +105,7 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [bodyType, brand, currentPage, isInstant, priceMax, priceMin, reloadVersion]);
+  }, [bodyType, brand, currentPage, kind, priceMax, priceMin, reloadVersion]);
 
   const totalPages = Math.ceil(total / CAMPAIGN_PAGE_SIZE);
   const updateFilter = <T,>(setter: (value: T) => void, value: T) => {

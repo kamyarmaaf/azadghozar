@@ -5,9 +5,21 @@ import { useAuth } from '@/stores/auth';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Store, Building2, ChevronLeft, Search, BarChart3, Users, Star } from 'lucide-react';
+import { ShoppingBag, Store, Building2, ChevronLeft, Crown } from 'lucide-react';
+import type { RegistrationAccountType } from '@/lib/business-registration';
 
-const accountTypes = [
+const accountTypes: Array<{
+  id: RegistrationAccountType;
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+  description: string;
+  features: string[];
+  color: string;
+  iconColor: string;
+  btnClass: string;
+  buttonLabel: string;
+}> = [
   {
     id: 'buyer',
     icon: ShoppingBag,
@@ -18,6 +30,7 @@ const accountTypes = [
     color: 'from-powder/20 to-powder-light/10',
     iconColor: 'text-gold-dark',
     btnClass: 'bg-gold-dark hover:bg-gold-dark/90 text-white',
+    buttonLabel: 'شروع ثبت‌نام خریدار',
   },
   {
     id: 'seller',
@@ -29,17 +42,31 @@ const accountTypes = [
     color: 'from-emerald-500/20 to-emerald-400/10',
     iconColor: 'text-emerald-600',
     btnClass: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+    buttonLabel: 'شروع ثبت‌نام فروشنده',
   },
   {
     id: 'gallery',
     icon: Building2,
-    title: 'نمایشگاه',
+    title: 'نمایشگاه‌دار',
     subtitle: 'من مدیر نمایشگاه هستم',
     description: 'مدیریت آگهی‌های نمایشگاه، پروفایل کسب‌وکار و دسترسی کارمندان. پیام‌رسانی و امتیازدهی هنوز فعال نیست.',
-    features: ['صفحه کسب‌وکار', 'مدیریت آگهی‌ها', 'ثبت اعضای تیم', 'درخواست ارتقا به نمایندگی'],
+    features: ['صفحه نمایشگاه', 'مدیریت آگهی‌ها', 'ثبت اعضای تیم', 'احراز پروانه کسب'],
     color: 'from-amber-500/20 to-amber-400/10',
     iconColor: 'text-amber-600',
     btnClass: 'bg-amber-600 hover:bg-amber-700 text-white',
+    buttonLabel: 'ثبت نمایشگاه',
+  },
+  {
+    id: 'agency',
+    icon: Crown,
+    title: 'نمایندگی',
+    subtitle: 'شرکت واردکننده خودرو هستم',
+    description: 'ویژه شرکت‌های حقوقی واردکننده خودرو؛ پرونده نمایندگی از ابتدا مستقل از نمایشگاه ثبت و بررسی می‌شود.',
+    features: ['ثبت اطلاعات حقوقی شرکت', 'ثبت مجوز واردات', 'اعلام برندهای وارداتی', 'احراز مستقل نمایندگی'],
+    color: 'from-indigo-500/20 to-violet-400/10',
+    iconColor: 'text-indigo-600',
+    btnClass: 'bg-indigo-600 hover:bg-indigo-700 text-white',
+    buttonLabel: 'درخواست ثبت نمایندگی',
   },
 ];
 
@@ -49,24 +76,27 @@ export function AccountTypePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
-      <div className="w-full max-w-5xl">
+      <div className="w-full max-w-7xl">
         <div className="text-center mb-10">
           <h1 className="text-2xl md:text-3xl font-bold mb-3">
             نوع حساب کاربری خود را انتخاب کنید
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            این کارت‌ها نقش حساب را تغییر نمی‌دهند؛ نقش هنگام ثبت‌نام انتخاب می‌شود.
+            نوع فعالیت را انتخاب کنید تا فرم ثبت‌نام متناسب با همان حساب نمایش داده شود.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {accountTypes.map((type) => {
             const Icon = type.icon;
             return (
               <Card
                 key={type.id}
                 className="hover-lift shadow-premium cursor-pointer group border-2 hover:border-primary/20 transition-all"
-                onClick={() => navigateTo(currentUser ? currentUser.dashboardPage : 'register')}
+                onClick={() => navigateTo(
+                  currentUser ? currentUser.dashboardPage : 'register',
+                  currentUser ? undefined : { registrationType: type.id },
+                )}
               >
                 <CardHeader className="text-center pb-2">
                   <div className={cn('w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-gradient-to-br', type.color)}>
@@ -94,7 +124,7 @@ export function AccountTypePage() {
                     ))}
                   </ul>
                   <Button className={cn('w-full h-11 mt-2', type.btnClass)}>
-                    {currentUser ? 'رفتن به پنل حساب فعلی' : `شروع ثبت‌نام ${type.title}`}
+                    {currentUser ? 'رفتن به پنل حساب فعلی' : type.buttonLabel}
                     <ChevronLeft className="size-4" />
                   </Button>
                 </CardContent>

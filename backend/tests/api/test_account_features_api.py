@@ -23,7 +23,7 @@ def test_roles_endpoint_exposes_all_roles_and_public_subset(
         for item in response.data["roles"]
         if item["can_self_register"]
     }
-    assert public_roles == {"buyer", "seller", "gallery"}
+    assert public_roles == {"buyer", "seller", "gallery", "agency"}
 
 
 @pytest.mark.api
@@ -51,6 +51,25 @@ def test_gallery_can_register_but_privileged_role_cannot(
 
     assert gallery_response.status_code == 202
     assert privileged_response.status_code == 400
+    assert len(otp_outbox.messages) == 1
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_agency_can_register_as_an_independent_business_type(
+    api_client,
+    otp_outbox,
+) -> None:
+    response = api_client.post(
+        reverse("accounts:signup-request-otp"),
+        {
+            "phone_number": "09123334449",
+            "role": "agency",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 202
     assert len(otp_outbox.messages) == 1
 
 
@@ -454,6 +473,143 @@ def test_verified_user_can_complete_profile_and_login_with_password(
     assert login_response.data["user"]["id"] == buyer_user.pk
     assert login_response.data["access"]
     assert login_response.data["refresh"]
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_gallery_signup_completion_creates_only_a_gallery_business(
+    api_client,
+) -> None:
+    gallery = User.objects.create_user(
+        username="+989123334451",
+        phone_number="+989123334451",
+        role=User.Role.GALLERY,
+        is_phone_verified=True,
+    )
+    api_client.force_authenticate(user=gallery)
+
+    response = api_client.post(
+        reverse("accounts:signup-complete"),
+        {
+            "full_name": "مریم احمدی",
+            "password": "AzadGozar-Agency-2026!",
+            "password_confirmation": "AzadGozar-Agency-2026!",
+            "accept_terms": True,
+            "business_name": "نمایشگاه ساحل خودرو",
+            "business_phone": "01333334444",
+            "province": "گیلان",
+            "city": "انزلی",
+            "address": "بلوار اصلی، پلاک ۲۰",
+            "postal_code": "4313111111",
+            "business_description": "فروش خودروهای وارداتی منطقه آزاد",
+            "license_number": "GL-1405-100",
+            "license_issuer": "اتحادیه نمایشگاه‌داران انزلی",
+            "national_id": "14001234567",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 200
+    assert response.data["user"]["role"] == User.Role.GALLERY
+    assert response.data["business_registration"] == {
+        "id": response.data["user"]["business_access"]["id"],
+        "kind": "gallery",
+        "verification_status": "pending",
+    }
+    gallery.refresh_from_db()
+    business = gallery.business_profile
+    assert gallery.business_name == "نمایشگاه ساحل خودرو"
+    assert business.name == "نمایشگاه ساحل خودرو"
+    assert business.slug.startswith("نمایشگاه-ساحل-خودرو-")
+    assert business.license_number == "GL-1405-100"
+    assert business.national_id == "14001234567"
+    assert business.verification_status == "pending"
+    assert business.subscriptions.count() == 0
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_agency_signup_completion_creates_an_independent_agency_business(
+    api_client,
+) -> None:
+    agency = User.objects.create_user(
+        username="+989123334453",
+        phone_number="+989123334453",
+        role=User.Role.AGENCY,
+        is_phone_verified=True,
+    )
+    api_client.force_authenticate(user=agency)
+
+    response = api_client.post(
+        reverse("accounts:signup-complete"),
+        {
+            "full_name": "مریم احمدی",
+            "password": "AzadGozar-Agency-2026!",
+            "password_confirmation": "AzadGozar-Agency-2026!",
+            "accept_terms": True,
+            "business_name": "شرکت واردکننده ساحل خودرو",
+            "business_phone": "01333334444",
+            "province": "گیلان",
+            "city": "انزلی",
+            "address": "بلوار اصلی، پلاک ۲۱",
+            "postal_code": "4313111112",
+            "national_id": "14001234568",
+            "company_registration_number": "123456",
+            "authorized_representative_name": "مریم احمدی",
+            "import_license_number": "IMP-1405-10",
+            "import_license_issuer": "وزارت صنعت، معدن و تجارت",
+            "represented_brands": ["Toyota", "Kia"],
+        },
+        format="json",
+    )
+
+    assert response.status_code == 200
+    assert response.data["user"]["role"] == User.Role.AGENCY
+    assert response.data["business_registration"]["kind"] == "agency"
+    agency.refresh_from_db()
+    business = agency.business_profile
+    assert business.kind == "agency"
+    assert business.company_registration_number == "123456"
+    assert business.import_license_number == "IMP-1405-10"
+    assert business.represented_brands == ["Toyota", "Kia"]
+    assert business.subscriptions.count() == 0
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_gallery_signup_requires_verification_profile_fields(api_client) -> None:
+    gallery = User.objects.create_user(
+        username="+989123334452",
+        phone_number="+989123334452",
+        role=User.Role.GALLERY,
+        is_phone_verified=True,
+    )
+    api_client.force_authenticate(user=gallery)
+
+    response = api_client.post(
+        reverse("accounts:signup-complete"),
+        {
+            "full_name": "مریم احمدی",
+            "password": "AzadGozar-Gallery-2026!",
+            "password_confirmation": "AzadGozar-Gallery-2026!",
+            "accept_terms": True,
+            "business_name": "نمایشگاه ناقص",
+        },
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert {
+        "business_phone",
+        "province",
+        "city",
+        "address",
+        "postal_code",
+        "license_number",
+        "license_issuer",
+    }.issubset(response.data)
+    gallery.refresh_from_db()
+    assert gallery.profile_completed_at is None
 
 
 @pytest.mark.security

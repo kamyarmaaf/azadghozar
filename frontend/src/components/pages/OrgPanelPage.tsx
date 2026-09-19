@@ -152,7 +152,7 @@ export function OrgPanelPage() {
               <Building2 className="size-7 text-gold" />
             </div>
             <div className="flex-1">
-              <h1 className="text-lg sm:text-xl font-bold text-white">پنل نظارت سازمان منطقه آزاد</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-white">پنل نظارت منطقه آزاد</h1>
               <p className="text-xs sm:text-sm text-white/60 mt-0.5">نظارت بر عملکرد پلتفرم آزاد گذر</p>
             </div>
             <div className="flex items-center gap-2">

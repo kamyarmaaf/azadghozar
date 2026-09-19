@@ -225,6 +225,7 @@ class SignupVerifyOTPView(APIView):
 class SignupCompleteView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @transaction.atomic
     def post(self, request):
         serializer = SignupCompleteSerializer(
             data=request.data,
@@ -245,6 +246,23 @@ class SignupCompleteView(APIView):
         now = timezone.now()
         request.user.terms_accepted_at = now
         request.user.profile_completed_at = now
+        business_update_fields = []
+        if request.user.role in {User.Role.GALLERY, User.Role.AGENCY}:
+            business_user_fields = {
+                "business_name": "business_name",
+                "business_phone": "business_phone",
+                "business_description": "business_description",
+                "province": "province",
+                "city": "city",
+                "address": "address",
+            }
+            for serializer_field, user_field in business_user_fields.items():
+                setattr(
+                    request.user,
+                    user_field,
+                    serializer.validated_data.get(serializer_field, ""),
+                )
+                business_update_fields.append(user_field)
         request.user.save(
             update_fields=[
                 "first_name",
@@ -252,20 +270,141 @@ class SignupCompleteView(APIView):
                 "password",
                 "terms_accepted_at",
                 "profile_completed_at",
+                *business_update_fields,
             ]
         )
+        profile = None
         if request.user.role in {User.Role.GALLERY, User.Role.AGENCY}:
-            from apps.businesses.services import ensure_business_profile
+            from apps.businesses.models import BusinessProfile
+            from apps.businesses.services import (
+                business_slug,
+                ensure_business_profile,
+            )
 
             profile = ensure_business_profile(request.user)
-            if profile is not None and not request.user.business_name:
-                profile.name = request.user.display_name
-                profile.save(update_fields=("name", "updated_at"))
+            if profile is not None:
+                profile.name = request.user.business_name
+                profile.slug = business_slug(
+                    request.user,
+                    request.user.business_name,
+                )
+                profile.phone = request.user.business_phone
+                profile.province = request.user.province
+                profile.city = request.user.city
+                profile.address = request.user.address
+                profile.description = request.user.business_description
+                profile.license_number = serializer.validated_data.get(
+                    "license_number",
+                    "",
+                )
+                profile.national_id = serializer.validated_data.get(
+                    "national_id",
+                    "",
+                )
+                profile.postal_code = serializer.validated_data.get(
+                    "postal_code",
+                    "",
+                )
+                profile.license_issuer = serializer.validated_data.get(
+                    "license_issuer",
+                    "",
+                )
+                profile.license_expires_at = serializer.validated_data.get(
+                    "license_expires_at"
+                )
+                profile.company_registration_number = (
+                    serializer.validated_data.get(
+                        "company_registration_number",
+                        "",
+                    )
+                )
+                profile.economic_code = serializer.validated_data.get(
+                    "economic_code",
+                    "",
+                )
+                profile.authorized_representative_name = (
+                    serializer.validated_data.get(
+                        "authorized_representative_name",
+                        "",
+                    )
+                )
+                profile.import_license_number = (
+                    serializer.validated_data.get(
+                        "import_license_number",
+                        "",
+                    )
+                )
+                profile.import_license_issuer = (
+                    serializer.validated_data.get(
+                        "import_license_issuer",
+                        "",
+                    )
+                )
+                profile.import_license_expires_at = (
+                    serializer.validated_data.get(
+                        "import_license_expires_at"
+                    )
+                )
+                profile.business_card_number = serializer.validated_data.get(
+                    "business_card_number",
+                    "",
+                )
+                profile.represented_brands = serializer.validated_data.get(
+                    "represented_brands",
+                    [],
+                )
+                profile.kind = (
+                    BusinessProfile.Kind.AGENCY
+                    if request.user.role == User.Role.AGENCY
+                    else BusinessProfile.Kind.GALLERY
+                )
+                profile.verification_status = (
+                    BusinessProfile.VerificationStatus.PENDING
+                )
+                profile.verification_note = ""
+                profile.reviewed_by = None
+                profile.verified_at = None
+                profile.save(
+                    update_fields=(
+                        "name",
+                        "slug",
+                        "phone",
+                        "province",
+                        "city",
+                        "address",
+                        "description",
+                        "license_number",
+                        "national_id",
+                        "postal_code",
+                        "license_issuer",
+                        "license_expires_at",
+                        "company_registration_number",
+                        "economic_code",
+                        "authorized_representative_name",
+                        "import_license_number",
+                        "import_license_issuer",
+                        "import_license_expires_at",
+                        "business_card_number",
+                        "represented_brands",
+                        "kind",
+                        "verification_status",
+                        "verification_note",
+                        "reviewed_by",
+                        "verified_at",
+                        "updated_at",
+                    )
+                )
 
-        return Response(
-            {"user": UserSerializer(request.user).data},
-            status=status.HTTP_200_OK,
-        )
+        payload: dict[str, object] = {
+            "user": UserSerializer(request.user).data,
+        }
+        if profile is not None:
+            payload["business_registration"] = {
+                "id": profile.pk,
+                "kind": profile.kind,
+                "verification_status": profile.verification_status,
+            }
+        return Response(payload, status=status.HTTP_200_OK)
 
 
 class LoginRequestOTPView(APIView):

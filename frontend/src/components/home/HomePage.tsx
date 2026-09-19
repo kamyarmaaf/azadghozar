@@ -63,7 +63,6 @@ import {
   heroImages,
   brands,
   blogArticles,
-  videos,
   faqs,
   bodyTypes,
   bodyTypeImages,
@@ -84,6 +83,8 @@ import {
   type BusinessKind,
   type BusinessProfile,
 } from '@/lib/business-api';
+import { fetchAllCatalogBrands, type CatalogBrand } from '@/lib/catalog-api';
+import { fetchEducationalVideos, type EducationalVideo } from '@/lib/video-api';
 
 // Editorial sections still use sample fixtures. Never show them as live data.
 const editorialContentReady = false;
@@ -611,8 +612,27 @@ function FilterTag({ label, onRemove }: { label: string; onRemove: () => void })
 function BrandsSection() {
   const { navigateTo } = useNavigation();
   const { ref, scroll } = useHorizontalScroll();
+  const [catalogBrands, setCatalogBrands] = useState<CatalogBrand[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  if (!editorialContentReady) return <Section><ComingSoonNotice title="برندهای خودرو" detail="فهرست برندها هنوز به بانک اطلاعات خودرو متصل نشده است؛ برای جست‌وجوی آگهی واقعی از بخش خرید خودرو استفاده کنید." /></Section>;
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchAllCatalogBrands('', controller.signal)
+      .then((results) => {
+        setCatalogBrands(results);
+        setError('');
+      })
+      .catch((requestError) => {
+        if (!controller.signal.aborted) {
+          setError(requestError instanceof Error ? requestError.message : 'دریافت برندها انجام نشد.');
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   return (
     <Section>
@@ -626,30 +646,36 @@ function BrandsSection() {
           <ArrowLeft className="size-4" />
         </button>
       </div>
-      <div className="relative">
+      {error ? (
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+      ) : loading ? (
+        <div className="flex h-28 items-center justify-center gap-2 text-sm text-text-muted"><Loader2 className="size-5 animate-spin" /> در حال دریافت برندها...</div>
+      ) : catalogBrands.length === 0 ? (
+        <div className="rounded-xl border border-border-light bg-muted/20 p-6 text-center text-sm text-text-muted">هنوز برندی در کاتالوگ ثبت نشده است.</div>
+      ) : <div className="relative">
         <div
           ref={ref}
           className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-hide pb-2"
         >
-          {brands.map((brand) => (
+          {catalogBrands.map((brand) => {
+            const title = brand.name_fa.trim() || brand.name;
+            return (
             <button
               key={brand.id}
-              onClick={() => navigateTo('brand-detail', { brandId: brand.id })}
+              onClick={() => navigateTo('brand-detail', { brandSlug: brand.slug })}
               className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-white rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-muted/40 transition-colors"
             >
-              <OptimizedImage
-                src={brand.logo}
-                alt={brand.name}
-                width={96}
-                height={96}
-                sizes="48px"
-                className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 object-contain opacity-80"
-              />
+              {brand.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={brand.logo_url} alt={title} className="h-9 w-9 object-contain opacity-80 sm:h-11 sm:w-11 md:h-12 md:w-12" />
+              ) : (
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-xs font-bold text-white">{brand.name.slice(0, 3).toUpperCase()}</span>
+              )}
               <span className="text-[10px] sm:text-[11px] text-text-muted font-medium">
-                {brand.name}
+                {title}
               </span>
             </button>
-          ))}
+          );})}
         </div>
         {/* Scroll buttons */}
         <button
@@ -664,7 +690,7 @@ function BrandsSection() {
         >
           <ChevronRight className="size-4 text-text-secondary" />
         </button>
-      </div>
+      </div>}
     </Section>
   );
 }
@@ -1002,9 +1028,26 @@ function LatestListingsSection() {
 /* ================================================================== */
 function EducationalVideos() {
   const { navigateTo } = useNavigation();
-  const { ref, scroll } = useHorizontalScroll();
+  const { ref } = useHorizontalScroll();
+  const [videos, setVideos] = useState<EducationalVideo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  if (!editorialContentReady) return <Section><ComingSoonNotice title="ویدیوهای آموزشی" detail="ویدیوهای نمونه از صفحه اصلی حذف شده‌اند تا فقط محتوای منتشرشدهٔ واقعی نمایش داده شود." /></Section>;
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchEducationalVideos({ page: 1, pageSize: 6, signal: controller.signal })
+      .then((page) => {
+        setVideos(page.results);
+        setError('');
+      })
+      .catch((requestError) => {
+        if (!controller.signal.aborted) setError(requestError instanceof Error ? requestError.message : 'دریافت ویدیوها انجام نشد.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   return (
     <Section>
@@ -1018,17 +1061,21 @@ function EducationalVideos() {
           <ArrowLeft className="size-4" />
         </button>
       </div>
+      {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+      {loading && <div className="flex h-40 items-center justify-center gap-2 text-sm text-text-muted"><Loader2 className="size-5 animate-spin" /> در حال دریافت ویدیوها...</div>}
+      {!loading && !error && videos.length === 0 && <div className="rounded-xl border border-border-light bg-muted/20 p-6 text-center text-sm text-text-muted">هنوز ویدیوی آموزشی منتشر نشده است.</div>}
+      {!loading && !error && videos.length > 0 && (
       <div className="relative">
         <div ref={ref} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-          {videos.slice(0, 6).map((video) => (
+          {videos.map((video) => (
             <button
               key={video.id}
-              onClick={() => navigateTo('videos', { videoId: video.id })}
+              onClick={() => navigateTo('video-detail', { videoId: video.slug })}
               className="flex-shrink-0 w-64 md:w-72 rounded-xl overflow-hidden bg-white border border-border-light hover-lift group"
             >
               <div className="relative h-40 overflow-hidden">
                 <OptimizedImage
-                  src={video.thumbnail}
+                  src={video.thumbnail_url}
                   alt={video.title}
                   width={576}
                   height={320}
@@ -1046,15 +1093,16 @@ function EducationalVideos() {
               <div className="p-3.5">
                 <p className="text-sm font-semibold text-text-primary line-clamp-2 leading-6">{video.title}</p>
                 <div className="flex items-center gap-2 mt-2 text-xs text-text-muted">
-                  <span>{video.category}</span>
+                  <span>{video.category_label}</span>
                   <span>•</span>
-                  <span>{video.views} بازدید</span>
+                  <span>{toPersianNumber(video.view_count)} بازدید</span>
                 </div>
               </div>
             </button>
           ))}
         </div>
       </div>
+      )}
     </Section>
   );
 }

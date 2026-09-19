@@ -7,8 +7,8 @@ export function DealershipsPage() {
     <BusinessDirectoryPage
       kind="agency"
       detailPage="dealership-detail"
-      title="نمایندگی‌های تأییدشده آزادگذر"
-      description="نمایندگی‌های معتبر دارای اشتراک فعال و اطلاعات تأییدشده"
+      title="نمایندگی‌ها و شرکت‌های واردکننده تأییدشده"
+      description="شرکت‌های واردکننده خودرو با اطلاعات حقوقی و مجوز واردات تأییدشده"
     />
   );
 }

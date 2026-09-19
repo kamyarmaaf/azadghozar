@@ -18,9 +18,10 @@ import { type PageId, useNavigation } from '@/stores/navigation';
 
 interface Props {
   directoryPage: PageId;
+  expectedKind: 'gallery' | 'agency';
 }
 
-export function BusinessDetailPage({ directoryPage }: Props) {
+export function BusinessDetailPage({ directoryPage, expectedKind }: Props) {
   const navigateTo = useNavigation((state) => state.navigateTo);
   const pageData = useNavigation((state) => state.pageData);
   const slug = typeof pageData?.businessSlug === 'string' ? pageData.businessSlug : '';
@@ -35,9 +36,15 @@ export function BusinessDetailPage({ directoryPage }: Props) {
     if (!slug) {
       return () => { active = false; };
     }
-    void Promise.all([fetchBusiness(slug), fetchBusinessListings(slug)])
+    void Promise.all([
+      fetchBusiness(slug, expectedKind),
+      fetchBusinessListings(slug, expectedKind),
+    ])
       .then(([profile, page]) => {
         if (!active) return;
+        if (profile.kind !== expectedKind) {
+          throw new Error('نوع کسب‌وکار با این صفحه مطابقت ندارد.');
+        }
         setBusiness(profile);
         setListings(page.results);
         setNextUrl(page.next);
@@ -50,11 +57,11 @@ export function BusinessDetailPage({ directoryPage }: Props) {
         if (active) setLoading(false);
       });
     return () => { active = false; };
-  }, [slug]);
+  }, [expectedKind, slug]);
 
   const loadMore = async () => {
     if (!business || !nextUrl) return;
-    const page = await fetchBusinessListings(business.slug, nextUrl);
+    const page = await fetchBusinessListings(business.slug, expectedKind, nextUrl);
     setListings((current) => [...current, ...page.results]);
     setNextUrl(page.next);
   };
@@ -84,6 +91,10 @@ export function BusinessDetailPage({ directoryPage }: Props) {
     { icon: Eye, label: 'بازدید آگهی‌ها', value: business.total_views },
     { icon: Calendar, label: 'سال تأسیس', value: business.established_year || '—' },
   ];
+  const displayedBrands = Array.from(new Set([
+    ...(business.represented_brands ?? []),
+    ...business.brands,
+  ]));
 
   return (
     <main className="min-h-screen bg-background">
@@ -101,6 +112,9 @@ export function BusinessDetailPage({ directoryPage }: Props) {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold md:text-2xl">{business.name}</h1>
+                <Badge variant="secondary">
+                  {business.kind === 'agency' ? 'شرکت واردکننده خودرو' : 'نمایشگاه خودرو'}
+                </Badge>
                 <Badge className="bg-white text-emerald-700"><ShieldCheck className="size-3.5" /> تأیید شده</Badge>
               </div>
               <p className="mt-2 flex items-center gap-1 text-sm text-white/80"><MapPin className="size-4" /> {business.city || business.province}</p>
@@ -120,7 +134,7 @@ export function BusinessDetailPage({ directoryPage }: Props) {
               ))}
             </div>
             {business.description && <Card className="p-5"><h2 className="mb-2 font-bold">درباره {business.name}</h2><p className="text-sm leading-7 text-muted-foreground">{business.description}</p></Card>}
-            {business.brands.length > 0 && <Card className="p-5"><h2 className="mb-3 font-bold">برندهای فعال</h2><div className="flex flex-wrap gap-2">{business.brands.map((brand) => <Badge key={brand} variant="secondary">{brand}</Badge>)}</div></Card>}
+            {displayedBrands.length > 0 && <Card className="p-5"><h2 className="mb-3 font-bold">{business.kind === 'agency' ? 'برندهای وارداتی' : 'برندهای فعال'}</h2><div className="flex flex-wrap gap-2">{displayedBrands.map((brand) => <Badge key={brand} variant="secondary">{brand}</Badge>)}</div></Card>}
           </div>
           <Card className="h-fit p-5">
             <h2 className="mb-4 font-bold">اطلاعات تماس</h2>

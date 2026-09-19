@@ -104,9 +104,18 @@ def create_active_listing(owner: User, **overrides) -> VehicleListing:
 
 @pytest.mark.api
 @pytest.mark.django_db
-def test_brand_list_is_public_paginated_and_hides_inactive(api_client) -> None:
-    Brand.objects.create(name="BMW", slug="bmw")
+def test_brand_list_is_public_paginated_and_hides_inactive(
+    api_client,
+    buyer_user,
+) -> None:
+    Brand.objects.create(name="BMW", name_fa="بی‌ام‌و", slug="bmw")
     Brand.objects.create(name="Hidden", slug="hidden", is_active=False)
+    create_active_listing(buyer_user, brand_name="بی‌ام‌و")
+    create_active_listing(
+        buyer_user,
+        brand_name="بی‌ام‌و",
+        status=VehicleListing.Status.PENDING,
+    )
 
     response = api_client.get(reverse("catalog:brand-list"))
 
@@ -114,6 +123,7 @@ def test_brand_list_is_public_paginated_and_hides_inactive(api_client) -> None:
     assert set(response.data) == {"count", "next", "previous", "results"}
     assert response.data["count"] == 1
     assert response.data["results"][0]["slug"] == "bmw"
+    assert response.data["results"][0]["listing_count"] == 1
 
 
 @pytest.mark.api
@@ -127,6 +137,61 @@ def test_brand_detail_uses_slug(api_client) -> None:
 
     assert response.status_code == 200
     assert response.data["name"] == "BMW"
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_staff_can_upload_brand_logo_and_banner(
+    api_client,
+    staff_user,
+    settings,
+    tmp_path,
+) -> None:
+    settings.MEDIA_ROOT = tmp_path
+    api_client.force_authenticate(user=staff_user)
+    output = BytesIO()
+    Image.new("RGBA", (1200, 600), (255, 0, 0, 0)).save(
+        output,
+        format="PNG",
+    )
+    logo = SimpleUploadedFile(
+        "bmw-logo.png",
+        output.getvalue(),
+        content_type="image/png",
+    )
+    banner_output = BytesIO()
+    Image.new("RGB", (1600, 500), (15, 23, 42)).save(
+        banner_output,
+        format="JPEG",
+    )
+    banner = SimpleUploadedFile(
+        "bmw-banner.jpg",
+        banner_output.getvalue(),
+        content_type="image/jpeg",
+    )
+
+    response = api_client.post(
+        reverse("catalog:brand-list"),
+        {
+            "name": "BMW",
+            "name_fa": "بی‌ام‌و",
+            "slug": "bmw",
+            "logo": logo,
+            "banner": banner,
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == 201
+    brand = Brand.objects.get(slug="bmw")
+    assert brand.logo.name.endswith(".webp")
+    assert brand.logo.size <= 300 * 1024
+    assert brand.banner.name.endswith(".webp")
+    assert brand.banner.size <= 900 * 1024
+    assert response.data["logo_url"].startswith("http://testserver/media/")
+    assert response.data["banner_url"].startswith("http://testserver/media/")
+    assert "logo" not in response.data
+    assert "banner" not in response.data
 
 
 @pytest.mark.api
@@ -303,6 +368,82 @@ def test_listing_filters_mine_and_staff_can_moderate(
     assert approve_response.status_code == 200
     assert approve_response.data["status"] == VehicleListing.Status.ACTIVE
     assert approve_response.data["published_at"] is not None
+    assert approve_response.data["is_instant_sale"] is False
+    assert approve_response.data["is_special_sale"] is False
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("campaign", "is_instant_sale", "is_special_sale"),
+    (
+        ("regular", False, False),
+        ("instant", True, False),
+        ("special", False, True),
+    ),
+)
+def test_staff_assigns_campaign_while_approving_listing(
+    api_client,
+    buyer_user,
+    staff_user,
+    campaign,
+    is_instant_sale,
+    is_special_sale,
+) -> None:
+    listing = create_active_listing(
+        buyer_user,
+        status=VehicleListing.Status.PENDING,
+        published_at=None,
+        is_instant_sale=True,
+        is_special_sale=True,
+    )
+    api_client.force_authenticate(user=staff_user)
+
+    response = api_client.post(
+        reverse(
+            "catalog:vehicle-listing-approve",
+            kwargs={"pk": listing.pk},
+        ),
+        {"campaign": campaign},
+        format="json",
+    )
+
+    assert response.status_code == 200
+    listing.refresh_from_db()
+    assert listing.status == VehicleListing.Status.ACTIVE
+    assert listing.is_instant_sale is is_instant_sale
+    assert listing.is_special_sale is is_special_sale
+    assert response.data["is_instant_sale"] is is_instant_sale
+    assert response.data["is_special_sale"] is is_special_sale
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_staff_cannot_approve_listing_with_unknown_campaign(
+    api_client,
+    buyer_user,
+    staff_user,
+) -> None:
+    listing = create_active_listing(
+        buyer_user,
+        status=VehicleListing.Status.PENDING,
+        published_at=None,
+    )
+    api_client.force_authenticate(user=staff_user)
+
+    response = api_client.post(
+        reverse(
+            "catalog:vehicle-listing-approve",
+            kwargs={"pk": listing.pk},
+        ),
+        {"campaign": "sponsored"},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert "campaign" in response.data
+    listing.refresh_from_db()
+    assert listing.status == VehicleListing.Status.PENDING
 
 
 @pytest.mark.api
@@ -341,8 +482,39 @@ def test_public_listing_search_honors_home_filters_and_bounded_pages(
     invalid = api_client.get(url, {"brands": ["BMW"] * 21})
     assert invalid.status_code == 400
 
-    create_active_listing(owner, brand_name="Toyota", is_instant_sale=True)
-    create_active_listing(owner, brand_name="BMW", is_special_sale=True)
+    instant_listing = create_active_listing(
+        owner, brand_name="Toyota", is_instant_sale=True,
+    )
+    special_listing = create_active_listing(
+        owner, brand_name="BMW", is_special_sale=True,
+    )
+    instant_response = api_client.get(url, {
+        "is_instant_sale": "True", "page_size": 24, "summary": "true",
+    })
+    assert instant_response.status_code == 200
+    assert instant_response.data["count"] == 1
+    assert instant_response.data["results"][0]["id"] == instant_listing.id
+    special_response = api_client.get(url, {
+        "is_special_sale": "True", "page_size": 24, "summary": "true",
+    })
+    assert special_response.status_code == 200
+    assert special_response.data["count"] == 1
+    assert special_response.data["results"][0]["id"] == special_listing.id
+    instant_campaign = api_client.get(url, {
+        "campaign": "instant", "page_size": 24, "summary": "true",
+    })
+    assert instant_campaign.status_code == 200
+    assert instant_campaign.data["count"] == 1
+    assert instant_campaign.data["results"][0]["id"] == instant_listing.id
+    special_campaign = api_client.get(url, {
+        "campaign": "special", "page_size": 24, "summary": "true",
+    })
+    assert special_campaign.status_code == 200
+    assert special_campaign.data["count"] == 1
+    assert special_campaign.data["results"][0]["id"] == special_listing.id
+    invalid_campaign = api_client.get(url, {"campaign": "featured"})
+    assert invalid_campaign.status_code == 400
+    assert "campaign" in invalid_campaign.data
     latest_regular = api_client.get(url, {
         "is_instant_sale": "False", "is_special_sale": "False",
         "page_size": 6, "summary": "true",

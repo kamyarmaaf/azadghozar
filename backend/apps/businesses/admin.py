@@ -11,7 +11,15 @@ from apps.businesses.models import (
 class BusinessProfileAdmin(admin.ModelAdmin):
     list_display = ("name", "kind", "verification_status", "city", "owner")
     list_filter = ("kind", "verification_status", "province")
-    search_fields = ("name", "phone", "license_number", "owner__phone_number")
+    search_fields = (
+        "name",
+        "phone",
+        "license_number",
+        "national_id",
+        "company_registration_number",
+        "import_license_number",
+        "owner__phone_number",
+    )
     raw_id_fields = ("owner", "reviewed_by")
     readonly_fields = ("slug", "verified_at", "created_at", "updated_at")
 

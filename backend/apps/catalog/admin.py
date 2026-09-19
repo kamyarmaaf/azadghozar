@@ -15,13 +15,50 @@ from apps.catalog.models import (
 )
 
 
+class BrandAdminForm(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = "__all__"
+
+    def clean_logo(self):
+        upload = self.cleaned_data.get("logo")
+        if not isinstance(upload, UploadedFile):
+            return upload
+        try:
+            return compress_uploaded_image(
+                upload,
+                max_input_bytes=5 * 1024 * 1024,
+                target_bytes=300 * 1024,
+                max_dimension=800,
+                preserve_transparency=True,
+            )
+        except InvalidImageUpload as exc:
+            raise forms.ValidationError(str(exc)) from exc
+
+    def clean_banner(self):
+        upload = self.cleaned_data.get("banner")
+        if not isinstance(upload, UploadedFile):
+            return upload
+        try:
+            return compress_uploaded_image(
+                upload,
+                max_input_bytes=10 * 1024 * 1024,
+                target_bytes=900 * 1024,
+                max_dimension=2400,
+            )
+        except InvalidImageUpload as exc:
+            raise forms.ValidationError(str(exc)) from exc
+
+
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
+    form = BrandAdminForm
     list_display = ("name", "name_fa", "country", "is_active", "sort_order")
     list_filter = ("is_active", "country")
     search_fields = ("name", "name_fa", "slug")
     ordering = ("sort_order", "name")
     prepopulated_fields = {"slug": ("name",)}
+    exclude = ("logo_url",)
 
 
 @admin.register(VehicleModel)
@@ -104,6 +141,7 @@ class VehicleListingAdmin(admin.ModelAdmin):
         "city",
         "price",
         "status",
+        "campaign_label",
         "view_count",
         "created_at",
     )
@@ -130,7 +168,21 @@ class VehicleListingAdmin(admin.ModelAdmin):
     inlines = (VehicleListingImageInline,)
     list_select_related = ("owner", "business")
     date_hierarchy = "created_at"
-    actions = ("approve_selected", "mark_pending", "mark_sold")
+    actions = (
+        "approve_selected",
+        "publish_as_instant",
+        "publish_as_special",
+        "mark_pending",
+        "mark_sold",
+    )
+
+    @admin.display(description="نوع فروش")
+    def campaign_label(self, obj) -> str:
+        if obj.is_instant_sale:
+            return "فروش فوری"
+        if obj.is_special_sale:
+            return "فروش ویژه"
+        return "عادی"
 
     def save_model(self, request, obj, form, change) -> None:
         if obj.status == VehicleListing.Status.ACTIVE:
@@ -147,11 +199,37 @@ class VehicleListingAdmin(admin.ModelAdmin):
     def approve_selected(self, request, queryset) -> None:
         updated = queryset.update(
             status=VehicleListing.Status.ACTIVE,
+            is_instant_sale=False,
+            is_special_sale=False,
             rejection_reason="",
             published_at=timezone.now(),
             updated_at=timezone.now(),
         )
         self.message_user(request, f"{updated} آگهی تایید و منتشر شد.")
+
+    @admin.action(description="انتشار آگهی‌های انتخاب‌شده به‌عنوان فروش فوری")
+    def publish_as_instant(self, request, queryset) -> None:
+        updated = queryset.update(
+            status=VehicleListing.Status.ACTIVE,
+            is_instant_sale=True,
+            is_special_sale=False,
+            rejection_reason="",
+            published_at=timezone.now(),
+            updated_at=timezone.now(),
+        )
+        self.message_user(request, f"{updated} آگهی در فروش فوری منتشر شد.")
+
+    @admin.action(description="انتشار آگهی‌های انتخاب‌شده به‌عنوان فروش ویژه")
+    def publish_as_special(self, request, queryset) -> None:
+        updated = queryset.update(
+            status=VehicleListing.Status.ACTIVE,
+            is_instant_sale=False,
+            is_special_sale=True,
+            rejection_reason="",
+            published_at=timezone.now(),
+            updated_at=timezone.now(),
+        )
+        self.message_user(request, f"{updated} آگهی در فروش ویژه منتشر شد.")
 
     @admin.action(description="بازگرداندن آگهی‌های انتخاب‌شده به صف بررسی")
     def mark_pending(self, request, queryset) -> None:

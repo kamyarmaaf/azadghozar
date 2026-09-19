@@ -18,6 +18,18 @@ test('admin moderation queue fetches bounded pages and exposes navigation', () =
   assert.doesNotMatch(page, /pageSize: 100/);
 });
 
+test('admin can classify an approved listing as regular, instant, or special', () => {
+  const page = readFileSync(join(root, 'src/components/pages/AdminDashboardPage.tsx'), 'utf8');
+  const api = readFileSync(join(root, 'src/lib/listing-api.ts'), 'utf8');
+  assert.match(api, /export type ListingCampaign = 'regular' \| 'instant' \| 'special'/);
+  assert.match(api, /JSON\.stringify\(\{ campaign \}\)/);
+  assert.match(page, /onApprove\(listing\.id, 'regular'\)/);
+  assert.match(page, /onApprove\(listing\.id, 'instant'\)/);
+  assert.match(page, /onApprove\(listing\.id, 'special'\)/);
+  assert.match(page, /فروش فوری/);
+  assert.match(page, /فروش ویژه/);
+});
+
 test('role queue requests the next page through a validated URL', () => {
   const page = readFileSync(join(root, 'src/components/pages/AdminDashboardPage.tsx'), 'utf8');
   const api = readFileSync(join(root, 'src/lib/account-api.ts'), 'utf8');
@@ -26,10 +38,10 @@ test('role queue requests the next page through a validated URL', () => {
   assert.match(api, /next: response\.next/);
 });
 
-test('business and upgrade queues can load beyond their first cursor page', () => {
+test('business and subscription queues can load beyond their first cursor page', () => {
   const page = readFileSync(join(root, 'src/components/business/AdminBusinessPanel.tsx'), 'utf8');
   const api = readFileSync(join(root, 'src/lib/business-api.ts'), 'utf8');
   assert.match(page, /fetchAdminBusinesses\(\{ kind, nextUrl: businessNext \}\)/);
-  assert.match(page, /fetchAdminSubscriptions\('pending', subscriptionNext\)/);
+  assert.match(page, /fetchAdminSubscriptions\('pending', kind, subscriptionNext\)/);
   assert.match(api, /cursor\.origin !== base\.origin/);
 });

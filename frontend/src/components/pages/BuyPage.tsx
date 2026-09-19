@@ -70,7 +70,7 @@ const conditions = ['آکبند', 'در حد نو', 'کارکرده تمیز', '
 const sellerTypes = [
   { value: 'all', label: 'همه' },
   { value: 'gallery', label: 'نمایشگاه' },
-  { value: 'dealership', label: 'نمایندگی' },
+  { value: 'agency', label: 'نمایندگی / شرکت واردکننده' },
   { value: 'personal', label: 'شخصی' },
 ];
 
@@ -423,7 +423,7 @@ export function BuyPage() {
         transmission: transmission === 'all' ? undefined : transmissionApiMap[transmission],
         fuelType: fuel === 'all' ? undefined : fuelApiMap[fuel],
         condition: condition === 'all' ? undefined : conditionApiMap[condition],
-        sellerType: sellerTypeFilter === 'dealership' ? 'agency' : sellerTypeFilter === 'all' ? undefined : sellerTypeFilter,
+        sellerType: sellerTypeFilter === 'all' ? undefined : sellerTypeFilter,
         instantSale: instantSale || undefined,
         specialSale: specialSale || undefined,
         inspected,

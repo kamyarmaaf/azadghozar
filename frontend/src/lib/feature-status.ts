@@ -3,10 +3,6 @@ import type { PageId } from '@/stores/navigation';
 // Keep this list aligned with the actual backend integrations. Unfinished routes
 // must not show mock people, prices, activity or successful transactions.
 export const upcomingPages = {
-  brands: { title: 'صفحه برندها', detail: 'فهرست برند و مدل هنوز به داده‌های واقعی متصل نشده است.' },
-  'brand-detail': { title: 'صفحه برند', detail: 'صفحه اختصاصی برند هنوز به داده‌های واقعی متصل نشده است.' },
-  videos: { title: 'ویدیوهای آموزشی', detail: 'انتشار ویدیو و آمار بازدید هنوز راه‌اندازی نشده است.' },
-  'video-detail': { title: 'پخش ویدیو', detail: 'ویدیوها و پخش‌کننده هنوز به محتوای واقعی متصل نیستند.' },
   blog: { title: 'مجله خودرو', detail: 'سامانه انتشار مقاله هنوز راه‌اندازی نشده است.' },
   'article-detail': { title: 'مقاله', detail: 'مقالات هنوز به سامانه انتشار واقعی متصل نیستند.' },
   faq: { title: 'سؤالات متداول', detail: 'متن پرسش‌ها باید نهایی و تأیید شود.' },

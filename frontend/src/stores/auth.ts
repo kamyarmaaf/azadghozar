@@ -22,6 +22,7 @@ import {
   type ReferralState,
   type RoleChangeRequest,
   type ProfileUpdateInput,
+  type SignupCompleteInput,
   type UserRole,
 } from '@/lib/account-api';
 import { useFavorites } from '@/stores/favorites';
@@ -37,7 +38,7 @@ export const roleLabels: Record<UserRole, string> = {
   expert: 'کارشناس خودرو',
   admin: 'مدیر سامانه',
   org: 'مدیریت سازمان منطقه آزاد',
-  free_zone_supervisor: 'نظارت منطقه آزاد',
+  free_zone_supervisor: 'پنل نظارت منطقه آزاد',
   smart_id_operator: 'اپراتور شناسنامه هوشمند',
 };
 
@@ -78,12 +79,7 @@ interface AuthState {
     phoneNumber: string,
     otp: string,
   ) => Promise<AuthUser>;
-  finishRegistration: (input: {
-    fullName: string;
-    password: string;
-    passwordConfirmation: string;
-    acceptTerms: boolean;
-  }) => Promise<AuthUser>;
+  finishRegistration: (input: SignupCompleteInput) => Promise<AuthUser>;
   loginWithPassword: (
     identifier: string,
     password: string,

@@ -8,6 +8,11 @@ from .models import OtpChallenge, Referral, RoleChangeRequest, User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+    readonly_fields = (
+        *UserAdmin.readonly_fields,
+        "referral_code",
+    )
+
     list_display = (
         "username",
         "phone_number",

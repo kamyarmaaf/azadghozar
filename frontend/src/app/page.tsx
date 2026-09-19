@@ -24,9 +24,14 @@ import { AccountTypePage } from "@/components/pages/AccountTypePage";
 import { BuyerDashboardPage } from "@/components/pages/BuyerDashboardPage";
 import { SellerDashboardPage } from "@/components/pages/SellerDashboardPage";
 import { GalleryDashboardPage } from "@/components/pages/GalleryDashboardPage";
+import { AgencyDashboardPage } from "@/components/pages/AgencyDashboardPage";
 import { ExpertDashboardPage } from "@/components/pages/ExpertDashboardPage";
 import { AdminDashboardPage } from "@/components/pages/AdminDashboardPage";
 import { FavoritesPage } from "@/components/pages/FavoritesPage";
+import { BrandsPage } from "@/components/pages/BrandsPage";
+import { BrandDetailPage } from "@/components/pages/BrandDetailPage";
+import { VideosPage } from "@/components/pages/VideosPage";
+import { VideoDetailPage } from "@/components/pages/VideoDetailPage";
 import { ComingSoonPage } from "@/components/ui/coming-soon";
 import { TermsPage } from "@/components/pages/TermsPage";
 import { PrivacyPage } from "@/components/pages/PrivacyPage";
@@ -41,8 +46,8 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   'instant-sale': InstantSalePage,
   'special-sale': SpecialSalePage,
   favorites: FavoritesPage,
-  brands: ComingSoonPage,
-  'brand-detail': ComingSoonPage,
+  brands: BrandsPage,
+  'brand-detail': BrandDetailPage,
   dealerships: DealershipsPage,
   'dealership-detail': DealershipDetailPage,
   galleries: GalleriesPage,
@@ -52,10 +57,10 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   transportation: ServicesPage,
   inspection: ServicesPage,
   consultation: ServicesPage,
-  videos: ComingSoonPage,
+  videos: VideosPage,
   blog: ComingSoonPage,
   'article-detail': ComingSoonPage,
-  'video-detail': ComingSoonPage,
+  'video-detail': VideoDetailPage,
   faq: ComingSoonPage,
   about: ComingSoonPage,
   contact: ComingSoonPage,
@@ -66,6 +71,7 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   'buyer-dashboard': BuyerDashboardPage,
   'seller-dashboard': SellerDashboardPage,
   'gallery-dashboard': GalleryDashboardPage,
+  'agency-dashboard': AgencyDashboardPage,
   'expert-dashboard': ExpertDashboardPage,
   'admin-dashboard': AdminDashboardPage,
   tariffs: ComingSoonPage,

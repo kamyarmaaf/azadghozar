@@ -16,21 +16,33 @@ def create_business(
     phone: str,
     name: str,
     verification_status: str = BusinessProfile.VerificationStatus.VERIFIED,
+    kind: str = BusinessProfile.Kind.GALLERY,
 ) -> tuple[User, BusinessProfile]:
     owner = User.objects.create_user(
         username=phone,
         phone_number=phone,
-        role=User.Role.GALLERY,
+        role=User.Role.AGENCY if kind == BusinessProfile.Kind.AGENCY else User.Role.GALLERY,
         business_name=name,
         is_phone_verified=True,
     )
     business = BusinessProfile.objects.create(
         owner=owner,
+        kind=kind,
         name=name,
         slug=f"business-{owner.pk}",
+        phone="02188776655",
+        province="تهران",
         city="تهران",
+        address="خیابان اصلی، پلاک ۱۰",
+        postal_code="1234567890",
         license_number="LIC-123",
+        license_issuer="اتحادیه نمایشگاه‌داران",
         national_id="1234567890",
+        company_registration_number=("REG-123" if kind == BusinessProfile.Kind.AGENCY else ""),
+        authorized_representative_name=("نماینده شرکت" if kind == BusinessProfile.Kind.AGENCY else ""),
+        import_license_number=("IMP-123" if kind == BusinessProfile.Kind.AGENCY else ""),
+        import_license_issuer=("وزارت صمت" if kind == BusinessProfile.Kind.AGENCY else ""),
+        represented_brands=(["Toyota"] if kind == BusinessProfile.Kind.AGENCY else []),
         verification_status=verification_status,
         verified_at=(
             timezone.now()
@@ -139,6 +151,70 @@ def test_public_detail_does_not_expose_review_documents(api_client) -> None:
 
 @pytest.mark.api
 @pytest.mark.django_db
+def test_public_detail_is_scoped_to_requested_business_kind(api_client) -> None:
+    _, gallery = create_business(phone="+989120000023", name="نمایشگاه مستقل")
+
+    response = api_client.get(
+        reverse("businesses:business-detail", kwargs={"slug": gallery.slug}),
+        {"kind": BusinessProfile.Kind.AGENCY},
+    )
+
+    assert response.status_code == 404
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_business_profile_rejects_documents_from_other_kind(api_client) -> None:
+    owner, business = create_business(
+        phone="+989120000024",
+        name="نمایشگاه تفکیک‌شده",
+        kind=BusinessProfile.Kind.GALLERY,
+    )
+    api_client.force_authenticate(owner)
+
+    response = api_client.patch(
+        reverse("businesses:my-business"),
+        {"import_license_number": "IMP-WRONG"},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert "import_license_number" in response.data
+    business.refresh_from_db()
+    assert business.import_license_number == ""
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_admin_cannot_verify_incomplete_importer_agency(
+    api_client,
+    staff_user,
+) -> None:
+    _, agency = create_business(
+        phone="+989120000025",
+        name="شرکت واردکننده ناقص",
+        kind=BusinessProfile.Kind.AGENCY,
+        verification_status=BusinessProfile.VerificationStatus.PENDING,
+    )
+    agency.import_license_number = ""
+    agency.save()
+    api_client.force_authenticate(staff_user)
+
+    response = api_client.post(
+        reverse(
+            "businesses:admin-business-review",
+            kwargs={"pk": agency.pk},
+        ),
+        {"action": "verify"},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert "import_license_number" in response.data
+
+
+@pytest.mark.api
+@pytest.mark.django_db
 def test_sensitive_change_returns_verified_business_to_review(
     api_client,
 ) -> None:
@@ -158,6 +234,34 @@ def test_sensitive_change_returns_verified_business_to_review(
         == BusinessProfile.VerificationStatus.PENDING
     )
     assert business.verified_at is None
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_correcting_rejected_business_returns_it_to_review(api_client) -> None:
+    owner, business = create_business(
+        phone="+989120000014",
+        name="مدارک ناقص",
+        verification_status=BusinessProfile.VerificationStatus.REJECTED,
+    )
+    business.verification_note = "شماره مجوز اصلاح شود."
+    business.save(update_fields=("verification_note", "updated_at"))
+    api_client.force_authenticate(owner)
+
+    response = api_client.patch(
+        reverse("businesses:my-business"),
+        {"description": "توضیحات اصلاح‌شده کسب‌وکار"},
+        format="json",
+    )
+
+    assert response.status_code == 200
+    business.refresh_from_db()
+    assert business.description == "توضیحات اصلاح‌شده کسب‌وکار"
+    assert (
+        business.verification_status
+        == BusinessProfile.VerificationStatus.PENDING
+    )
+    assert business.verification_note == ""
 
 
 @pytest.mark.api
@@ -232,14 +336,14 @@ def test_owner_can_add_existing_user_as_employee(api_client) -> None:
 
 @pytest.mark.api
 @pytest.mark.django_db
-def test_admin_approval_upgrades_gallery_to_agency(
+def test_admin_subscription_approval_does_not_change_business_identity(
     api_client,
     staff_user,
 ) -> None:
-    owner, business = create_business(phone="+989120000010", name="ارتقا")
+    owner, business = create_business(phone="+989120000010", name="اشتراک")
     subscription = BusinessSubscription.objects.create(
         business=business,
-        plan=BusinessSubscription.Plan.AGENCY_MONTHLY,
+        plan=BusinessSubscription.Plan.GALLERY_MONTHLY,
         requested_by=owner,
     )
     api_client.force_authenticate(staff_user)
@@ -254,13 +358,102 @@ def test_admin_approval_upgrades_gallery_to_agency(
     )
 
     assert response.status_code == 200
+    assert response.data["business_verification_status"] == "verified"
     business.refresh_from_db()
     owner.refresh_from_db()
     subscription.refresh_from_db()
-    assert business.kind == BusinessProfile.Kind.AGENCY
-    assert owner.role == User.Role.AGENCY
+    assert business.kind == BusinessProfile.Kind.GALLERY
+    assert owner.role == User.Role.GALLERY
     assert subscription.status == BusinessSubscription.Status.ACTIVE
     assert subscription.ends_at is not None
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_admin_business_queues_are_separated_by_kind(
+    api_client,
+    staff_user,
+) -> None:
+    gallery_owner, gallery = create_business(
+        phone="+989120000020",
+        name="نمایشگاه مستقل",
+        kind=BusinessProfile.Kind.GALLERY,
+        verification_status=BusinessProfile.VerificationStatus.PENDING,
+    )
+    agency_owner, agency = create_business(
+        phone="+989120000021",
+        name="شرکت واردکننده مستقل",
+        kind=BusinessProfile.Kind.AGENCY,
+        verification_status=BusinessProfile.VerificationStatus.PENDING,
+    )
+    BusinessSubscription.objects.create(
+        business=gallery,
+        plan=BusinessSubscription.Plan.GALLERY_MONTHLY,
+        requested_by=gallery_owner,
+    )
+    BusinessSubscription.objects.create(
+        business=agency,
+        plan=BusinessSubscription.Plan.AGENCY_MONTHLY,
+        requested_by=agency_owner,
+    )
+    api_client.force_authenticate(staff_user)
+
+    gallery_profiles = api_client.get(
+        reverse("businesses:admin-business-list"),
+        {"kind": BusinessProfile.Kind.GALLERY},
+    )
+    agency_profiles = api_client.get(
+        reverse("businesses:admin-business-list"),
+        {"kind": BusinessProfile.Kind.AGENCY},
+    )
+    gallery_subscriptions = api_client.get(
+        reverse("businesses:admin-subscription-list"),
+        {"kind": BusinessProfile.Kind.GALLERY, "status": "pending"},
+    )
+    agency_subscriptions = api_client.get(
+        reverse("businesses:admin-subscription-list"),
+        {"kind": BusinessProfile.Kind.AGENCY, "status": "pending"},
+    )
+
+    assert [item["kind"] for item in gallery_profiles.data["results"]] == [
+        BusinessProfile.Kind.GALLERY
+    ]
+    assert [item["kind"] for item in agency_profiles.data["results"]] == [
+        BusinessProfile.Kind.AGENCY
+    ]
+    assert [
+        item["business_name"]
+        for item in gallery_subscriptions.data["results"]
+    ] == [gallery.name]
+    assert [
+        item["business_name"]
+        for item in agency_subscriptions.data["results"]
+    ] == [agency.name]
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_subscription_plan_must_match_business_kind(api_client) -> None:
+    owner, _ = create_business(
+        phone="+989120000022",
+        name="واردکننده پلن مستقل",
+        kind=BusinessProfile.Kind.AGENCY,
+    )
+    api_client.force_authenticate(owner)
+
+    invalid = api_client.post(
+        reverse("businesses:business-subscriptions"),
+        {"plan": BusinessSubscription.Plan.GALLERY_MONTHLY},
+        format="json",
+    )
+    valid = api_client.post(
+        reverse("businesses:business-subscriptions"),
+        {"plan": BusinessSubscription.Plan.AGENCY_MONTHLY},
+        format="json",
+    )
+
+    assert invalid.status_code == 400
+    assert valid.status_code == 201
 
 
 @pytest.mark.api
@@ -289,3 +482,64 @@ def test_admin_can_verify_business(api_client, staff_user) -> None:
         == BusinessProfile.VerificationStatus.VERIFIED
     )
     assert business.reviewed_by == staff_user
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_admin_cannot_activate_subscription_before_business_verification(
+    api_client,
+    staff_user,
+) -> None:
+    owner, business = create_business(
+        phone="+989120000012",
+        name="نمایشگاه در انتظار",
+        verification_status=BusinessProfile.VerificationStatus.PENDING,
+    )
+    subscription = BusinessSubscription.objects.create(
+        business=business,
+        plan=BusinessSubscription.Plan.GALLERY_MONTHLY,
+        requested_by=owner,
+    )
+    api_client.force_authenticate(staff_user)
+
+    response = api_client.post(
+        reverse(
+            "businesses:admin-subscription-review",
+            kwargs={"pk": subscription.pk},
+        ),
+        {"action": "approve", "note": "بررسی اولیه"},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    owner.refresh_from_db()
+    business.refresh_from_db()
+    subscription.refresh_from_db()
+    assert owner.role == User.Role.GALLERY
+    assert business.kind == BusinessProfile.Kind.GALLERY
+    assert subscription.status == BusinessSubscription.Status.PENDING
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_rejecting_business_requires_a_reason(api_client, staff_user) -> None:
+    _, business = create_business(
+        phone="+989120000013",
+        name="بررسی علت رد",
+        verification_status=BusinessProfile.VerificationStatus.PENDING,
+    )
+    api_client.force_authenticate(staff_user)
+
+    response = api_client.post(
+        reverse(
+            "businesses:admin-business-review",
+            kwargs={"pk": business.pk},
+        ),
+        {"action": "reject", "note": ""},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert "note" in response.data
+    business.refresh_from_db()
+    assert business.verification_status == BusinessProfile.VerificationStatus.PENDING

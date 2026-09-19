@@ -1,7 +1,18 @@
 from typing import cast
 
 from django.db import IntegrityError, transaction
-from django.db.models import F, OuterRef, Q, Subquery
+from django.db.models import (
+    Case,
+    Count,
+    F,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
+from django.db.models.functions import Coalesce
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 from rest_framework import status
@@ -96,10 +107,45 @@ class CatalogModelViewSet(ModelViewSet):
 
 class BrandViewSet(CatalogModelViewSet):
     serializer_class = BrandSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
+        active_listing_count_by_name = (
+            VehicleListing.objects.filter(
+                status=VehicleListing.Status.ACTIVE,
+                brand_name__iexact=OuterRef("name"),
+            )
+            .values("brand_name")
+            .annotate(total=Count("id"))
+            .values("total")[:1]
+        )
+        active_listing_count_by_fa_name = (
+            VehicleListing.objects.filter(
+                status=VehicleListing.Status.ACTIVE,
+                brand_name__iexact=OuterRef("name_fa"),
+            )
+            .values("brand_name")
+            .annotate(total=Count("id"))
+            .values("total")[:1]
+        )
         queryset = get_brands_queryset(
             include_inactive=self._include_inactive()
+        ).annotate(
+            listing_count=Coalesce(
+                Subquery(active_listing_count_by_name, output_field=IntegerField()),
+                Value(0),
+            )
+            + Coalesce(
+                Case(
+                    When(name_fa=F("name"), then=Value(0)),
+                    default=Subquery(
+                        active_listing_count_by_fa_name,
+                        output_field=IntegerField(),
+                    ),
+                    output_field=IntegerField(),
+                ),
+                Value(0),
+            )
         )
         query = self.request.query_params.get("q", "").strip()
         if query:
@@ -224,6 +270,29 @@ class VehicleListingViewSet(ModelViewSet):
                 | Q(model_name__icontains=query)
                 | Q(trim_name__icontains=query)
                 | Q(city__icontains=query)
+            )
+
+        campaign = self.request.query_params.get("campaign", "").strip().lower()
+        if campaign:
+            campaign_filters = {
+                "regular": {
+                    "is_instant_sale": False,
+                    "is_special_sale": False,
+                },
+                "instant": {
+                    "is_instant_sale": True,
+                },
+                "special": {
+                    "is_special_sale": True,
+                },
+            }
+            if campaign not in campaign_filters:
+                raise ValidationError(
+                    {"campaign": "Choose regular, instant, or special."}
+                )
+            queryset = queryset.filter(
+                status=VehicleListing.Status.ACTIVE,
+                **campaign_filters[campaign],
             )
 
         exact_filters = {
@@ -357,6 +426,19 @@ class VehicleListingViewSet(ModelViewSet):
                     "role": (
                         "Only sellers, galleries, and agencies can "
                         "publish vehicle listings."
+                    )
+                }
+            )
+        if (
+            business is not None
+            and business.verification_status
+            != BusinessProfile.VerificationStatus.VERIFIED
+        ):
+            raise ValidationError(
+                {
+                    "business": (
+                        "Business verification must be completed before "
+                        "publishing vehicle listings."
                     )
                 }
             )
@@ -509,18 +591,42 @@ class VehicleListingViewSet(ModelViewSet):
     )
     def approve(self, request, pk=None):
         listing = self.get_object()
+        campaign = request.data.get("campaign")
+        campaign_flags = {
+            "regular": (False, False),
+            "instant": (True, False),
+            "special": (False, True),
+        }
+        if campaign is not None:
+            normalized_campaign = str(campaign).strip().lower()
+            if normalized_campaign not in campaign_flags:
+                raise ValidationError(
+                    {
+                        "campaign": (
+                            "Choose regular, instant, or special."
+                        )
+                    }
+                )
+            (
+                listing.is_instant_sale,
+                listing.is_special_sale,
+            ) = campaign_flags[normalized_campaign]
         listing.status = VehicleListing.Status.ACTIVE
         listing.rejection_reason = ""
         listing.published_at = timezone.now()
-        listing.save(
-            update_fields=[
-                "status",
-                "rejection_reason",
-                "published_at",
-                "updated_at",
-            ]
-        )
+        update_fields = [
+            "status",
+            "rejection_reason",
+            "published_at",
+            "updated_at",
+        ]
+        if campaign is not None:
+            update_fields.extend(
+                ["is_instant_sale", "is_special_sale"]
+            )
+        listing.save(update_fields=update_fields)
         return Response(self.get_serializer(listing).data)
+
     @action(
         detail=True,
         methods=("post",),

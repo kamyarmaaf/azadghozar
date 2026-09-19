@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import F
 from django.core.files.storage import Storage, default_storage
+from django.utils.text import slugify
 from rest_framework import serializers
 
 from apps.image_processing import (
@@ -18,7 +19,38 @@ from apps.catalog.models import (
 )
 
 
+def ensure_catalog_brand(name: str) -> None:
+    normalized = name.strip()
+    if not normalized or Brand.objects.filter(name__iexact=normalized).exists():
+        return
+    base_slug = slugify(normalized, allow_unicode=True)[:100] or "brand"
+    slug = base_slug
+    suffix = 2
+    while Brand.objects.filter(slug=slug).exists():
+        slug = f"{base_slug[:110 - len(str(suffix))]}-{suffix}"
+        suffix += 1
+    Brand.objects.create(
+        name=normalized,
+        name_fa=normalized if any("\u0600" <= char <= "\u06ff" for char in normalized) else "",
+        slug=slug,
+    )
+
+
 class BrandSerializer(serializers.ModelSerializer):
+    listing_count = serializers.IntegerField(read_only=True, default=0)
+    logo_url = serializers.SerializerMethodField()
+    banner_url = serializers.SerializerMethodField()
+    logo = serializers.ImageField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    banner = serializers.ImageField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
     class Meta:
         model = Brand
         fields = (
@@ -26,14 +58,67 @@ class BrandSerializer(serializers.ModelSerializer):
             "name",
             "name_fa",
             "slug",
+            "logo",
             "logo_url",
+            "banner",
+            "banner_url",
             "country",
             "is_active",
             "sort_order",
+            "listing_count",
             "created_at",
             "updated_at",
         )
         read_only_fields = ("id", "created_at", "updated_at")
+
+    def get_logo_url(self, obj: Brand) -> str:
+        if obj.logo:
+            try:
+                url = obj.logo.url
+            except ValueError:
+                url = ""
+            if url:
+                request = self.context.get("request")
+                return request.build_absolute_uri(url) if request else url
+        return obj.logo_url
+
+    def get_banner_url(self, obj: Brand) -> str:
+        if obj.banner:
+            try:
+                url = obj.banner.url
+            except ValueError:
+                url = ""
+            if url:
+                request = self.context.get("request")
+                return request.build_absolute_uri(url) if request else url
+        return ""
+
+    def validate_logo(self, upload):
+        if upload is None:
+            return upload
+        try:
+            return compress_uploaded_image(
+                upload,
+                max_input_bytes=5 * 1024 * 1024,
+                target_bytes=300 * 1024,
+                max_dimension=800,
+                preserve_transparency=True,
+            )
+        except InvalidImageUpload as exc:
+            raise serializers.ValidationError(str(exc)) from exc
+
+    def validate_banner(self, upload):
+        if upload is None:
+            return upload
+        try:
+            return compress_uploaded_image(
+                upload,
+                max_input_bytes=10 * 1024 * 1024,
+                target_bytes=900 * 1024,
+                max_dimension=2400,
+            )
+        except InvalidImageUpload as exc:
+            raise serializers.ValidationError(str(exc)) from exc
 
     def validate_name(self, value: str) -> str:
         queryset = Brand.objects.filter(name__iexact=value.strip())
@@ -698,6 +783,7 @@ class VehicleListingSerializer(serializers.ModelSerializer):
         validated_data.pop("retained_image_ids", None)
         validated_data.pop("remove_video", None)
         listing = VehicleListing.objects.create(**validated_data)
+        ensure_catalog_brand(listing.brand_name)
         for index, upload in enumerate(uploads):
             VehicleListingImage.objects.create(
                 listing=listing,
@@ -712,6 +798,9 @@ class VehicleListingSerializer(serializers.ModelSerializer):
         uploads = validated_data.pop("images", [])
         retained_image_ids = validated_data.pop("retained_image_ids", None)
         remove_video = validated_data.pop("remove_video", False)
+        updated_brand_name = validated_data.get("brand_name")
+        if updated_brand_name:
+            ensure_catalog_brand(str(updated_brand_name))
 
         files_to_delete: list[tuple[Storage, str]] = []
         if retained_image_ids is not None:

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.accounts.apps.AccountsConfig",
     "apps.businesses.apps.BusinessesConfig",
     "apps.catalog.apps.CatalogConfig",
+    "apps.content.apps.ContentConfig",
     "apps.service_requests.apps.ServiceRequestsConfig",
 ]
 

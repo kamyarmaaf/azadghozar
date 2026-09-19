@@ -92,6 +92,33 @@ export interface AuthResponse extends AuthTokens {
   user: BackendUser;
 }
 
+export interface SignupCompleteInput {
+  fullName: string;
+  password: string;
+  passwordConfirmation: string;
+  acceptTerms: boolean;
+  businessKind?: 'gallery' | 'agency';
+  businessName?: string;
+  businessPhone?: string;
+  province?: string;
+  city?: string;
+  address?: string;
+  businessDescription?: string;
+  licenseNumber?: string;
+  nationalId?: string;
+  postalCode?: string;
+  licenseIssuer?: string;
+  licenseExpiresAt?: string | null;
+  companyRegistrationNumber?: string;
+  economicCode?: string;
+  authorizedRepresentativeName?: string;
+  importLicenseNumber?: string;
+  importLicenseIssuer?: string;
+  importLicenseExpiresAt?: string | null;
+  businessCardNumber?: string;
+  representedBrands?: string[];
+}
+
 export interface ReferralRecord {
   id: string;
   refereeName: string;
@@ -163,7 +190,7 @@ const dashboardByRole: Record<UserRole, PageId> = {
   buyer: "buyer-dashboard",
   seller: "seller-dashboard",
   gallery: "gallery-dashboard",
-  agency: "gallery-dashboard",
+  agency: "agency-dashboard",
   expert: "expert-dashboard",
   admin: "admin-dashboard",
   org: "org-panel",
@@ -193,7 +220,9 @@ export function mapUser(user: BackendUser): AuthUser {
     businessCover: resolveMediaUrl(user.business_cover),
     avatar: name.trim().charAt(0) || "ک",
     dashboardPage: user.business_access
-      ? 'gallery-dashboard'
+      ? user.business_access.kind === 'agency'
+        ? 'agency-dashboard'
+        : 'gallery-dashboard'
       : dashboardByRole[user.role],
     referralCode: user.referral_code,
     referralCredit: user.referral_credit,
@@ -259,12 +288,39 @@ export async function verifySignupOtp(
   return persistAuth(response);
 }
 
-export async function completeSignup(input: {
-  fullName: string;
-  password: string;
-  passwordConfirmation: string;
-  acceptTerms: boolean;
-}): Promise<AuthUser> {
+export async function completeSignup(
+  input: SignupCompleteInput,
+): Promise<AuthUser> {
+  const commonBusinessPayload = input.businessKind
+    ? {
+        business_name: input.businessName,
+        business_phone: input.businessPhone,
+        province: input.province,
+        city: input.city,
+        address: input.address,
+        business_description: input.businessDescription,
+        postal_code: input.postalCode,
+        national_id: input.nationalId,
+      }
+    : {};
+  const kindBusinessPayload = input.businessKind === 'agency'
+    ? {
+        company_registration_number: input.companyRegistrationNumber,
+        economic_code: input.economicCode,
+        authorized_representative_name: input.authorizedRepresentativeName,
+        import_license_number: input.importLicenseNumber,
+        import_license_issuer: input.importLicenseIssuer,
+        import_license_expires_at: input.importLicenseExpiresAt,
+        business_card_number: input.businessCardNumber,
+        represented_brands: input.representedBrands,
+      }
+    : input.businessKind === 'gallery'
+      ? {
+          license_number: input.licenseNumber,
+          license_issuer: input.licenseIssuer,
+          license_expires_at: input.licenseExpiresAt,
+        }
+      : {};
   const response = await apiRequest<{ user: BackendUser }>(
     "/auth/signup/complete/",
     {
@@ -275,6 +331,8 @@ export async function completeSignup(input: {
         password: input.password,
         password_confirmation: input.passwordConfirmation,
         accept_terms: input.acceptTerms,
+        ...commonBusinessPayload,
+        ...kindBusinessPayload,
       }),
     },
   );

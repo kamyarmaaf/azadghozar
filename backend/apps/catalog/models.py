@@ -15,10 +15,31 @@ class TimestampedModel(models.Model):
         abstract = True
 
 
+def brand_logo_upload_to(instance, filename: str) -> str:
+    suffix = Path(filename).suffix.lower()
+    return f"catalog/brands/{uuid4().hex}{suffix}"
+
+
+def brand_banner_upload_to(instance, filename: str) -> str:
+    suffix = Path(filename).suffix.lower()
+    return f"catalog/brands/banners/{uuid4().hex}{suffix}"
+
+
 class Brand(TimestampedModel):
     name = models.CharField(max_length=100)
     name_fa = models.CharField(max_length=100, blank=True)
     slug = models.SlugField(max_length=120, unique=True)
+    logo = models.ImageField(
+        upload_to=brand_logo_upload_to,
+        blank=True,
+        verbose_name="لوگوی برند",
+    )
+    banner = models.ImageField(
+        upload_to=brand_banner_upload_to,
+        blank=True,
+        verbose_name="بنر برند",
+        help_text="تصویر افقی پیشنهادی: 1600 در 500 پیکسل",
+    )
     logo_url = models.URLField(max_length=500, blank=True)
     country = models.CharField(max_length=80, blank=True)
     is_active = models.BooleanField(default=True)
@@ -389,6 +410,22 @@ class VehicleListing(TimestampedModel):
                 fields=("brand_name", "-created_at"),
                 condition=models.Q(status="active"),
                 name="listing_active_brand_idx",
+            ),
+            models.Index(
+                fields=("-created_at", "-id"),
+                condition=models.Q(
+                    status="active",
+                    is_instant_sale=True,
+                ),
+                name="listing_active_instant_idx",
+            ),
+            models.Index(
+                fields=("-created_at", "-id"),
+                condition=models.Q(
+                    status="active",
+                    is_special_sale=True,
+                ),
+                name="listing_active_special_idx",
             ),
             models.Index(
                 fields=("province", "city", "status"),

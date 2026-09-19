@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { isRegistrationAccountType } from '@/lib/business-registration';
 
 export type PageId =
   | 'home'
@@ -35,6 +36,7 @@ export type PageId =
   | 'buyer-dashboard'
   | 'seller-dashboard'
   | 'gallery-dashboard'
+  | 'agency-dashboard'
   | 'expert-dashboard'
   | 'admin-dashboard'
   | 'tariffs'
@@ -50,7 +52,7 @@ export const allPageIds: PageId[] = [
   'ownership-transfer','transportation','inspection','consultation',
   'videos','blog','article-detail','video-detail','faq','about','contact','login',
   'register','forgot-password','account-type','buyer-dashboard','seller-dashboard',
-  'gallery-dashboard','expert-dashboard','admin-dashboard','tariffs','org-panel','smart-id','terms','privacy',
+  'gallery-dashboard','agency-dashboard','expert-dashboard','admin-dashboard','tariffs','org-panel','smart-id','terms','privacy',
 ];
 
 function isValidPageId(hash: string): hash is PageId {
@@ -69,13 +71,28 @@ function getHashLocation(): {
       const params = new URLSearchParams(query);
       const listingId = params.get('id');
       const businessSlug = params.get('slug');
+      const brandSlug = params.get('brand');
+      const videoSlug = params.get('video');
+      const registrationType = params.get('type');
+      const referralCode = params.get('ref');
       return {
         page: pageId,
         data: listingId
           ? { vehicleId: listingId }
           : businessSlug
             ? { businessSlug }
-            : null,
+            : pageId === 'brand-detail' && brandSlug
+              ? { brandSlug }
+            : pageId === 'video-detail' && videoSlug
+              ? { videoId: videoSlug }
+            : pageId === 'register'
+              ? {
+                  ...(isRegistrationAccountType(registrationType)
+                    ? { registrationType }
+                    : {}),
+                  ...(referralCode ? { referralCode } : {}),
+                }
+              : null,
       };
     }
   }
@@ -114,10 +131,22 @@ export const useNavigation = create<NavigationState>((set, get) => ({
 
     const listingId = data?.vehicleId;
     const businessSlug = data?.businessSlug;
+    const brandSlug = data?.brandSlug;
+    const videoId = data?.videoId;
+    const registrationType = data?.registrationType;
+    const referralCode = data?.referralCode;
     window.location.hash = ['vehicle-details', 'sell'].includes(page) && listingId
       ? `${page}?id=${encodeURIComponent(String(listingId))}`
       : ['gallery-detail', 'dealership-detail'].includes(page) && businessSlug
         ? `${page}?slug=${encodeURIComponent(String(businessSlug))}`
+        : page === 'brand-detail' && brandSlug
+          ? `${page}?brand=${encodeURIComponent(String(brandSlug))}`
+        : page === 'video-detail' && videoId
+          ? `${page}?video=${encodeURIComponent(String(videoId))}`
+        : page === 'register' && isRegistrationAccountType(registrationType)
+          ? `register?type=${encodeURIComponent(registrationType)}${
+              referralCode ? `&ref=${encodeURIComponent(String(referralCode))}` : ''
+            }`
         : page;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 

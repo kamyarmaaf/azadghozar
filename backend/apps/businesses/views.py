@@ -19,7 +19,6 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.models import User
 from apps.businesses.models import (
     BusinessMembership,
     BusinessProfile,
@@ -106,7 +105,11 @@ class PublicBusinessDetailView(generics.RetrieveAPIView):
     lookup_field = "slug"
 
     def get_queryset(self):
-        return public_businesses()
+        queryset = public_businesses()
+        kind = self.request.query_params.get("kind")
+        if kind in BusinessProfile.Kind.values:
+            queryset = queryset.filter(kind=kind)
+        return queryset
 
     def get_serializer_context(self) -> dict:
         context = super().get_serializer_context()
@@ -120,10 +123,16 @@ class PublicBusinessListingView(generics.ListAPIView):
     pagination_class = BusinessListingCursorPagination
 
     def get_queryset(self):
+        business_filters = {
+            "slug": self.kwargs["slug"],
+            "verification_status": BusinessProfile.VerificationStatus.VERIFIED,
+        }
+        kind = self.request.query_params.get("kind")
+        if kind in BusinessProfile.Kind.values:
+            business_filters["kind"] = kind
         business = get_object_or_404(
             BusinessProfile,
-            slug=self.kwargs["slug"],
-            verification_status=BusinessProfile.VerificationStatus.VERIFIED,
+            **business_filters,
         )
         first_image = VehicleListingImage.objects.filter(
             listing_id=OuterRef("pk")
@@ -324,6 +333,13 @@ class AdminBusinessReviewView(APIView):
             BusinessProfile.objects.select_for_update(), pk=pk
         )
         action = serializer.validated_data["action"]
+        if action == "verify":
+            profile_serializer = BusinessProfileSerializer(
+                business,
+                data={},
+                partial=True,
+            )
+            profile_serializer.is_valid(raise_exception=True)
         status_by_action = {
             "verify": BusinessProfile.VerificationStatus.VERIFIED,
             "reject": BusinessProfile.VerificationStatus.REJECTED,
@@ -355,6 +371,9 @@ class AdminSubscriptionListView(generics.ListAPIView):
         subscription_status = self.request.query_params.get("status")
         if subscription_status in BusinessSubscription.Status.values:
             queryset = queryset.filter(status=subscription_status)
+        kind = self.request.query_params.get("kind")
+        if kind in BusinessProfile.Kind.values:
+            queryset = queryset.filter(business__kind=kind)
         return queryset.order_by("-created_at", "-id")
 
 
@@ -374,15 +393,29 @@ class AdminSubscriptionReviewView(APIView):
         action = serializer.validated_data["action"]
         now = timezone.now()
         if action == "approve":
+            if (
+                subscription.status
+                != BusinessSubscription.Status.PENDING
+            ):
+                raise ValidationError(
+                    {"detail": "فقط درخواست در انتظار قابل تأیید است."}
+                )
+            if (
+                subscription.business.verification_status
+                != BusinessProfile.VerificationStatus.VERIFIED
+            ):
+                raise ValidationError(
+                    {
+                        "detail": (
+                            "ابتدا باید پروفایل کسب‌وکار تأیید شود؛ "
+                            "سپس درخواست اشتراک را تأیید کنید."
+                        )
+                    }
+                )
             subscription.status = BusinessSubscription.Status.ACTIVE
             subscription.starts_at = now
             duration = 365 if subscription.plan.endswith("yearly") else 30
             subscription.ends_at = now + timedelta(days=duration)
-            subscription.business.kind = BusinessProfile.Kind.AGENCY
-            subscription.business.save(update_fields=("kind", "updated_at"))
-            owner = subscription.business.owner
-            owner.role = User.Role.AGENCY
-            owner.save(update_fields=("role",))
         elif action == "reject":
             subscription.status = BusinessSubscription.Status.REJECTED
         else:

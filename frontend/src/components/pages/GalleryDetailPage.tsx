@@ -3,5 +3,5 @@
 import { BusinessDetailPage } from '@/components/business/BusinessDetailPage';
 
 export function GalleryDetailPage() {
-  return <BusinessDetailPage directoryPage="galleries" />;
+  return <BusinessDetailPage directoryPage="galleries" expectedKind="gallery" />;
 }
