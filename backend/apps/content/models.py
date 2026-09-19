@@ -86,3 +86,41 @@ class EducationalVideo(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class FrequentlyAskedQuestion(models.Model):
+    class Category(models.TextChoices):
+        GENERAL = "general", "عمومی"
+        BUYING = "buying", "خرید خودرو"
+        SELLING = "selling", "فروش خودرو"
+        FREE_ZONE = "free_zone", "مناطق آزاد و قوانین"
+        ACCOUNT = "account", "حساب کاربری"
+        SERVICES = "services", "خدمات"
+
+    question = models.CharField(max_length=300, verbose_name="سؤال")
+    answer = models.TextField(verbose_name="پاسخ")
+    category = models.CharField(
+        max_length=24,
+        choices=Category.choices,
+        default=Category.GENERAL,
+        db_index=True,
+        verbose_name="دسته‌بندی",
+    )
+    is_published = models.BooleanField(default=False, verbose_name="منتشر شده")
+    sort_order = models.PositiveIntegerField(default=0, verbose_name="ترتیب نمایش")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("sort_order", "id")
+        indexes = [
+            models.Index(
+                fields=("is_published", "sort_order", "id"),
+                name="content_faq_public_idx",
+            ),
+        ]
+        verbose_name = "سؤال متداول"
+        verbose_name_plural = "سؤالات متداول"
+
+    def __str__(self) -> str:
+        return self.question

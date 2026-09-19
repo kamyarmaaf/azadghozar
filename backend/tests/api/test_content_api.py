@@ -5,7 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from PIL import Image
 
-from apps.content.models import EducationalVideo
+from apps.content.models import EducationalVideo, FrequentlyAskedQuestion
 
 
 def image_upload(name: str = "cover.jpg") -> SimpleUploadedFile:
@@ -73,3 +73,51 @@ def test_video_list_filters_by_category(api_client) -> None:
     assert response.status_code == 200
     assert response.data["count"] == 1
     assert response.data["results"][0]["category"] == "rules"
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_public_faq_list_is_paginated_and_hides_drafts(api_client) -> None:
+    FrequentlyAskedQuestion.objects.create(
+        question="چطور آگهی ثبت کنم؟",
+        answer="پس از ورود، ثبت آگهی را انتخاب کنید.",
+        category=FrequentlyAskedQuestion.Category.SELLING,
+        is_published=True,
+    )
+    FrequentlyAskedQuestion.objects.create(
+        question="سؤال پیش‌نویس",
+        answer="پاسخ پیش‌نویس",
+        is_published=False,
+    )
+
+    response = api_client.get(reverse("content:faq-list"))
+
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+    assert response.data["results"][0]["category_label"] == "فروش خودرو"
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_faq_list_supports_search_and_category(api_client) -> None:
+    FrequentlyAskedQuestion.objects.create(
+        question="مدارک خرید خودرو چیست؟",
+        answer="مدارک هویتی و مالکیت لازم است.",
+        category=FrequentlyAskedQuestion.Category.BUYING,
+        is_published=True,
+    )
+    FrequentlyAskedQuestion.objects.create(
+        question="نحوه ثبت‌نام",
+        answer="شماره همراه خود را وارد کنید.",
+        category=FrequentlyAskedQuestion.Category.ACCOUNT,
+        is_published=True,
+    )
+
+    response = api_client.get(
+        reverse("content:faq-list"),
+        {"category": "buying", "q": "مدارک"},
+    )
+
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+    assert response.data["results"][0]["category"] == "buying"

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.content.models import EducationalVideo
+from apps.content.models import EducationalVideo, FrequentlyAskedQuestion
 
 
 class EducationalVideoSerializer(serializers.ModelSerializer):
@@ -44,3 +44,20 @@ class EducationalVideoSerializer(serializers.ModelSerializer):
 
     def get_video_url(self, obj: EducationalVideo) -> str:
         return self._absolute_file_url(obj.video)
+
+
+class FrequentlyAskedQuestionSerializer(serializers.ModelSerializer):
+    category_label = serializers.CharField(
+        source="get_category_display",
+        read_only=True,
+    )
+
+    class Meta:
+        model = FrequentlyAskedQuestion
+        fields = (
+            "id",
+            "question",
+            "answer",
+            "category",
+            "category_label",
+        )

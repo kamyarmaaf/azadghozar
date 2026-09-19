@@ -27,10 +27,12 @@ test('unfinished routes are explicitly labelled and render the safe placeholder'
   assert.equal(isUpcomingPage('brand-detail'), false);
   assert.equal(isUpcomingPage('videos'), false);
   assert.equal(isUpcomingPage('video-detail'), false);
+  assert.equal(isUpcomingPage('faq'), false);
   assert.match(router, /brands: BrandsPage/);
   assert.match(router, /'brand-detail': BrandDetailPage/);
   assert.match(router, /videos: VideosPage/);
   assert.match(router, /'video-detail': VideoDetailPage/);
+  assert.match(router, /faq: FAQPage/);
 });
 
 test('brands page loads real catalog data and opens a brand detail', () => {
@@ -69,6 +71,17 @@ test('educational videos use the published content API and real player', () => {
   assert.match(detailPage, /<video src=\{video\.video_url\}/);
   assert.match(home, /fetchEducationalVideos\(\{ page: 1, pageSize: 6/);
   assert.match(api, /\/content\/videos\//);
+});
+
+test('faq page and home section use the published content API', () => {
+  const page = readFileSync(join(root, 'src/components/pages/FAQPage.tsx'), 'utf8');
+  const api = readFileSync(join(root, 'src/lib/faq-api.ts'), 'utf8');
+  const home = readFileSync(join(root, 'src/components/home/HomePage.tsx'), 'utf8');
+  assert.match(page, /fetchFrequentlyAskedQuestions/);
+  assert.match(page, /pageSize: FAQS_PER_PAGE/);
+  assert.match(page, /fetchFAQCategories/);
+  assert.match(home, /fetchFrequentlyAskedQuestions\(\{ page: 1, pageSize: 6/);
+  assert.match(api, /\/content\/faqs\//);
 });
 
 test('campaign listings offer access past the first page without a 100-item request', () => {

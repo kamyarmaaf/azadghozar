@@ -546,7 +546,7 @@ export function AdminDashboardPage() {
           </TabsContent>
 
           <TabsContent value="content" className="mt-6">
-            <ComingSoonNotice title="مدیریت محتوا" detail="مدیریت و انتشار ویدیوهای آموزشی از پنل مدیریت Django فعال است؛ مقاله‌ها، پرسش‌های متداول و بنرهای عمومی هنوز به API متصل نشده‌اند." />
+            <ComingSoonNotice title="مدیریت محتوا" detail="مدیریت و انتشار ویدیوهای آموزشی و سؤالات متداول از پنل مدیریت Django فعال است؛ مقاله‌ها و بنرهای عمومی هنوز به API متصل نشده‌اند." />
           </TabsContent>
 
           {/* Admin Settings Tab */}

@@ -32,6 +32,7 @@ import { BrandsPage } from "@/components/pages/BrandsPage";
 import { BrandDetailPage } from "@/components/pages/BrandDetailPage";
 import { VideosPage } from "@/components/pages/VideosPage";
 import { VideoDetailPage } from "@/components/pages/VideoDetailPage";
+import { FAQPage } from "@/components/pages/FAQPage";
 import { ComingSoonPage } from "@/components/ui/coming-soon";
 import { TermsPage } from "@/components/pages/TermsPage";
 import { PrivacyPage } from "@/components/pages/PrivacyPage";
@@ -61,7 +62,7 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   blog: ComingSoonPage,
   'article-detail': ComingSoonPage,
   'video-detail': VideoDetailPage,
-  faq: ComingSoonPage,
+  faq: FAQPage,
   about: ComingSoonPage,
   contact: ComingSoonPage,
   login: LoginPage,

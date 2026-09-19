@@ -63,7 +63,6 @@ import {
   heroImages,
   brands,
   blogArticles,
-  faqs,
   bodyTypes,
   bodyTypeImages,
   budgetImages,
@@ -85,6 +84,7 @@ import {
 } from '@/lib/business-api';
 import { fetchAllCatalogBrands, type CatalogBrand } from '@/lib/catalog-api';
 import { fetchEducationalVideos, type EducationalVideo } from '@/lib/video-api';
+import { fetchFrequentlyAskedQuestions, type FrequentlyAskedQuestion } from '@/lib/faq-api';
 
 // Editorial sections still use sample fixtures. Never show them as live data.
 const editorialContentReady = false;
@@ -1111,17 +1111,43 @@ function EducationalVideos() {
 /*  12. FAQ Section                                                     */
 /* ================================================================== */
 function FAQSection() {
-  if (!editorialContentReady) return <Section><ComingSoonNotice title="سؤالات متداول" detail="پاسخ‌های این بخش هنوز نهایی و تأیید نشده‌اند." /></Section>;
+  const { navigateTo } = useNavigation();
+  const [faqs, setFaqs] = useState<FrequentlyAskedQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchFrequentlyAskedQuestions({ page: 1, pageSize: 6, signal: controller.signal })
+      .then((page) => {
+        setFaqs(page.results);
+        setError('');
+      })
+      .catch((requestError) => {
+        if (!controller.signal.aborted) setError(requestError instanceof Error ? requestError.message : 'دریافت سؤالات متداول انجام نشد.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   return (
     <Section className="bg-warm-gray">
       <div className="max-w-3xl mx-auto">
-        <SectionTitle subtitle="پاسخ سوالات رایج درباره خدمات آزاد گذر">سوالات متداول</SectionTitle>
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <SectionTitle subtitle="پاسخ سؤال‌های رایج درباره خدمات آزادگذر">سؤالات متداول</SectionTitle>
+          <button onClick={() => navigateTo('faq')} className="shrink-0 text-sm font-medium text-gold-dark hover:text-gold">مشاهده همه</button>
+        </div>
+        {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+        {loading && <div className="flex h-32 items-center justify-center gap-2 text-sm text-text-muted"><Loader2 className="size-5 animate-spin" /> در حال دریافت سؤالات...</div>}
+        {!loading && !error && faqs.length === 0 && <div className="rounded-xl border border-border-light bg-white p-6 text-center text-sm text-text-muted">هنوز سؤال متداولی منتشر نشده است.</div>}
+        {!loading && !error && faqs.length > 0 && (
         <Accordion type="single" collapsible className="space-y-2">
-          {faqs.slice(0, 6).map((faq, i) => (
+          {faqs.map((faq) => (
             <AccordionItem
               key={faq.id}
-              value={faq.id}
+              value={String(faq.id)}
               className="bg-white rounded-xl border border-border-light px-5 data-[state=open]:shadow-card"
             >
               <AccordionTrigger className="text-sm font-semibold text-text-primary hover:no-underline py-4 text-right">
@@ -1133,6 +1159,7 @@ function FAQSection() {
             </AccordionItem>
           ))}
         </Accordion>
+        )}
       </div>
     </Section>
   );

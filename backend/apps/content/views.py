@@ -5,9 +5,15 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from apps.content.models import EducationalVideo
-from apps.content.pagination import EducationalVideoPagination
-from apps.content.serializers import EducationalVideoSerializer
+from apps.content.models import EducationalVideo, FrequentlyAskedQuestion
+from apps.content.pagination import (
+    EducationalVideoPagination,
+    FrequentlyAskedQuestionPagination,
+)
+from apps.content.serializers import (
+    EducationalVideoSerializer,
+    FrequentlyAskedQuestionSerializer,
+)
 
 
 class EducationalVideoViewSet(
@@ -51,5 +57,35 @@ class EducationalVideoViewSet(
             [
                 {"value": value, "label": label}
                 for value, label in EducationalVideo.Category.choices
+            ]
+        )
+
+
+class FrequentlyAskedQuestionViewSet(
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    serializer_class = FrequentlyAskedQuestionSerializer
+    permission_classes = (AllowAny,)
+    pagination_class = FrequentlyAskedQuestionPagination
+
+    def get_queryset(self):
+        queryset = FrequentlyAskedQuestion.objects.filter(is_published=True)
+        category = self.request.query_params.get("category", "").strip()
+        query = self.request.query_params.get("q", "").strip()
+        if category:
+            queryset = queryset.filter(category=category)
+        if query:
+            queryset = queryset.filter(
+                Q(question__icontains=query) | Q(answer__icontains=query)
+            )
+        return queryset
+
+    @action(detail=False, methods=("get",), url_path="categories")
+    def categories(self, request):
+        return Response(
+            [
+                {"value": value, "label": label}
+                for value, label in FrequentlyAskedQuestion.Category.choices
             ]
         )

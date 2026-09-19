@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.core.files.uploadedfile import UploadedFile
 
-from apps.content.models import EducationalVideo
+from apps.content.models import EducationalVideo, FrequentlyAskedQuestion
 from apps.image_processing import InvalidImageUpload, compress_uploaded_image
 
 
@@ -58,3 +58,19 @@ class EducationalVideoAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     ordering = ("sort_order", "-published_at", "-id")
     date_hierarchy = "published_at"
+
+
+@admin.register(FrequentlyAskedQuestion)
+class FrequentlyAskedQuestionAdmin(admin.ModelAdmin):
+    list_display = (
+        "question",
+        "category",
+        "is_published",
+        "sort_order",
+        "updated_at",
+    )
+    list_filter = ("is_published", "category")
+    search_fields = ("question", "answer")
+    list_editable = ("is_published", "sort_order")
+    readonly_fields = ("created_at", "updated_at")
+    ordering = ("sort_order", "id")
