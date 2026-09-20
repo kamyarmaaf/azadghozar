@@ -1,10 +1,24 @@
 'use client';
 
-import React from 'react';
-import { Circle, Target, Eye, Heart, ShieldCheck, Award, Users, Building2, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  Award,
+  Building2,
+  CheckCircle2,
+  Eye,
+  Heart,
+  Loader2,
+  RefreshCw,
+  ShieldCheck,
+  Target,
+  UserRound,
+  Users,
+} from 'lucide-react';
+import { fetchAboutPage, type AboutPageContent } from '@/lib/about-api';
 import { toPersianNumber } from '@/lib/utils';
 import { useNavigation } from '@/stores/navigation';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -14,110 +28,117 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-const stats = [
-  { label: 'آگهی فعال', value: 2540, icon: CheckCircle2 },
-  { label: 'نمایندگی‌ها', value: 160, icon: Building2 },
-  { label: 'نمایشگاه‌ها', value: 95, icon: Award },
-  { label: 'کاربران راضی', value: 18500, icon: Users },
-];
+const statisticIcons = {
+  listing: CheckCircle2,
+  agency: Building2,
+  gallery: Award,
+  users: Users,
+};
 
-const teamMembers = [
-  { name: 'علی محمدی', role: 'مدیرعامل و بنیان‌گذار', color: 'from-blue-500 to-cyan-500' },
-  { name: 'سارا رضایی', role: 'مدیر عملیات', color: 'from-violet-500 to-purple-500' },
-  { name: 'مهدی کریمی', role: 'مدیر فنی', color: 'from-emerald-500 to-teal-500' },
-  { name: 'نازنین احمدی', role: 'مدیر بازاریابی', color: 'from-orange-500 to-amber-500' },
-];
-
-const trustBadges = [
-  { title: 'تایید رسمی', desc: 'دارای مجوز رسمی فعالیت از سازمان صنعت و معدن', icon: ShieldCheck },
-  { title: 'پشتیبانی ۲۴/۷', desc: 'تیم پشتیبانی در تمام ساعات شبانه‌روز', icon: Users },
-  { title: 'ضمانت معامله', desc: 'تضمین امنیت و صحت تمامی معاملات', icon: Award },
-  { title: 'بازرسی تخصصی', desc: 'بازرسی خودرو توسط کارشناسان معتبر', icon: CheckCircle2 },
-];
+const trustIcons = {
+  verified: ShieldCheck,
+  support: Users,
+  guarantee: Award,
+  inspection: CheckCircle2,
+};
 
 export function AboutPage() {
   const { navigateTo } = useNavigation();
+  const [content, setContent] = useState<AboutPageContent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadVersion, setReloadVersion] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError('');
+    fetchAboutPage(controller.signal)
+      .then(setContent)
+      .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
+        setContent(null);
+        setError(reason instanceof Error ? reason.message : 'دریافت اطلاعات درباره ما ناموفق بود.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [reloadVersion]);
+
+  useEffect(() => {
+    if (!content) return;
+    const previousTitle = document.title;
+    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const previousDescription = description?.content;
+    document.title = content.meta_title || content.hero_title;
+    if (description && content.meta_description) description.content = content.meta_description;
+    return () => {
+      document.title = previousTitle;
+      if (description && previousDescription !== undefined) description.content = previousDescription;
+    };
+  }, [content]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center gap-2 text-muted-foreground">
+        <Loader2 className="size-5 animate-spin" /> در حال دریافت اطلاعات درباره ما...
+      </div>
+    );
+  }
+
+  if (!content) {
+    return (
+      <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center gap-4 px-4 text-center">
+        <ShieldCheck className="size-12 text-muted-foreground" />
+        <h1 className="text-xl font-bold">محتوای درباره ما در دسترس نیست</h1>
+        <p className="text-sm leading-7 text-muted-foreground">{error || 'این صفحه هنوز از پنل مدیریت منتشر نشده است.'}</p>
+        <Button variant="outline" onClick={() => setReloadVersion((version) => version + 1)}>
+          <RefreshCw className="size-4" /> تلاش دوباره
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="mx-auto max-w-7xl px-4 py-6">
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink onClick={() => navigateTo('home')} className="cursor-pointer">خانه</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>درباره ما</BreadcrumbPage>
-            </BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbPage>درباره ما</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Hero Section */}
-        <section className="bg-gradient-brand rounded-2xl p-8 md:p-12 text-white mb-10 shadow-premium-lg relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-gold/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-48 h-48 bg-gold/10 rounded-full translate-x-1/2 translate-y-1/2" />
+        <section
+          className="relative mb-10 overflow-hidden rounded-2xl bg-gradient-brand p-8 text-white shadow-premium-lg md:p-12"
+          style={content.hero_image_url ? { backgroundImage: `linear-gradient(90deg, rgba(7, 16, 35, .94), rgba(7, 16, 35, .60)), url(${content.hero_image_url})`, backgroundPosition: 'center', backgroundSize: 'cover' } : undefined}
+        >
+          <div className="absolute left-0 top-0 size-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/10" />
           <div className="relative z-10 max-w-2xl">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">درباره آزاد گذر</h1>
-            <p className="text-white/80 leading-8 text-sm md:text-base">
-              آزاد گذر، اولین بازارگاه تخصصی خودروهای مناطق آزاد ایران است که با هدف شفاف‌سازی و تسهیل فرآیند خرید و فروش خودروهای وارداتی، از سال ۱۴۰۱ فعالیت خود را آغاز کرده است. ما با ایجاد پلی ارتباطی مطمئن بین خریداران و فروشندگان معتبر، تجربه‌ای امن و لذت‌بخش از معاملات خودرو فراهم می‌کنیم.
-            </p>
+            <h1 className="mb-4 text-3xl font-bold md:text-4xl">{content.hero_title}</h1>
+            <p className="whitespace-pre-line text-sm leading-8 text-white/85 md:text-base">{content.intro}</p>
           </div>
         </section>
 
-        {/* Mission / Vision / Values */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold mb-6 text-center">چرا آزاد گذر؟</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="py-0 hover-lift shadow-premium">
-              <div className="p-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
-                  <Target className="size-7 text-blue-500" />
-                </div>
-                <h3 className="font-bold text-base mb-2">مأموریت ما</h3>
-                <p className="text-sm text-muted-foreground leading-6">
-                  ایجاد شفافیت و اعتماد در بازار خودروهای مناطق آزاد و ارائه بستری امن برای معاملات خودرو با تمرکز بر رضایت کاربران.
-                </p>
-              </div>
-            </Card>
-            <Card className="py-0 hover-lift shadow-premium">
-              <div className="p-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
-                  <Eye className="size-7 text-emerald-500" />
-                </div>
-                <h3 className="font-bold text-base mb-2">چشم‌انداز ما</h3>
-                <p className="text-sm text-muted-foreground leading-6">
-                  تبدیل شدن به بزرگ‌ترین و معتبرترین پلتفرم خرید و فروش خودرو در ایران با پوشش تمامی مناطق آزاد و مرزی.
-                </p>
-              </div>
-            </Card>
-            <Card className="py-0 hover-lift shadow-premium">
-              <div className="p-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-pink-500/10 flex items-center justify-center mx-auto mb-4">
-                  <Heart className="size-7 text-pink-500" />
-                </div>
-                <h3 className="font-bold text-base mb-2">ارزش‌های ما</h3>
-                <p className="text-sm text-muted-foreground leading-6">
-                  صداقت، شفافیت، امنیت و احترام به حقوق کاربران. ما به رضایت شما افتخار می‌کنیم و همواره در تلاش برای بهبود هستیم.
-                </p>
-              </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Statistics */}
-        <section className="mb-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map((stat) => {
-              const Icon = stat.icon;
+          <h2 className="mb-6 text-center text-xl font-bold">{content.why_title}</h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {[
+              { title: content.mission_title, text: content.mission_text, icon: Target, style: 'bg-blue-500/10 text-blue-500' },
+              { title: content.vision_title, text: content.vision_text, icon: Eye, style: 'bg-emerald-500/10 text-emerald-500' },
+              { title: content.values_title, text: content.values_text, icon: Heart, style: 'bg-pink-500/10 text-pink-500' },
+            ].map((item) => {
+              const Icon = item.icon;
               return (
-                <Card key={stat.label} className="py-0 shadow-premium hover-lift">
-                  <div className="p-5 text-center">
-                    <Icon className="size-8 text-gold-dark mx-auto mb-3" />
-                    <p className="text-2xl md:text-3xl font-bold text-brand">
-                      {toPersianNumber(stat.value.toLocaleString())}+
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+                <Card key={item.title} className="py-0 shadow-premium hover-lift">
+                  <div className="p-6 text-center">
+                    <div className={`mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl ${item.style}`}><Icon className="size-7" /></div>
+                    <h3 className="mb-2 text-base font-bold">{item.title}</h3>
+                    <p className="whitespace-pre-line text-sm leading-6 text-muted-foreground">{item.text}</p>
                   </div>
                 </Card>
               );
@@ -125,46 +146,72 @@ export function AboutPage() {
           </div>
         </section>
 
-        {/* Team Section */}
-        <section className="mb-10">
-          <h2 className="text-xl font-bold mb-6 text-center">تیم ما</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {teamMembers.map((member) => (
-              <Card key={member.name} className="py-0 hover-lift shadow-premium overflow-hidden">
-                <div className={`h-24 bg-gradient-to-br ${member.color} flex items-center justify-center`}>
-                  <Circle className="size-16 text-white/30" />
-                </div>
-                <div className="p-4 text-center">
-                  <h3 className="font-bold text-sm">{member.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{member.role}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </section>
+        {content.show_statistics && content.statistics.length > 0 && (
+          <section className="mb-10">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {content.statistics.map((stat) => {
+                const Icon = statisticIcons[stat.icon] || CheckCircle2;
+                return (
+                  <Card key={stat.id} className="py-0 shadow-premium hover-lift">
+                    <div className="p-5 text-center">
+                      <Icon className="mx-auto mb-3 size-8 text-gold-dark" />
+                      <p className="text-2xl font-bold text-brand md:text-3xl">
+                        {toPersianNumber(stat.value.toLocaleString())}{stat.suffix}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{stat.label}</p>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
-        {/* Trust Badges */}
-        <section>
-          <h2 className="text-xl font-bold mb-6 text-center">نشان‌های اعتماد</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {trustBadges.map((badge) => {
-              const Icon = badge.icon;
-              return (
-                <Card key={badge.title} className="py-0 hover-lift shadow-card">
-                  <div className="p-4 flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-gold/10 shrink-0">
-                      <Icon className="size-5 text-gold-dark" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm">{badge.title}</h3>
-                      <p className="text-xs text-muted-foreground mt-1 leading-5">{badge.desc}</p>
-                    </div>
+        {content.show_team && content.team_members.length > 0 && (
+          <section className="mb-10">
+            <h2 className="mb-6 text-center text-xl font-bold">{content.team_title}</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {content.team_members.map((member) => (
+                <Card key={member.id} className="overflow-hidden py-0 shadow-premium hover-lift">
+                  <div className="flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-brand to-slate-700">
+                    {member.photo_url ? (
+                      <img src={member.photo_url} alt={member.name} className="size-full object-cover" />
+                    ) : (
+                      <UserRound className="size-20 text-white/35" />
+                    )}
+                  </div>
+                  <div className="p-4 text-center">
+                    <h3 className="text-sm font-bold">{member.name}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">{member.role}</p>
+                    {member.description && <p className="mt-3 text-xs leading-6 text-muted-foreground">{member.description}</p>}
                   </div>
                 </Card>
-              );
-            })}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {content.show_trust_items && content.trust_items.length > 0 && (
+          <section>
+            <h2 className="mb-6 text-center text-xl font-bold">{content.trust_title}</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {content.trust_items.map((item) => {
+                const Icon = trustIcons[item.icon] || ShieldCheck;
+                return (
+                  <Card key={item.id} className="py-0 shadow-card hover-lift">
+                    <div className="flex items-start gap-3 p-4">
+                      <div className="shrink-0 rounded-lg bg-gold/10 p-2"><Icon className="size-5 text-gold-dark" /></div>
+                      <div>
+                        <h3 className="text-sm font-semibold">{item.title}</h3>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.description}</p>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

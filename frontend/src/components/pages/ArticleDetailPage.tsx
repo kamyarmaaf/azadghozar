@@ -1,237 +1,165 @@
 'use client';
 
-import { isValidElement, useMemo } from 'react';
-import { ArrowRight, User, Clock, Calendar, Share2, Bookmark, Heart, MessageSquare, Eye } from 'lucide-react';
-import { blogArticles } from '@/lib/mock-data';
-import { useNavigation } from '@/stores/navigation';
-import { Button } from '@/components/ui/button';
+import { isValidElement, useEffect, useState } from 'react';
+import { ArrowRight, Calendar, Clock, Eye, Loader2, Share2, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import {
-  Breadcrumb, BreadcrumbList, BreadcrumbItem,
-  BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-
-function renderMarkdown(text: string) {
-  const lines = text.split('\n');
-  const elements: React.ReactNode[] = [];
-  let inList = false;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) {
-      if (inList) { elements.push(<ul key={elements.length} className="list-disc list-inside space-y-1 mb-4 text-muted-foreground" />); inList = false; }
-      continue;
-    }
-
-    // Heading ##
-    if (trimmed.startsWith('## ')) {
-      if (inList) { elements.push(<ul key={elements.length} className="list-disc list-inside space-y-1 mb-4 text-muted-foreground" />); inList = false; }
-      elements.push(<h2 key={elements.length} className="text-lg font-bold mt-8 mb-4">{trimmed.slice(3)}</h2>);
-      continue;
-    }
-
-    // List item
-    if (trimmed.startsWith('- ')) {
-      if (!inList) {
-        inList = true;
-        elements.push(<ul key={elements.length} className="list-disc list-inside space-y-1 mb-4 text-muted-foreground">
-          <li className="leading-7">{trimmed.slice(2)}</li>
-        </ul>);
-      } else {
-        const lastUl = elements[elements.length - 1];
-        if (isValidElement<{ children?: React.ReactNode }>(lastUl)) {
-          elements[elements.length - 1] = <ul key={elements.length - 1} className="list-disc list-inside space-y-1 mb-4 text-muted-foreground">
-            {lastUl.props.children}
-            <li className="leading-7">{trimmed.slice(2)}</li>
-          </ul>;
-        }
-      }
-      continue;
-    }
-
-    // Numbered list
-    if (/^\d+\.\s/.test(trimmed)) {
-      const text = trimmed.replace(/^\d+\.\s/, '');
-      // Parse bold
-      const parsed = parseBold(text);
-      elements.push(<p key={elements.length} className="leading-8 mb-2 flex gap-2"><span className="text-gold-dark font-bold shrink-0">{trimmed.match(/^\d+/)?.[0]}.</span><span>{parsed}</span></p>);
-      continue;
-    }
-
-    if (inList) { elements.push(<ul key={elements.length} className="list-disc list-inside space-y-1 mb-4 text-muted-foreground" />); inList = false; }
-
-    // Paragraph with bold
-    elements.push(<p key={elements.length} className="leading-8 mb-4 text-muted-foreground">{parseBold(trimmed)}</p>);
-  }
-
-  if (inList) elements.push(<ul key={elements.length} className="list-disc list-inside space-y-1 mb-4 text-muted-foreground" />);
-  return elements;
-}
+import { fetchArticle, fetchArticles, type Article } from '@/lib/article-api';
+import { toPersianNumber } from '@/lib/utils';
+import { useNavigation } from '@/stores/navigation';
 
 function parseBold(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="text-foreground font-semibold">{part.slice(2, -2)}</strong>;
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => part.startsWith('**') && part.endsWith('**')
+    ? <strong key={index} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>
+    : part);
+}
+
+function renderMarkdown(text: string) {
+  const elements: React.ReactNode[] = [];
+  let listItems: React.ReactNode[] = [];
+  const flushList = () => {
+    if (listItems.length === 0) return;
+    elements.push(<ul key={`list-${elements.length}`} className="mb-5 list-inside list-disc space-y-2 text-muted-foreground">{listItems}</ul>);
+    listItems = [];
+  };
+
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushList();
+      continue;
     }
-    return part;
-  });
+    if (line.startsWith('## ')) {
+      flushList();
+      elements.push(<h2 key={elements.length} className="mb-4 mt-9 text-xl font-bold">{line.slice(3)}</h2>);
+    } else if (line.startsWith('- ')) {
+      listItems.push(<li key={listItems.length} className="leading-8">{parseBold(line.slice(2))}</li>);
+    } else if (/^\d+\.\s/.test(line)) {
+      flushList();
+      const number = line.match(/^\d+/)?.[0];
+      elements.push(<p key={elements.length} className="mb-3 flex gap-2 leading-8"><span className="shrink-0 font-bold text-gold-dark">{number}.</span><span>{parseBold(line.replace(/^\d+\.\s/, ''))}</span></p>);
+    } else {
+      flushList();
+      elements.push(<p key={elements.length} className="mb-5 leading-8 text-muted-foreground">{parseBold(line)}</p>);
+    }
+  }
+  flushList();
+  return elements.filter(isValidElement);
+}
+
+function formatDate(value: string | null): string {
+  if (!value) return '';
+  try {
+    return new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(value));
+  } catch {
+    return '';
+  }
 }
 
 export function ArticleDetailPage() {
   const { navigateTo, pageData, goBack } = useNavigation();
-  const articleId = pageData?.articleId as string | undefined;
+  const articleSlug = typeof pageData?.articleId === 'string' ? pageData.articleId : '';
+  const [article, setArticle] = useState<Article | null>(null);
+  const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [shareLabel, setShareLabel] = useState('اشتراک‌گذاری');
 
-  const article = useMemo(() => {
-    if (!articleId) return null;
-    return blogArticles.find((a) => a.id === articleId) ?? null;
-  }, [articleId]);
+  useEffect(() => {
+    const controller = new AbortController();
+    if (!articleSlug) return () => controller.abort();
+    const timer = window.setTimeout(() => setLoading(true), 0);
+    void fetchArticle(articleSlug, controller.signal)
+      .then(async (result) => {
+        const relatedPage = await fetchArticles({ category: result.category, pageSize: 4, signal: controller.signal });
+        if (controller.signal.aborted) return;
+        setArticle(result);
+        setRelatedArticles(relatedPage.results.filter((item) => item.slug !== result.slug).slice(0, 3));
+        setError('');
+      })
+      .catch((requestError) => {
+        if (!controller.signal.aborted) setError(requestError instanceof Error ? requestError.message : 'دریافت مقاله انجام نشد.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [articleSlug]);
 
-  const relatedArticles = useMemo(() => {
-    if (!article) return [];
-    return blogArticles
-      .filter((a) => a.id !== article.id && a.category === article.category)
-      .slice(0, 3);
+  useEffect(() => {
+    if (!article) return;
+    const previousTitle = document.title;
+    document.title = article.meta_title || `${article.title} | آزادگذر`;
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const previousDescription = meta?.content ?? '';
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'description';
+      document.head.appendChild(meta);
+    }
+    meta.content = article.meta_description || article.summary;
+    return () => {
+      document.title = previousTitle;
+      if (meta) meta.content = previousDescription;
+    };
   }, [article]);
 
-  if (!article) {
-    return (
-      <main className="min-h-screen bg-background">
-        <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-          <h2 className="text-xl font-bold mb-2">مقاله یافت نشد</h2>
-          <p className="text-muted-foreground mb-6">مقاله مورد نظر شما وجود ندارد یا حذف شده است.</p>
-          <Button onClick={() => navigateTo('blog')}>بازگشت به وبلاگ</Button>
-        </div>
-      </main>
-    );
-  }
+  const shareArticle = async () => {
+    if (!article) return;
+    try {
+      if (navigator.share) await navigator.share({ title: article.title, text: article.summary, url: window.location.href });
+      else await navigator.clipboard.writeText(window.location.href);
+      setShareLabel('لینک کپی شد');
+      window.setTimeout(() => setShareLabel('اشتراک‌گذاری'), 1800);
+    } catch {
+      setShareLabel('اشتراک‌گذاری');
+    }
+  };
 
-  const contentText = article.content || article.summary;
+  if (!articleSlug) return <div className="mx-auto max-w-xl px-4 py-20 text-center"><p className="mb-4 text-red-700">نشانی مقاله مشخص نیست.</p><Button onClick={() => navigateTo('blog')}>بازگشت به مجله</Button></div>;
+  if (loading) return <div className="flex min-h-[60vh] items-center justify-center gap-2"><Loader2 className="size-5 animate-spin" /> در حال دریافت مقاله...</div>;
+  if (error || !article) return <div className="mx-auto max-w-xl px-4 py-20 text-center"><p className="mb-4 text-red-700">{error || 'مقاله پیدا نشد.'}</p><Button onClick={() => navigateTo('blog')}>بازگشت به مجله</Button></div>;
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        {/* Breadcrumb */}
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink onClick={() => navigateTo('home')} className="cursor-pointer">خانه</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink onClick={() => navigateTo('blog')} className="cursor-pointer">وبلاگ</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{article.title}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="mx-auto max-w-4xl px-4 py-6">
+        <Breadcrumb className="mb-6"><BreadcrumbList>
+          <BreadcrumbItem><BreadcrumbLink onClick={() => navigateTo('home')} className="cursor-pointer">خانه</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbLink onClick={() => navigateTo('blog')} className="cursor-pointer">مجله خودرو</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbPage className="max-w-[240px] truncate">{article.title}</BreadcrumbPage></BreadcrumbItem>
+        </BreadcrumbList></Breadcrumb>
 
-        {/* Back button */}
-        <Button variant="ghost" className="mb-6 gap-1 -mr-2" onClick={goBack}>
-          <ArrowRight className="size-4" />
-          بازگشت
-        </Button>
+        <Button variant="ghost" className="mb-6 gap-1" onClick={goBack}><ArrowRight className="size-4" /> بازگشت</Button>
 
-        {/* Hero Image */}
-        <div className="relative aspect-video rounded-2xl overflow-hidden mb-8 shadow-premium">
-          <OptimizedImage src={article.image} alt={article.title} fill sizes="(max-width: 1024px) 100vw, 1024px" className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute bottom-0 right-0 left-0 p-6">
-            <Badge variant="secondary" className="mb-3">{article.category}</Badge>
-            <h1 className="text-2xl md:text-3xl font-bold text-white leading-10">{article.title}</h1>
-          </div>
+        <div className="relative mb-8 aspect-video overflow-hidden rounded-2xl bg-muted shadow-premium">
+          {article.cover_image_url && <OptimizedImage src={article.cover_image_url} alt={article.title} fill sizes="(max-width: 1024px) 100vw, 1024px" className="object-cover" />}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-6"><Badge variant="secondary" className="mb-3">{article.category_label}</Badge><h1 className="text-2xl font-bold leading-10 text-white md:text-3xl">{article.title}</h1></div>
         </div>
 
-        {/* Meta info */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8 pb-6 border-b">
-          <span className="flex items-center gap-1.5">
-            <User className="size-4" />
-            {article.author}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Calendar className="size-4" />
-            {article.date}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="size-4" />
-            {article.readTime}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Eye className="size-4" />
-            ۱,۲۳۴ بازدید
-          </span>
+        <div className="mb-8 flex flex-wrap items-center gap-4 border-b pb-6 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5"><User className="size-4" />{article.author}</span>
+          <span className="flex items-center gap-1.5"><Calendar className="size-4" />{formatDate(article.published_at)}</span>
+          {article.read_time && <span className="flex items-center gap-1.5"><Clock className="size-4" />{article.read_time}</span>}
+          <span className="flex items-center gap-1.5"><Eye className="size-4" />{toPersianNumber(article.view_count)} بازدید</span>
         </div>
 
-        {/* Content */}
-        <article className="prose prose-lg max-w-none mb-12">
-          {renderMarkdown(contentText)}
-        </article>
+        <p className="mb-8 border-r-4 border-gold-dark pr-4 text-base leading-8 text-muted-foreground">{article.summary}</p>
+        <article className="prose prose-lg mb-12 max-w-none">{renderMarkdown(article.content)}</article>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-3 mb-12 pb-8 border-b">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Share2 className="size-4" />
-            اشتراک‌گذاری
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Bookmark className="size-4" />
-            ذخیره
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Heart className="size-4" />
-            لایک
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <MessageSquare className="size-4" />
-            نظر
-          </Button>
-        </div>
+        <div className="mb-12 border-b pb-8"><Button variant="outline" size="sm" className="gap-1.5" onClick={shareArticle}><Share2 className="size-4" />{shareLabel}</Button></div>
 
-        {/* Related Articles */}
-        {relatedArticles.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-xl font-bold mb-6">مقالات مرتبط</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {relatedArticles.map((ra) => (
-                <Card
-                  key={ra.id}
-                  className="py-0 overflow-hidden hover-lift group cursor-pointer"
-                  onClick={() => navigateTo('article-detail', { articleId: ra.id })}
-                >
-                  <div className="relative aspect-[16/10]">
-                    <OptimizedImage src={ra.image} alt={ra.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
-                  </div>
-                  <div className="p-4 space-y-2">
-                    <h3 className="font-bold text-sm line-clamp-2 leading-6 group-hover:text-gold-dark transition-colors">
-                      {ra.title}
-                    </h3>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{ra.readTime}</span>
-                      <span>{ra.date}</span>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
+        {relatedArticles.length > 0 && <section className="mb-12"><h2 className="mb-6 text-xl font-bold">مقالات مرتبط</h2><div className="grid grid-cols-1 gap-4 sm:grid-cols-3">{relatedArticles.map((related) => <Card key={related.id} className="group cursor-pointer overflow-hidden py-0 hover-lift" onClick={() => navigateTo('article-detail', { articleId: related.slug })}><div className="relative aspect-[16/10] bg-muted">{related.cover_image_url && <OptimizedImage src={related.cover_image_url} alt={related.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />}</div><div className="space-y-2 p-4"><h3 className="line-clamp-2 text-sm font-bold leading-6 transition-colors group-hover:text-gold-dark">{related.title}</h3><div className="flex items-center justify-between text-xs text-muted-foreground"><span>{related.read_time}</span><span>{formatDate(related.published_at)}</span></div></div></Card>)}</div></section>}
 
-        {/* CTA */}
-        <Card className="bg-gradient-brand p-6 md:p-8 mb-8">
-          <div className="text-center text-white">
-            <h3 className="text-xl font-bold mb-2">به دنبال خودروی ایده‌آل خود هستید؟</h3>
-            <p className="text-white/70 text-sm mb-4">هزاران خودروی وارداتی با بهترین قیمت در آزاد گذر</p>
-            <Button variant="secondary" className="gap-2" onClick={() => navigateTo('buy')}>
-              مشاهده خودروها
-              <ArrowRight className="size-4" />
-            </Button>
-          </div>
-        </Card>
+        <Card className="mb-8 bg-gradient-brand p-6 md:p-8"><div className="text-center text-white"><h2 className="mb-2 text-xl font-bold">به دنبال خودروی ایده‌آل خود هستید؟</h2><p className="mb-4 text-sm text-white/70">خودروهای فعال بازار را در آزادگذر مشاهده کنید.</p><Button variant="secondary" className="gap-2" onClick={() => navigateTo('buy')}>مشاهده خودروها <ArrowRight className="size-4" /></Button></div></Card>
       </div>
     </main>
   );

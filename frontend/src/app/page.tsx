@@ -33,6 +33,10 @@ import { BrandDetailPage } from "@/components/pages/BrandDetailPage";
 import { VideosPage } from "@/components/pages/VideosPage";
 import { VideoDetailPage } from "@/components/pages/VideoDetailPage";
 import { FAQPage } from "@/components/pages/FAQPage";
+import { BlogPage } from "@/components/pages/BlogPage";
+import { ArticleDetailPage } from "@/components/pages/ArticleDetailPage";
+import { AboutPage } from "@/components/pages/AboutPage";
+import { ContactPage } from "@/components/pages/ContactPage";
 import { ComingSoonPage } from "@/components/ui/coming-soon";
 import { TermsPage } from "@/components/pages/TermsPage";
 import { PrivacyPage } from "@/components/pages/PrivacyPage";
@@ -59,12 +63,12 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   inspection: ServicesPage,
   consultation: ServicesPage,
   videos: VideosPage,
-  blog: ComingSoonPage,
-  'article-detail': ComingSoonPage,
+  blog: BlogPage,
+  'article-detail': ArticleDetailPage,
   'video-detail': VideoDetailPage,
   faq: FAQPage,
-  about: ComingSoonPage,
-  contact: ComingSoonPage,
+  about: AboutPage,
+  contact: ContactPage,
   login: LoginPage,
   register: RegisterPage,
   'forgot-password': ForgotPasswordPage,

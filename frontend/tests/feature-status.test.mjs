@@ -28,11 +28,44 @@ test('unfinished routes are explicitly labelled and render the safe placeholder'
   assert.equal(isUpcomingPage('videos'), false);
   assert.equal(isUpcomingPage('video-detail'), false);
   assert.equal(isUpcomingPage('faq'), false);
+  assert.equal(isUpcomingPage('blog'), false);
+  assert.equal(isUpcomingPage('article-detail'), false);
+  assert.equal(isUpcomingPage('about'), false);
+  assert.equal(isUpcomingPage('contact'), false);
   assert.match(router, /brands: BrandsPage/);
   assert.match(router, /'brand-detail': BrandDetailPage/);
   assert.match(router, /videos: VideosPage/);
   assert.match(router, /'video-detail': VideoDetailPage/);
   assert.match(router, /faq: FAQPage/);
+  assert.match(router, /blog: BlogPage/);
+  assert.match(router, /'article-detail': ArticleDetailPage/);
+  assert.match(router, /about: AboutPage/);
+  assert.match(router, /contact: ContactPage/);
+});
+
+test('about page uses published backend content without mock statistics or team members', () => {
+  const page = readFileSync(join(root, 'src/components/pages/AboutPage.tsx'), 'utf8');
+  const api = readFileSync(join(root, 'src/lib/about-api.ts'), 'utf8');
+  assert.match(page, /fetchAboutPage\(controller\.signal\)/);
+  assert.match(page, /content\.statistics/);
+  assert.match(page, /content\.team_members/);
+  assert.match(page, /content\.trust_items/);
+  assert.match(page, /content\.hero_image_url/);
+  assert.doesNotMatch(page, /2540|18500|علی محمدی|سارا رضایی/);
+  assert.match(api, /\/content\/about\//);
+});
+
+test('contact page loads real settings and persists messages through the backend API', () => {
+  const page = readFileSync(join(root, 'src/components/pages/ContactPage.tsx'), 'utf8');
+  const api = readFileSync(join(root, 'src/lib/contact-api.ts'), 'utf8');
+  assert.match(page, /fetchContactPage\(controller\.signal\)/);
+  assert.match(page, /submitContactMessage\(form\)/);
+  assert.match(page, /trackingId/);
+  assert.match(page, /content\.subjects/);
+  assert.match(page, /content\.map_embed_url/);
+  assert.doesNotMatch(page, /021-88881234|خیابان ولیعصر|setTimeout/);
+  assert.match(api, /\/content\/contact\//);
+  assert.match(api, /\/content\/contact\/messages\//);
 });
 
 test('brands page loads real catalog data and opens a brand detail', () => {
@@ -82,6 +115,21 @@ test('faq page and home section use the published content API', () => {
   assert.match(page, /fetchFAQCategories/);
   assert.match(home, /fetchFrequentlyAskedQuestions\(\{ page: 1, pageSize: 6/);
   assert.match(api, /\/content\/faqs\//);
+});
+
+test('car magazine pages use published articles and slug detail routes', () => {
+  const page = readFileSync(join(root, 'src/components/pages/BlogPage.tsx'), 'utf8');
+  const detail = readFileSync(join(root, 'src/components/pages/ArticleDetailPage.tsx'), 'utf8');
+  const api = readFileSync(join(root, 'src/lib/article-api.ts'), 'utf8');
+  const home = readFileSync(join(root, 'src/components/home/HomePage.tsx'), 'utf8');
+  const navigation = readFileSync(join(root, 'src/stores/navigation.ts'), 'utf8');
+  assert.match(page, /fetchArticles/);
+  assert.match(page, /articleId: featuredArticle\.slug/);
+  assert.match(detail, /fetchArticle\(articleSlug/);
+  assert.match(detail, /article\.meta_title/);
+  assert.match(home, /fetchArticles\(\{ page: 1, pageSize: 3/);
+  assert.match(api, /\/content\/articles\//);
+  assert.match(navigation, /article-detail' && articleId/);
 });
 
 test('campaign listings offer access past the first page without a 100-item request', () => {

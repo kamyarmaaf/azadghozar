@@ -157,6 +157,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "service_request_create": "10/hour",
+        "contact_message_create": "5/hour",
     },
 }
 

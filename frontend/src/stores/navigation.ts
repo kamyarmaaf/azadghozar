@@ -73,6 +73,7 @@ function getHashLocation(): {
       const businessSlug = params.get('slug');
       const brandSlug = params.get('brand');
       const videoSlug = params.get('video');
+      const articleSlug = params.get('article');
       const registrationType = params.get('type');
       const referralCode = params.get('ref');
       return {
@@ -85,6 +86,8 @@ function getHashLocation(): {
               ? { brandSlug }
             : pageId === 'video-detail' && videoSlug
               ? { videoId: videoSlug }
+            : pageId === 'article-detail' && articleSlug
+              ? { articleId: articleSlug }
             : pageId === 'register'
               ? {
                   ...(isRegistrationAccountType(registrationType)
@@ -133,6 +136,7 @@ export const useNavigation = create<NavigationState>((set, get) => ({
     const businessSlug = data?.businessSlug;
     const brandSlug = data?.brandSlug;
     const videoId = data?.videoId;
+    const articleId = data?.articleId;
     const registrationType = data?.registrationType;
     const referralCode = data?.referralCode;
     window.location.hash = ['vehicle-details', 'sell'].includes(page) && listingId
@@ -143,6 +147,8 @@ export const useNavigation = create<NavigationState>((set, get) => ({
           ? `${page}?brand=${encodeURIComponent(String(brandSlug))}`
         : page === 'video-detail' && videoId
           ? `${page}?video=${encodeURIComponent(String(videoId))}`
+        : page === 'article-detail' && articleId
+          ? `${page}?article=${encodeURIComponent(String(articleId))}`
         : page === 'register' && isRegistrationAccountType(registrationType)
           ? `register?type=${encodeURIComponent(registrationType)}${
               referralCode ? `&ref=${encodeURIComponent(String(referralCode))}` : ''

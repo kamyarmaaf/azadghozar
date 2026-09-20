@@ -62,7 +62,6 @@ import {
 import {
   heroImages,
   brands,
-  blogArticles,
   bodyTypes,
   bodyTypeImages,
   budgetImages,
@@ -76,7 +75,6 @@ import {
   type PublicListingSummary,
 } from '@/lib/listing-api';
 import { PublicListingCard } from '@/components/vehicle/PublicListingCard';
-import { ComingSoonNotice } from '@/components/ui/coming-soon';
 import {
   fetchBusinesses,
   type BusinessKind,
@@ -85,9 +83,7 @@ import {
 import { fetchAllCatalogBrands, type CatalogBrand } from '@/lib/catalog-api';
 import { fetchEducationalVideos, type EducationalVideo } from '@/lib/video-api';
 import { fetchFrequentlyAskedQuestions, type FrequentlyAskedQuestion } from '@/lib/faq-api';
-
-// Editorial sections still use sample fixtures. Never show them as live data.
-const editorialContentReady = false;
+import { fetchArticles, type Article } from '@/lib/article-api';
 
 /* ------------------------------------------------------------------ */
 /*  Horizontal Scroll Hook                                             */
@@ -1170,8 +1166,25 @@ function FAQSection() {
 /* ================================================================== */
 function BlogSection() {
   const { navigateTo } = useNavigation();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  if (!editorialContentReady) return <Section><ComingSoonNotice title="مجله خودرو" detail="سامانه مقاله‌ها هنوز آماده انتشار محتوا نیست؛ مطالب نمونه نمایش داده نمی‌شوند." /></Section>;
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchArticles({ page: 1, pageSize: 3, signal: controller.signal })
+      .then((page) => {
+        setArticles(page.results);
+        setError('');
+      })
+      .catch((requestError) => {
+        if (!controller.signal.aborted) setError(requestError instanceof Error ? requestError.message : 'دریافت مقاله‌ها انجام نشد.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   return (
     <Section>
@@ -1185,16 +1198,20 @@ function BlogSection() {
           <ArrowLeft className="size-4" />
         </button>
       </div>
+      {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+      {loading && <div className="flex h-40 items-center justify-center gap-2 text-sm text-text-muted"><Loader2 className="size-5 animate-spin" /> در حال دریافت مقاله‌ها...</div>}
+      {!loading && !error && articles.length === 0 && <div className="rounded-xl border border-border-light bg-muted/20 p-6 text-center text-sm text-text-muted">هنوز مقاله‌ای منتشر نشده است.</div>}
+      {!loading && !error && articles.length > 0 && (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {blogArticles.slice(0, 3).map((article) => (
+        {articles.map((article) => (
           <button
             key={article.id}
-            onClick={() => navigateTo('article-detail', { articleId: article.id })}
+            onClick={() => navigateTo('article-detail', { articleId: article.slug })}
             className="text-right bg-white rounded-xl border border-border-light overflow-hidden hover-lift group"
           >
             <div className="relative h-48 overflow-hidden">
               <OptimizedImage
-                src={article.image}
+                src={article.cover_image_url}
                 alt={article.title}
                 width={800}
                 height={480}
@@ -1202,7 +1219,7 @@ function BlogSection() {
               />
               <div className="absolute top-2.5 right-2.5">
                 <Badge className="bg-white/90 text-text-primary text-[10px] px-2.5 py-0.5 rounded-md font-medium border-0">
-                  {article.category}
+                  {article.category_label}
                 </Badge>
               </div>
             </div>
@@ -1214,13 +1231,14 @@ function BlogSection() {
                 {article.summary}
               </p>
               <div className="flex items-center justify-between text-[11px] text-text-muted">
-                <span>{article.date}</span>
-                <span>{article.readTime} مطالعه</span>
+                <span>{article.author}</span>
+                <span>{article.read_time || 'مطالعه مقاله'}</span>
               </div>
             </div>
           </button>
         ))}
       </div>
+      )}
     </Section>
   );
 }
