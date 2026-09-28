@@ -12,7 +12,7 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Sheet,
   SheetTrigger,
@@ -79,6 +79,13 @@ export function Header() {
   const comparisonCount = useComparison((state) => state.selectedIds.length);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const accountAvatarImage = currentUser
+    ? currentUser.role === 'gallery' || currentUser.role === 'agency'
+      ? currentUser.businessLogo
+      : currentUser.role === 'buyer' || currentUser.role === 'seller'
+        ? currentUser.profilePhoto
+        : ''
+    : '';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -191,6 +198,7 @@ export function Header() {
                     className="h-9 px-2 gap-2 text-text-secondary hover:text-text-primary hover:bg-muted"
                   >
                     <Avatar className="size-7 bg-muted">
+                      {accountAvatarImage && <AvatarImage src={accountAvatarImage} alt="تصویر حساب" className="object-cover" />}
                       <AvatarFallback className="text-[11px] font-bold text-brand bg-gold-light/50">
                         {currentUser.avatar}
                       </AvatarFallback>
@@ -203,6 +211,7 @@ export function Header() {
                 <DropdownMenuContent align="start" className="bg-white border-border-light text-text-primary min-w-[200px] shadow-premium-lg text-right">
                   <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5">
                     <Avatar className="size-8 bg-muted">
+                      {accountAvatarImage && <AvatarImage src={accountAvatarImage} alt="تصویر حساب" className="object-cover" />}
                       <AvatarFallback className="text-sm font-bold text-brand bg-gold-light/50">
                         {currentUser.avatar}
                       </AvatarFallback>

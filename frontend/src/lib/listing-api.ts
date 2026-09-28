@@ -333,7 +333,6 @@ export interface ListingQuery {
   condition?: string;
   sellerType?: string;
   business?: string;
-  campaign?: ListingCampaign;
   instantSale?: boolean;
   specialSale?: boolean;
   inspected?: boolean;
@@ -384,7 +383,6 @@ export async function fetchVehicleListings(
   addQueryValue(params, 'condition', query.condition);
   addQueryValue(params, 'seller_type', query.sellerType);
   addQueryValue(params, 'business', query.business);
-  addQueryValue(params, 'campaign', query.campaign);
   if (query.instantSale !== undefined) addQueryValue(params, 'is_instant_sale', query.instantSale ? 'True' : 'False');
   if (query.specialSale !== undefined) addQueryValue(params, 'is_special_sale', query.specialSale ? 'True' : 'False');
   if (query.inspected) addQueryValue(params, 'is_inspected', 'True');

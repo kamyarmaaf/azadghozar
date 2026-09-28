@@ -3,7 +3,8 @@ from django.utils import timezone
 from rest_framework import generics, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
@@ -14,6 +15,8 @@ from apps.content.models import (
     ContactPage,
     EducationalVideo,
     FrequentlyAskedQuestion,
+    SupportConversation,
+    SupportMessage,
 )
 from apps.content.pagination import (
     EducationalVideoPagination,
@@ -27,6 +30,7 @@ from apps.content.serializers import (
     AboutPageSerializer,
     ContactMessageCreateSerializer,
     ContactPageSerializer,
+    SupportMessageSerializer,
 )
 
 
@@ -59,6 +63,26 @@ class ContactMessageCreateAPIView(generics.CreateAPIView):
     throttle_classes = (ScopedRateThrottle,)
     throttle_scope = "contact_message_create"
     serializer_class = ContactMessageCreateSerializer
+
+
+class SupportChatAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        conversation = SupportConversation.objects.filter(user=request.user).first()
+        messages = conversation.messages.all() if conversation else SupportMessage.objects.none()
+        return Response({"messages": SupportMessageSerializer(messages, many=True).data})
+
+    @transaction.atomic
+    def post(self, request):
+        serializer = SupportMessageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        conversation, _ = SupportConversation.objects.get_or_create(user=request.user)
+        if conversation.status == SupportConversation.Status.CLOSED:
+            conversation.status = SupportConversation.Status.OPEN
+        conversation.save(update_fields=("status", "updated_at"))
+        message = serializer.save(conversation=conversation, sender=SupportMessage.Sender.USER)
+        return Response(SupportMessageSerializer(message).data, status=201)
 
 
 class EducationalVideoViewSet(

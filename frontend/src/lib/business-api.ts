@@ -32,17 +32,6 @@ export interface BusinessProfile {
   brands: string[];
   license_number?: string;
   national_id?: string;
-  postal_code?: string;
-  license_issuer?: string;
-  license_expires_at?: string | null;
-  company_registration_number?: string;
-  economic_code?: string;
-  authorized_representative_name?: string;
-  import_license_number?: string;
-  import_license_issuer?: string;
-  import_license_expires_at?: string | null;
-  business_card_number?: string;
-  represented_brands: string[];
   verification_note?: string;
 }
 
@@ -64,11 +53,7 @@ export interface BusinessSubscription {
   business: number;
   business_name: string;
   business_verification_status: VerificationStatus;
-  plan:
-    | 'gallery_monthly'
-    | 'gallery_yearly'
-    | 'agency_monthly'
-    | 'agency_yearly';
+  plan: 'agency_monthly' | 'agency_yearly';
   plan_label: string;
   status: 'pending' | 'active' | 'rejected' | 'expired' | 'cancelled';
   status_label: string;
@@ -133,24 +118,20 @@ export async function fetchBusinesses(input: {
   return { ...response, results: response.results.map(normalizeBusiness) };
 }
 
-export async function fetchBusiness(
-  slug: string,
-  kind: BusinessKind,
-): Promise<BusinessProfile> {
+export async function fetchBusiness(slug: string): Promise<BusinessProfile> {
   const response = await apiRequest<BusinessProfile>(
-    `/businesses/${encodeURIComponent(slug)}/?kind=${kind}`,
+    `/businesses/${encodeURIComponent(slug)}/`,
   );
   return normalizeBusiness(response);
 }
 
 export async function fetchBusinessListings(
   slug: string,
-  kind: BusinessKind,
   nextUrl?: string | null,
 ): Promise<CursorPage<PublicListingSummary>> {
   const path = nextUrl
     ? apiPathFromPageUrl(nextUrl)
-    : `/businesses/${encodeURIComponent(slug)}/listings/?kind=${kind}&page_size=20`;
+    : `/businesses/${encodeURIComponent(slug)}/listings/?page_size=20`;
   return apiRequest<CursorPage<PublicListingSummary>>(path);
 }
 
@@ -171,7 +152,6 @@ export async function fetchMyBusiness(): Promise<BusinessProfile> {
 }
 
 export async function updateMyBusiness(input: {
-  kind: BusinessKind;
   name: string;
   phone: string;
   province: string;
@@ -180,50 +160,22 @@ export async function updateMyBusiness(input: {
   description: string;
   licenseNumber: string;
   nationalId: string;
-  postalCode: string;
-  licenseIssuer: string;
-  licenseExpiresAt: string | null;
-  companyRegistrationNumber: string;
-  economicCode: string;
-  authorizedRepresentativeName: string;
-  importLicenseNumber: string;
-  importLicenseIssuer: string;
-  importLicenseExpiresAt: string | null;
-  businessCardNumber: string;
-  representedBrands: string[];
 }): Promise<BusinessProfile> {
-  const commonPayload = {
-    name: input.name,
-    phone: input.phone,
-    province: input.province,
-    city: input.city,
-    address: input.address,
-    description: input.description,
-    postal_code: input.postalCode,
-    national_id: input.nationalId,
-  };
-  const kindPayload = input.kind === 'agency'
-    ? {
-        company_registration_number: input.companyRegistrationNumber,
-        economic_code: input.economicCode,
-        authorized_representative_name: input.authorizedRepresentativeName,
-        import_license_number: input.importLicenseNumber,
-        import_license_issuer: input.importLicenseIssuer,
-        import_license_expires_at: input.importLicenseExpiresAt,
-        business_card_number: input.businessCardNumber,
-        represented_brands: input.representedBrands,
-      }
-    : {
-        license_number: input.licenseNumber,
-        license_issuer: input.licenseIssuer,
-        license_expires_at: input.licenseExpiresAt,
-      };
   const response = await apiRequest<BusinessProfile>(
     '/businesses/me/profile/',
     {
       method: 'PATCH',
       authenticated: true,
-      body: JSON.stringify({ ...commonPayload, ...kindPayload }),
+      body: JSON.stringify({
+        name: input.name,
+        phone: input.phone,
+        province: input.province,
+        city: input.city,
+        address: input.address,
+        description: input.description,
+        license_number: input.licenseNumber,
+        national_id: input.nationalId,
+      }),
     },
   );
   return normalizeBusiness(response);
@@ -263,7 +215,7 @@ export function removeBusinessMember(id: number): Promise<void> {
   });
 }
 
-export function requestBusinessSubscription(
+export function requestAgencySubscription(
   plan: BusinessSubscription['plan'],
 ): Promise<BusinessSubscription> {
   return apiRequest<BusinessSubscription>('/businesses/me/subscriptions/', {
@@ -313,14 +265,11 @@ export function reviewBusiness(
 
 export function fetchAdminSubscriptions(
   status = 'pending',
-  kind?: BusinessKind,
   nextUrl?: string,
 ): Promise<CursorPage<BusinessSubscription>> {
   const path = nextUrl
     ? adminBusinessPagePath(nextUrl, '/businesses/admin/subscriptions/')
-    : `/businesses/admin/subscriptions/?status=${encodeURIComponent(status)}${
-        kind ? `&kind=${encodeURIComponent(kind)}` : ''
-      }`;
+    : `/businesses/admin/subscriptions/?status=${encodeURIComponent(status)}`;
   return apiRequest<CursorPage<BusinessSubscription>>(
     path,
     { authenticated: true },

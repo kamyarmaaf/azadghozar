@@ -1,6 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -409,3 +410,47 @@ class ContactMessage(models.Model):
 
     def __str__(self) -> str:
         return f"{self.get_subject_display()} - {self.name}"
+
+
+class SupportConversation(models.Model):
+    class Status(models.TextChoices):
+        OPEN = "open", "باز"
+        CLOSED = "closed", "بسته"
+
+    public_id = models.UUIDField(default=uuid4, unique=True, editable=False)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="support_conversation",
+    )
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.OPEN, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-updated_at", "-id")
+        verbose_name = "گفتگوی پشتیبانی"
+        verbose_name_plural = "گفتگوهای پشتیبانی"
+
+    def __str__(self) -> str:
+        return f"{self.user.display_name} - {self.get_status_display()}"
+
+
+class SupportMessage(models.Model):
+    class Sender(models.TextChoices):
+        USER = "user", "کاربر"
+        SUPPORT = "support", "پشتیبانی"
+
+    conversation = models.ForeignKey(SupportConversation, on_delete=models.CASCADE, related_name="messages")
+    sender = models.CharField(max_length=12, choices=Sender.choices, default=Sender.SUPPORT)
+    text = models.TextField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("created_at", "id")
+        indexes = [models.Index(fields=("conversation", "created_at", "id"), name="content_chat_feed_idx")]
+        verbose_name = "پیام پشتیبانی"
+        verbose_name_plural = "پیام‌های پشتیبانی"
+
+    def __str__(self) -> str:
+        return f"{self.get_sender_display()}: {self.text[:40]}"

@@ -2,7 +2,7 @@
 
 import { Phone, Clock, Instagram, Twitter, Linkedin, Youtube, UserPlus, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNavigation } from '@/stores/navigation';
 import { useAuth, roleLabels } from '@/stores/auth';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,13 @@ import { cn } from '@/lib/utils';
 export function TopBar() {
   const { navigateTo } = useNavigation();
   const { isAuthenticated, currentUser, logout, _hasHydrated } = useAuth();
+  const accountAvatarImage = currentUser
+    ? currentUser.role === 'gallery' || currentUser.role === 'agency'
+      ? currentUser.businessLogo
+      : currentUser.role === 'buyer' || currentUser.role === 'seller'
+        ? currentUser.profilePhoto
+        : ''
+    : '';
 
   return (
     <div className="bg-gradient-navy text-white/80 text-xs py-1.5 hidden md:block">
@@ -59,6 +66,7 @@ export function TopBar() {
                 onClick={() => navigateTo(currentUser.dashboardPage as any)}
               >
                 <Avatar className="size-4 bg-powder/30">
+                  {accountAvatarImage && <AvatarImage src={accountAvatarImage} alt="تصویر حساب" className="object-cover" />}
                   <AvatarFallback className="text-[8px] font-bold text-powder bg-transparent">
                     {currentUser.avatar}
                   </AvatarFallback>

@@ -16,7 +16,7 @@ import { toast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import {
   Heart, GitCompare, History, FileText, MessageSquare,
@@ -28,6 +28,7 @@ import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm'
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ComingSoonNotice } from '@/components/ui/coming-soon';
 import { MyServiceRequestsPanel } from '@/components/services/MyServiceRequestsPanel';
+import { ListingConversationsPanel } from '@/components/dashboard/ListingConversationsPanel';
 
 export function BuyerDashboardPage() {
   const navigateTo = useNavigation((s) => s.navigateTo);
@@ -95,7 +96,7 @@ export function BuyerDashboardPage() {
     { value: 'compare', label: 'لیست مقایسه', icon: GitCompare },
     { value: 'history', label: 'تاریخچه (به‌زودی)', icon: History },
     { value: 'requests', label: 'درخواست‌های من', icon: FileText },
-    { value: 'messages', label: 'پیام‌ها (به‌زودی)', icon: MessageSquare },
+    { value: 'messages', label: 'پیام‌ها', icon: MessageSquare },
     { value: 'referral', label: 'دعوت از دوستان', icon: UserPlus },
     { value: 'role-change', label: 'تغییر نقش', icon: UserCog },
     { value: 'settings', label: 'تنظیمات', icon: Settings },
@@ -108,6 +109,7 @@ export function BuyerDashboardPage() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Avatar className="size-11">
+              {currentUser?.profilePhoto && <AvatarImage src={currentUser.profilePhoto} alt="عکس پروفایل" className="object-cover" />}
               <AvatarFallback className="bg-brand text-white text-sm font-bold">{currentUser?.avatar || 'ک'}</AvatarFallback>
             </Avatar>
             <div>
@@ -273,7 +275,7 @@ export function BuyerDashboardPage() {
 
           {/* Messages Tab */}
           <TabsContent value="messages" className="mt-6">
-            <ComingSoonNotice title="پیام‌ها" detail="گفت‌وگوی خریدار و فروشنده هنوز به سامانهٔ پیام متصل نیست." />
+            <ListingConversationsPanel />
           </TabsContent>
 
           {/* Referral Tab */}

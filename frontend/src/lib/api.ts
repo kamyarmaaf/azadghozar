@@ -126,6 +126,23 @@ async function getFreshAccessToken(): Promise<string> {
   return refreshPromise;
 }
 
+export async function getRealtimeAccessToken(forceRefresh = false): Promise<string | null> {
+  const access = getAccessToken();
+  if (!getRefreshToken()) return null;
+  if (!forceRefresh && access) {
+    try {
+      const encoded = access.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(encoded)) as { exp?: number };
+      if (typeof payload.exp === 'number' && payload.exp * 1000 > Date.now() + 30_000) return access;
+    } catch { /* Refresh an invalid token. */ }
+  }
+  try {
+    return await getFreshAccessToken();
+  } catch {
+    return null;
+  }
+}
+
 export interface ApiRequestOptions extends RequestInit {
   authenticated?: boolean;
 }

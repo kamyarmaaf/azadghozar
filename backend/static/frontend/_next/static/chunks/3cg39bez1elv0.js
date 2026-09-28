@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,22634,e=>{"use strict";var n=e.i(43476),i=e.i(87070);e.s(["AgencyDashboardPage",0,function(){return(0,n.jsx)(i.BusinessDashboardPage,{expectedKind:"agency"})}])},15031,function(e){e.n(e.i(22634))}]);

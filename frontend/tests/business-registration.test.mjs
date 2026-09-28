@@ -16,10 +16,10 @@ const {
   signupRoleFor,
 } = await import(`data:text/javascript,${encodeURIComponent(helperModule)}`);
 
-test('gallery and agency registration keep independent business identities', () => {
+test('agency registration follows the protected gallery upgrade path', () => {
   assert.equal(isRegistrationAccountType('agency'), true);
   assert.equal(isBusinessRegistration('agency'), true);
-  assert.equal(signupRoleFor('agency'), 'agency');
+  assert.equal(signupRoleFor('agency'), 'gallery');
   assert.equal(signupRoleFor('gallery'), 'gallery');
   assert.equal(signupRoleFor('buyer'), 'buyer');
   assert.equal(isRegistrationAccountType('admin'), false);
@@ -41,12 +41,10 @@ test('account selection and signup form expose both business registration choice
   assert.match(accountTypePage, /registrationType: type\.id/);
   assert.match(registerPage, /signupRoleFor\(selectedRole\)/);
   assert.match(registerPage, /businessName: businessName\.trim\(\)/);
-  assert.doesNotMatch(registerPage, /agencyPlan/);
-  assert.match(registerPage, /شماره پروانه کسب نمایشگاه/);
+  assert.match(registerPage, /agencyPlan/);
+  assert.match(registerPage, /شماره مجوز/);
   assert.match(registerPage, /شناسه ملی/);
-  assert.match(registerPage, /شماره مجوز واردات/);
-  assert.match(registerPage, /برندهای وارداتی/);
-  assert.match(registerPage, /ثبت نمایندگی و ارسال برای بررسی/);
+  assert.match(registerPage, /ثبت نمایشگاه و ارسال درخواست نمایندگی/);
   assert.match(navigation, /register\?type=/);
   assert.match(navigation, /isRegistrationAccountType\(registrationType\)/);
 });
@@ -65,19 +63,12 @@ test('business registration payload and correction form include review documents
 
   assert.match(accountApi, /license_number: input\.licenseNumber/);
   assert.match(accountApi, /national_id: input\.nationalId/);
-  assert.match(accountApi, /import_license_number: input\.importLicenseNumber/);
-  assert.match(accountApi, /represented_brands: input\.representedBrands/);
-  assert.match(accountApi, /businessKind\?: 'gallery' \| 'agency'/);
-  assert.match(accountApi, /input\.businessKind === 'agency'/);
-  assert.doesNotMatch(accountApi, /agency_plan/);
+  assert.match(accountApi, /agency_plan: input\.agencyPlan/);
   assert.match(businessApi, /export async function updateMyBusiness/);
-  assert.match(businessApi, /kind: BusinessKind/);
-  assert.match(businessApi, /input\.kind === 'agency'/);
   assert.match(businessApi, /'\/businesses\/me\/profile\/'/);
   assert.match(correctionForm, /verification_note/);
   assert.match(correctionForm, /ذخیره و ارسال برای بررسی/);
   assert.match(adminPanel, /business_verification_status === 'verified'/);
   assert.match(adminPanel, /reviewSubscription\(id, action, note\)/);
-  assert.match(adminPanel, /پروانه کسب/);
-  assert.match(adminPanel, /مجوز واردات/);
+  assert.match(adminPanel, /شماره مجوز/);
 });

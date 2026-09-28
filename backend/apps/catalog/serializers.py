@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 from django.core.files.storage import Storage, default_storage
 from django.utils.text import slugify
 from rest_framework import serializers
@@ -11,6 +11,7 @@ from apps.image_processing import (
 
 from apps.catalog.models import (
     Brand,
+    BodyType,
     ListingFavorite,
     VehicleListing,
     VehicleListingImage,
@@ -19,9 +20,17 @@ from apps.catalog.models import (
 )
 
 
+class BodyTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BodyType
+        fields = ("id", "name", "is_active", "sort_order")
+
+
 def ensure_catalog_brand(name: str) -> None:
     normalized = name.strip()
-    if not normalized or Brand.objects.filter(name__iexact=normalized).exists():
+    if not normalized or Brand.objects.filter(
+        Q(name__iexact=normalized) | Q(name_fa__iexact=normalized)
+    ).exists():
         return
     base_slug = slugify(normalized, allow_unicode=True)[:100] or "brand"
     slug = base_slug

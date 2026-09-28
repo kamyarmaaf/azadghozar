@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
 import { Separator } from '@/components/ui/separator';
 import {
   DropdownMenu,
@@ -271,12 +272,12 @@ export function AdminDashboardPage() {
     { value: 'dashboard', label: 'داشبورد', icon: LayoutDashboard },
     { value: 'users', label: 'کاربران', icon: Users },
     { value: 'listings', label: 'آگهی‌ها', icon: Car },
-    { value: 'agencies', label: 'نمایندگی‌ها', icon: Store },
+    { value: 'dealers', label: 'نمایندگی‌ها', icon: Store },
     { value: 'galleries', label: 'نمایشگاه‌ها', icon: Building2 },
     { value: 'services', label: 'خدمات', icon: ClipboardList },
     { value: 'role-requests', label: 'درخواست نقش', icon: UserCog },
     { value: 'content', label: 'محتوا (به‌زودی)', icon: FileText },
-    { value: 'settings', label: 'تنظیمات (به‌زودی)', icon: Settings },
+    { value: 'settings', label: 'پروفایل و تنظیمات', icon: Settings },
   ];
 
   if (!hasHydrated) {
@@ -533,7 +534,7 @@ export function AdminDashboardPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="agencies" className="mt-6">
+          <TabsContent value="dealers" className="mt-6">
             <AdminBusinessPanel kind="agency" />
           </TabsContent>
 
@@ -546,11 +547,15 @@ export function AdminDashboardPage() {
           </TabsContent>
 
           <TabsContent value="content" className="mt-6">
-            <ComingSoonNotice title="مدیریت محتوا" detail="مدیریت مقاله‌های مجله، ویدیوهای آموزشی و سؤالات متداول از پنل مدیریت Django فعال است؛ بنرهای عمومی هنوز به API متصل نشده‌اند." />
+            <ComingSoonNotice title="مدیریت محتوا" detail="ایجاد و انتشار مقاله، ویدیو، پرسش‌های متداول و بنر هنوز به API متصل نشده است." />
           </TabsContent>
 
           {/* Admin Settings Tab */}
           <TabsContent value="settings" className="mt-6">
+            <Card className="mb-6">
+              <CardHeader><CardTitle className="text-lg">پروفایل شخصی مدیر</CardTitle></CardHeader>
+              <CardContent><ProfileSettingsForm /></CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">تنظیمات سیستم</CardTitle>

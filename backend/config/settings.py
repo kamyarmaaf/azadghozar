@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
 
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -61,7 +63,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -75,18 +77,35 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST", "db"),
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),
+DATABASE_ENGINE = os.getenv(
+    "DATABASE_ENGINE",
+    "postgresql",
+).strip().lower()
+
+if DATABASE_ENGINE == "sqlite":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.getenv(
+                "SQLITE_PATH",
+                str(BASE_DIR / "db.sqlite3"),
+            ),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB"),
+            "USER": os.getenv("POSTGRES_USER"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "HOST": os.getenv("POSTGRES_HOST", "db"),
+            "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        }
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -126,9 +145,22 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+FRONTEND_PUBLIC_ROOT = BASE_DIR / "frontend_public"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = "/media/"
 
@@ -158,6 +190,8 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "service_request_create": "10/hour",
         "contact_message_create": "5/hour",
+        "listing_conversation_create": "10/hour",
+        "listing_message_create": "30/hour",
     },
 }
 
@@ -180,15 +214,40 @@ CELERY_RESULT_SERIALIZER = "json"
 
 CELERY_TIMEZONE = TIME_ZONE
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": os.getenv(
-            "REDIS_CACHE_URL",
-            "redis://redis:6379/2",
-        ),
-    }
+CELERY_ENABLED = os.getenv(
+    "CELERY_ENABLED",
+    "1",
+).lower() in {
+    "1",
+    "true",
+    "yes",
 }
+
+REDIS_CACHE_URL = os.getenv("REDIS_CACHE_URL", "").strip()
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.getenv("CHANNEL_REDIS_URL", "redis://redis:6379/3")],
+        },
+    },
+}
+
+if REDIS_CACHE_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_CACHE_URL,
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "azadgozar-local-cache",
+        }
+    }
 
 
 OTP_EXPIRATION_SECONDS = int(
@@ -247,6 +306,15 @@ CSRF_TRUSTED_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+
+SERVE_MEDIA_FILES = os.getenv(
+    "DJANGO_SERVE_MEDIA",
+    "0",
+).lower() in {
+    "1",
+    "true",
+    "yes",
+}
 
 REFERRAL_REWARD_VALUE = int(
     os.getenv("REFERRAL_REWARD_VALUE", "500000")

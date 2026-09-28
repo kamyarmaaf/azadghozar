@@ -15,6 +15,7 @@ import {
   requestSignupOtp,
   updateCurrentUserProfile,
   updateBusinessMedia,
+  updateProfilePhoto,
   verifyLoginOtp,
   verifySignupOtp,
   type AuthUser,
@@ -95,6 +96,7 @@ interface AuthState {
     businessLogo?: File;
     businessCover?: File;
   }) => Promise<AuthUser>;
+  updateProfilePhoto: (photo: File) => Promise<AuthUser>;
   logout: () => void;
   updateRole: (newRole: UserRole) => void;
   setPendingRoleChange: (request: PendingRoleChange | null) => void;
@@ -232,6 +234,12 @@ export const useAuth = create<AuthState>()(
         } finally {
           set({ isLoading: false });
         }
+      },
+
+      updateProfilePhoto: async (photo) => {
+        const user = await updateProfilePhoto(photo);
+        set(authenticatedState(user));
+        return user;
       },
 
       logout: () => {

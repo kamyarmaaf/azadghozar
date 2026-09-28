@@ -7,6 +7,7 @@ import {
   type AuthTokens,
 } from "@/lib/api";
 import type { PageId } from "@/stores/navigation";
+import type { AgencyPlan } from '@/lib/business-registration';
 
 export type UserRole =
   | "buyer"
@@ -44,6 +45,7 @@ export interface BackendUser {
   business_description: string;
   business_logo: string | null;
   business_cover: string | null;
+  profile_photo: string | null;
   business_access: BusinessAccess | null;
   date_joined: string;
 }
@@ -79,6 +81,7 @@ export interface AuthUser {
   businessDescription: string;
   businessLogo: string;
   businessCover: string;
+  profilePhoto: string;
   avatar: string;
   dashboardPage: PageId;
   referralCode: string;
@@ -97,7 +100,6 @@ export interface SignupCompleteInput {
   password: string;
   passwordConfirmation: string;
   acceptTerms: boolean;
-  businessKind?: 'gallery' | 'agency';
   businessName?: string;
   businessPhone?: string;
   province?: string;
@@ -106,17 +108,7 @@ export interface SignupCompleteInput {
   businessDescription?: string;
   licenseNumber?: string;
   nationalId?: string;
-  postalCode?: string;
-  licenseIssuer?: string;
-  licenseExpiresAt?: string | null;
-  companyRegistrationNumber?: string;
-  economicCode?: string;
-  authorizedRepresentativeName?: string;
-  importLicenseNumber?: string;
-  importLicenseIssuer?: string;
-  importLicenseExpiresAt?: string | null;
-  businessCardNumber?: string;
-  representedBrands?: string[];
+  agencyPlan?: AgencyPlan;
 }
 
 export interface ReferralRecord {
@@ -190,7 +182,7 @@ const dashboardByRole: Record<UserRole, PageId> = {
   buyer: "buyer-dashboard",
   seller: "seller-dashboard",
   gallery: "gallery-dashboard",
-  agency: "agency-dashboard",
+  agency: "gallery-dashboard",
   expert: "expert-dashboard",
   admin: "admin-dashboard",
   org: "org-panel",
@@ -218,11 +210,10 @@ export function mapUser(user: BackendUser): AuthUser {
     businessDescription: user.business_description,
     businessLogo: resolveMediaUrl(user.business_logo),
     businessCover: resolveMediaUrl(user.business_cover),
+    profilePhoto: resolveMediaUrl(user.profile_photo),
     avatar: name.trim().charAt(0) || "ک",
     dashboardPage: user.business_access
-      ? user.business_access.kind === 'agency'
-        ? 'agency-dashboard'
-        : 'gallery-dashboard'
+      ? 'gallery-dashboard'
       : dashboardByRole[user.role],
     referralCode: user.referral_code,
     referralCredit: user.referral_credit,
@@ -291,36 +282,6 @@ export async function verifySignupOtp(
 export async function completeSignup(
   input: SignupCompleteInput,
 ): Promise<AuthUser> {
-  const commonBusinessPayload = input.businessKind
-    ? {
-        business_name: input.businessName,
-        business_phone: input.businessPhone,
-        province: input.province,
-        city: input.city,
-        address: input.address,
-        business_description: input.businessDescription,
-        postal_code: input.postalCode,
-        national_id: input.nationalId,
-      }
-    : {};
-  const kindBusinessPayload = input.businessKind === 'agency'
-    ? {
-        company_registration_number: input.companyRegistrationNumber,
-        economic_code: input.economicCode,
-        authorized_representative_name: input.authorizedRepresentativeName,
-        import_license_number: input.importLicenseNumber,
-        import_license_issuer: input.importLicenseIssuer,
-        import_license_expires_at: input.importLicenseExpiresAt,
-        business_card_number: input.businessCardNumber,
-        represented_brands: input.representedBrands,
-      }
-    : input.businessKind === 'gallery'
-      ? {
-          license_number: input.licenseNumber,
-          license_issuer: input.licenseIssuer,
-          license_expires_at: input.licenseExpiresAt,
-        }
-      : {};
   const response = await apiRequest<{ user: BackendUser }>(
     "/auth/signup/complete/",
     {
@@ -331,8 +292,15 @@ export async function completeSignup(
         password: input.password,
         password_confirmation: input.passwordConfirmation,
         accept_terms: input.acceptTerms,
-        ...commonBusinessPayload,
-        ...kindBusinessPayload,
+        business_name: input.businessName,
+        business_phone: input.businessPhone,
+        province: input.province,
+        city: input.city,
+        address: input.address,
+        business_description: input.businessDescription,
+        license_number: input.licenseNumber,
+        national_id: input.nationalId,
+        agency_plan: input.agencyPlan,
       }),
     },
   );
@@ -456,6 +424,17 @@ export async function updateBusinessMedia(input: {
   }
   const response = await apiRequest<BackendUser>("/auth/me/", {
     method: "PATCH",
+    authenticated: true,
+    body,
+  });
+  return mapUser(response);
+}
+
+export async function updateProfilePhoto(photo: File): Promise<AuthUser> {
+  const body = new FormData();
+  body.append('profile_photo', photo, photo.name);
+  const response = await apiRequest<BackendUser>('/auth/me/', {
+    method: 'PATCH',
     authenticated: true,
     body,
   });

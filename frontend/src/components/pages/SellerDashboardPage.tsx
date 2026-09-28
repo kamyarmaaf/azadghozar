@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -26,6 +26,7 @@ import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm'
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { MyServiceRequestsPanel } from '@/components/services/MyServiceRequestsPanel';
 import { ComingSoonNotice } from '@/components/ui/coming-soon';
+import { ListingConversationsPanel } from '@/components/dashboard/ListingConversationsPanel';
 
 const statusMap: Record<string, { label: string; className: string }> = {
   active: { label: 'فعال', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
@@ -95,7 +96,7 @@ export function SellerDashboardPage() {
     { value: 'listings', label: 'آگهی‌های من', icon: Car },
     { value: 'inspections', label: 'درخواست‌های بازرسی', icon: BarChart3 },
     { value: 'stats', label: 'آمار محدود', icon: TrendingUp },
-    { value: 'messages', label: 'پیام‌ها (به‌زودی)', icon: MessageSquare },
+    { value: 'messages', label: 'پیام‌ها', icon: MessageSquare },
     { value: 'referral', label: 'دعوت از دوستان', icon: UserPlus },
     { value: 'settings', label: 'تنظیمات', icon: Settings },
   ];
@@ -107,6 +108,7 @@ export function SellerDashboardPage() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Avatar className="size-11">
+              {currentUser?.profilePhoto && <AvatarImage src={currentUser.profilePhoto} alt="عکس پروفایل" className="object-cover" />}
               <AvatarFallback className="bg-brand text-white text-sm font-bold">{currentUser?.avatar || 'ک'}</AvatarFallback>
             </Avatar>
             <div>
@@ -267,13 +269,7 @@ export function SellerDashboardPage() {
 
           {/* Messages Tab */}
           <TabsContent value="messages" className="mt-6">
-            <Card>
-              <CardContent className="p-8 text-center">
-                <MessageSquare className="size-12 text-muted-foreground mx-auto mb-3" />
-                <p className="font-medium">پیام‌ها: به‌زودی</p>
-                <p className="text-sm text-muted-foreground mt-1">اتصال به سامانه پیام‌رسانی هنوز انجام نشده است.</p>
-              </CardContent>
-            </Card>
+            <ListingConversationsPanel />
           </TabsContent>
 
           {/* Referral Tab */}

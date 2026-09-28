@@ -5,7 +5,16 @@ from apps.catalog.serializers import (
     BrandSerializer,
     VehicleModelSerializer,
     VehicleTrimSerializer,
+    ensure_catalog_brand,
 )
+
+
+@pytest.mark.component
+@pytest.mark.django_db
+def test_existing_persian_brand_name_does_not_create_duplicate() -> None:
+    Brand.objects.create(name="BMW", name_fa="بی‌ام‌و", slug="bmw")
+    ensure_catalog_brand("بی‌ام‌و")
+    assert Brand.objects.count() == 1
 
 
 @pytest.mark.component

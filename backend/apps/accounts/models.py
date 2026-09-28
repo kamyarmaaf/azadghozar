@@ -30,6 +30,10 @@ def business_cover_upload_to(instance, filename: str) -> str:
     return f"businesses/{instance.pk}/cover/{uuid4().hex}{suffix}"
 
 
+def profile_photo_upload_to(instance, filename: str) -> str:
+    return f"users/{instance.pk}/profile/{uuid4().hex}.webp"
+
+
 class User(AbstractUser):
     class Role(models.TextChoices):
         BUYER = "buyer", "خریدار"
@@ -142,6 +146,12 @@ class User(AbstractUser):
         choices=PreferredContactMethod.choices,
         default=PreferredContactMethod.BOTH,
         verbose_name="روش تماس ترجیحی",
+    )
+
+    profile_photo = models.ImageField(
+        upload_to=profile_photo_upload_to,
+        blank=True,
+        verbose_name="عکس پروفایل شخصی",
     )
 
     business_name = models.CharField(

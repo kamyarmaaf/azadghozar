@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import {
   Car, Eye, BarChart3, Settings,
@@ -26,6 +26,7 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 import { BusinessTeamPanel } from '@/components/business/BusinessTeamPanel';
 import { BusinessSubscriptionPanel } from '@/components/business/BusinessSubscriptionPanel';
 import { BusinessVerificationForm } from '@/components/business/BusinessVerificationForm';
+import { ListingConversationsPanel } from '@/components/dashboard/ListingConversationsPanel';
 import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
 import {
   fetchBusinessDashboard,
@@ -40,11 +41,7 @@ const statusMap: Record<string, { label: string; className: string }> = {
   expired: { label: 'منقضی', className: 'bg-red-100 text-red-700 border-red-200' },
 };
 
-export function BusinessDashboardPage({
-  expectedKind,
-}: {
-  expectedKind: 'gallery' | 'agency';
-}) {
+export function GalleryDashboardPage({ expectedKind }: { expectedKind?: 'gallery' | 'agency' } = {}) {
   const navigateTo = useNavigation((state) => state.navigateTo);
   const currentUser = useAuth((state) => state.currentUser);
   const [galleryVehicles, setGalleryVehicles] = useState<VehicleListing[]>([]);
@@ -128,9 +125,10 @@ export function BusinessDashboardPage({
 
   const tabs = [
     { value: 'vehicles', label: 'مدیریت خودروها', icon: Car },
+    { value: 'messages', label: 'پیام‌ها', icon: Bell },
     { value: 'add', label: 'افزودن خودرو', icon: Plus },
     { value: 'team', label: 'کارمندان', icon: Users },
-    { value: 'subscription', label: 'وضعیت اشتراک', icon: CreditCard },
+    { value: 'subscription', label: isAgencyAccount ? 'وضعیت اشتراک' : 'درخواست ارتقا', icon: CreditCard },
     { value: 'stats', label: 'آمار', icon: BarChart3 },
     { value: 'settings', label: isAgencyAccount ? 'تنظیمات نمایندگی' : 'تنظیمات نمایشگاه', icon: Settings },
   ];
@@ -142,6 +140,7 @@ export function BusinessDashboardPage({
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Avatar className="size-12">
+              {currentUser?.businessLogo && <AvatarImage src={currentUser.businessLogo} alt="لوگوی کسب‌وکار" className="object-cover" />}
               <AvatarFallback className="bg-gradient-brand text-white text-sm font-bold">{currentUser?.avatar || 'ک'}</AvatarFallback>
             </Avatar>
             <div>
@@ -149,7 +148,7 @@ export function BusinessDashboardPage({
                 {isAgencyAccount && <Crown className="size-5 text-indigo-600" />}
                 {isAgencyAccount ? 'پنل نمایندگی' : 'پنل نمایشگاه'}
               </h1>
-              <p className="text-sm text-muted-foreground">{currentUser?.businessAccess?.name || currentUser?.businessName || currentUser?.name || (isAgencyAccount ? 'شرکت واردکننده آزادگذر' : 'نمایشگاه آزادگذر')}</p>
+              <p className="text-sm text-muted-foreground">{currentUser?.businessAccess?.name || currentUser?.businessName || currentUser?.name || 'نمایشگاه آزادگذر'}</p>
             </div>
           </div>
           <span className="text-xs text-muted-foreground">اعلان‌ها: به‌زودی</span>
@@ -164,12 +163,12 @@ export function BusinessDashboardPage({
             <div>
               <p className="text-sm font-bold">
                 {registrationNotice === 'agency'
-                  ? 'درخواست ثبت نمایندگی شما با موفقیت ثبت شد.'
+                  ? 'نمایشگاه و درخواست نمایندگی شما ثبت شد.'
                   : 'نمایشگاه شما با موفقیت ثبت شد.'}
               </p>
               <p className="mt-1 text-xs leading-6">
                 {registrationNotice === 'agency'
-                  ? 'اطلاعات حقوقی شرکت واردکننده در صف نمایندگی‌ها بررسی می‌شود. تا قبل از تأیید، پروفایل عمومی و امکان ثبت آگهی فعال نخواهد بود.'
+                  ? 'ابتدا اطلاعات کسب‌وکار بررسی می‌شود و سپس درخواست اشتراک نمایندگی به تأیید مدیریت می‌رسد. تا قبل از تأیید، پروفایل عمومی نخواهد بود.'
                   : 'اطلاعات در صف بررسی مدیریت است و پس از تأیید، پروفایل نمایشگاه برای کاربران نمایش داده می‌شود.'}
               </p>
             </div>
@@ -300,6 +299,10 @@ export function BusinessDashboardPage({
           </TabsContent>
 
           {/* Add Vehicle Tab */}
+          <TabsContent value="messages" className="mt-6">
+            <ListingConversationsPanel />
+          </TabsContent>
+
           <TabsContent value="add" className="mt-6">
             <Card>
               <CardHeader>
@@ -402,6 +405,5 @@ export function BusinessDashboardPage({
   );
 }
 
-export function GalleryDashboardPage() {
-  return <BusinessDashboardPage expectedKind="gallery" />;
-}
+// Compatibility with older app shells that render the agency page separately.
+export { GalleryDashboardPage as BusinessDashboardPage };

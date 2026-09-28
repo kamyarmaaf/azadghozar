@@ -274,6 +274,9 @@ def _sync_challenge_to_cache(challenge: OtpChallenge) -> None:
 
 
 def _celery_worker_is_available() -> bool:
+    if not getattr(settings, "CELERY_ENABLED", True):
+        return False
+
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
         return True
 

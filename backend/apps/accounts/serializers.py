@@ -2,6 +2,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
+from django.db import transaction
 from rest_framework import serializers
 
 from apps.accounts.models import (
@@ -430,6 +431,12 @@ class UserSerializer(serializers.ModelSerializer):
     )
     business_access = serializers.SerializerMethodField()
 
+    def to_representation(self, instance: User) -> dict:
+        data = super().to_representation(instance)
+        if instance.role not in {User.Role.BUYER, User.Role.SELLER}:
+            data["profile_photo"] = None
+        return data
+
     def get_business_access(self, obj: User) -> dict | None:
         from apps.businesses.models import BusinessMembership, BusinessProfile
 
@@ -493,6 +500,7 @@ class UserSerializer(serializers.ModelSerializer):
             "city",
             "address",
             "preferred_contact_method",
+            "profile_photo",
             "business_name",
             "business_phone",
             "business_description",
@@ -515,6 +523,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             "city",
             "address",
             "preferred_contact_method",
+            "profile_photo",
             "business_name",
             "business_phone",
             "business_description",
@@ -536,6 +545,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             },
             "business_logo": {"required": False},
             "business_cover": {"required": False},
+            "profile_photo": {"required": False},
         }
 
     def validate_email(self, value: str) -> str:
@@ -611,6 +621,22 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         except InvalidImageUpload as exc:
             raise serializers.ValidationError(str(exc)) from exc
 
+    def validate_profile_photo(self, upload):
+        user = self.instance
+        if user is None or user.role not in {User.Role.BUYER, User.Role.SELLER}:
+            raise serializers.ValidationError(
+                "عکس پروفایل شخصی فقط برای خریدار و فروشنده شخصی فعال است."
+            )
+        try:
+            return compress_uploaded_image(
+                upload,
+                max_input_bytes=5 * 1024 * 1024,
+                target_bytes=250 * 1024,
+                max_dimension=512,
+            )
+        except InvalidImageUpload as exc:
+            raise serializers.ValidationError(str(exc)) from exc
+
     def validate_business_cover(self, upload):
         try:
             return compress_uploaded_image(
@@ -623,6 +649,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(exc)) from exc
 
     def update(self, instance: User, validated_data: dict) -> User:
+        old_photo = instance.profile_photo.name if "profile_photo" in validated_data else ""
         review_fields = {
             "business_name",
             "business_phone",
@@ -636,6 +663,9 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             for field in review_fields
         )
         user = super().update(instance, validated_data)
+        if old_photo and old_photo != user.profile_photo.name:
+            storage = user.profile_photo.storage
+            transaction.on_commit(lambda: storage.delete(old_photo))
         if user.role in {User.Role.GALLERY, User.Role.AGENCY}:
             from apps.businesses.services import ensure_business_profile
 

@@ -22,7 +22,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { brands, bodyTypes } from '@/lib/mock-data';
+import { useCatalogOptions } from '@/hooks/use-catalog-options';
+import { brandLabel } from '@/lib/catalog-options';
+import { campaignPriceValue } from '@/lib/campaign-price';
 import {
   fetchVehicleListings,
   type PublicListingSummary,
@@ -38,16 +40,6 @@ interface ListingCampaignPageProps {
 
 const CAMPAIGN_PAGE_SIZE = 24;
 
-function priceValue(value: string): number | undefined {
-  const normalized = value
-    .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
-    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
-    .replace(/[,٬\s]/g, '');
-  if (!normalized) return undefined;
-  const number = Number(normalized);
-  return Number.isFinite(number) && number >= 0 ? number * 1_000_000 : undefined;
-}
-
 export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
   const navigateTo = useNavigation((state) => state.navigateTo);
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
@@ -56,6 +48,7 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
   const [listings, setListings] = useState<PublicListingSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const { brands, bodyTypes, loading: catalogLoading, error: catalogError, reload: reloadCatalog } = useCatalogOptions();
   const [brand, setBrand] = useState('all');
   const [bodyType, setBodyType] = useState('all');
   const [priceMin, setPriceMin] = useState('');
@@ -80,9 +73,10 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
         pageSize: CAMPAIGN_PAGE_SIZE,
         brand: brand === 'all' ? undefined : brand,
         bodyType: bodyType === 'all' ? undefined : bodyType,
-        priceMin: priceValue(priceMin),
-        priceMax: priceValue(priceMax),
-        campaign: kind,
+        priceMin: campaignPriceValue(priceMin),
+        priceMax: campaignPriceValue(priceMax),
+        instantSale: isInstant ? true : undefined,
+        specialSale: isInstant ? undefined : true,
         summary: true,
       })
         .then((response) => {
@@ -105,7 +99,7 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [bodyType, brand, currentPage, kind, priceMax, priceMin, reloadVersion]);
+  }, [bodyType, brand, currentPage, isInstant, priceMax, priceMin, reloadVersion]);
 
   const totalPages = Math.ceil(total / CAMPAIGN_PAGE_SIZE);
   const updateFilter = <T,>(setter: (value: T) => void, value: T) => {
@@ -142,6 +136,8 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
           <p className="text-muted-foreground text-sm md:text-base">{description}</p>
         </div>
 
+        {catalogLoading && <p role="status" className="mb-2 text-sm">در حال دریافت گزینه‌های جستجو...</p>}
+        {catalogError && <button type="button" className="mb-2 text-sm text-destructive underline" onClick={reloadCatalog}>دریافت گزینه‌ها ناموفق بود؛ تلاش دوباره</button>}
         <Card className="mb-6 py-0">
           <div className="p-4 flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[180px]">
@@ -150,7 +146,7 @@ export function ListingCampaignPage({ kind }: ListingCampaignPageProps) {
                 <SelectTrigger className="w-full"><SelectValue placeholder="همه برندها" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">همه برندها</SelectItem>
-                  {brands.map((item) => <SelectItem key={item.id} value={item.name}>{item.name}</SelectItem>)}
+                  {brands.map((item) => <SelectItem key={item.id} value={brandLabel(item)}>{brandLabel(item)}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

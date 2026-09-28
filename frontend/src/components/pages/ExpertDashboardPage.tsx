@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
 import { useAuth } from '@/stores/auth';
 import {
   fetchExpertServiceRequests,
@@ -121,8 +122,11 @@ export function ExpertDashboardPage() {
             {nextUrl && <div className="text-center pt-2"><Button variant="outline" disabled={loading} onClick={() => void load(nextUrl)}>{loading ? <Loader2 className="size-4 animate-spin" /> : 'نمایش موارد بیشتر'}</Button></div>}
           </CardContent>
         </Card>
+        <Card className="mt-6">
+          <CardHeader><CardTitle className="text-lg">پروفایل شخصی کارشناس</CardTitle></CardHeader>
+          <CardContent><ProfileSettingsForm /></CardContent>
+        </Card>
       </div>
     </div>
   );
 }
-

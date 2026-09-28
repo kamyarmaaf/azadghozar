@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Heart, SlidersHorizontal, X, Search, ChevronRight, ChevronLeft, Loader2, RefreshCw } from 'lucide-react';
-import { brands, bodyTypes } from '@/lib/mock-data';
+import { useCatalogOptions } from '@/hooks/use-catalog-options';
+import { brandLabel } from '@/lib/catalog-options';
 import { homeListingFilters } from '@/lib/home-listing-filters.mjs';
 import { formatPrice, formatMileage, toPersianNumber } from '@/lib/utils';
 import {
@@ -70,7 +71,7 @@ const conditions = ['آکبند', 'در حد نو', 'کارکرده تمیز', '
 const sellerTypes = [
   { value: 'all', label: 'همه' },
   { value: 'gallery', label: 'نمایشگاه' },
-  { value: 'agency', label: 'نمایندگی / شرکت واردکننده' },
+  { value: 'dealership', label: 'نمایندگی' },
   { value: 'personal', label: 'شخصی' },
 ];
 
@@ -166,6 +167,7 @@ function FilterSidebar({
   setBody, setColor, setTransmission, setFuel, setCondition,
   setSellerTypeFilter, setInstantSale, setSpecialSale, setInspected,
 }: FilterProps) {
+  const { brands, bodyTypes, loading: catalogLoading, error: catalogError, reload: reloadCatalog } = useCatalogOptions();
   return (
     <div className="space-y-5 p-4">
       <div className="flex items-center justify-between">
@@ -179,6 +181,8 @@ function FilterSidebar({
       </div>
 
       <Separator />
+      {catalogLoading && <p role="status" className="text-xs">در حال دریافت برندها و انواع بدنه...</p>}
+      {catalogError && <button type="button" onClick={reloadCatalog} className="text-xs text-destructive underline">دریافت گزینه‌ها ناموفق بود؛ تلاش دوباره</button>}
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">نوع پلاک</Label>
@@ -204,7 +208,7 @@ function FilterSidebar({
           <SelectTrigger className="w-full"><SelectValue placeholder="همه برندها" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">همه برندها</SelectItem>
-            {brands.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
+            {brands.map((b) => <SelectItem key={b.id} value={brandLabel(b)}>{brandLabel(b)}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -423,7 +427,7 @@ export function BuyPage() {
         transmission: transmission === 'all' ? undefined : transmissionApiMap[transmission],
         fuelType: fuel === 'all' ? undefined : fuelApiMap[fuel],
         condition: condition === 'all' ? undefined : conditionApiMap[condition],
-        sellerType: sellerTypeFilter === 'all' ? undefined : sellerTypeFilter,
+        sellerType: sellerTypeFilter === 'dealership' ? 'agency' : sellerTypeFilter === 'all' ? undefined : sellerTypeFilter,
         instantSale: instantSale || undefined,
         specialSale: specialSale || undefined,
         inspected,

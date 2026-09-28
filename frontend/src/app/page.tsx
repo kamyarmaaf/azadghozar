@@ -24,19 +24,15 @@ import { AccountTypePage } from "@/components/pages/AccountTypePage";
 import { BuyerDashboardPage } from "@/components/pages/BuyerDashboardPage";
 import { SellerDashboardPage } from "@/components/pages/SellerDashboardPage";
 import { GalleryDashboardPage } from "@/components/pages/GalleryDashboardPage";
-import { AgencyDashboardPage } from "@/components/pages/AgencyDashboardPage";
+import { BrandsPage } from "@/components/pages/BrandsPage";
+import { VideosPage } from "@/components/pages/VideosPage";
+import { VideoDetailPage } from "@/components/pages/VideoDetailPage";
+import { BlogPage } from "@/components/pages/BlogPage";
+import { ArticleDetailPage } from "@/components/pages/ArticleDetailPage";
+import { FAQPage } from "@/components/pages/FAQPage";
 import { ExpertDashboardPage } from "@/components/pages/ExpertDashboardPage";
 import { AdminDashboardPage } from "@/components/pages/AdminDashboardPage";
 import { FavoritesPage } from "@/components/pages/FavoritesPage";
-import { BrandsPage } from "@/components/pages/BrandsPage";
-import { BrandDetailPage } from "@/components/pages/BrandDetailPage";
-import { VideosPage } from "@/components/pages/VideosPage";
-import { VideoDetailPage } from "@/components/pages/VideoDetailPage";
-import { FAQPage } from "@/components/pages/FAQPage";
-import { BlogPage } from "@/components/pages/BlogPage";
-import { ArticleDetailPage } from "@/components/pages/ArticleDetailPage";
-import { AboutPage } from "@/components/pages/AboutPage";
-import { ContactPage } from "@/components/pages/ContactPage";
 import { ComingSoonPage } from "@/components/ui/coming-soon";
 import { TermsPage } from "@/components/pages/TermsPage";
 import { PrivacyPage } from "@/components/pages/PrivacyPage";
@@ -52,7 +48,7 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   'special-sale': SpecialSalePage,
   favorites: FavoritesPage,
   brands: BrandsPage,
-  'brand-detail': BrandDetailPage,
+  'brand-detail': ComingSoonPage,
   dealerships: DealershipsPage,
   'dealership-detail': DealershipDetailPage,
   galleries: GalleriesPage,
@@ -67,8 +63,8 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   'article-detail': ArticleDetailPage,
   'video-detail': VideoDetailPage,
   faq: FAQPage,
-  about: AboutPage,
-  contact: ContactPage,
+  about: ComingSoonPage,
+  contact: ComingSoonPage,
   login: LoginPage,
   register: RegisterPage,
   'forgot-password': ForgotPasswordPage,
@@ -76,7 +72,6 @@ const pageComponents: Record<PageId, React.ComponentType> = {
   'buyer-dashboard': BuyerDashboardPage,
   'seller-dashboard': SellerDashboardPage,
   'gallery-dashboard': GalleryDashboardPage,
-  'agency-dashboard': AgencyDashboardPage,
   'expert-dashboard': ExpertDashboardPage,
   'admin-dashboard': AdminDashboardPage,
   tariffs: ComingSoonPage,

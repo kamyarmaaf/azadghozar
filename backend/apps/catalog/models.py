@@ -64,6 +64,20 @@ class Brand(TimestampedModel):
         return self.name_fa or self.name
 
 
+class BodyType(TimestampedModel):
+    """The body styles offered by the listing and search forms."""
+
+    name = models.CharField(max_length=40, unique=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ("sort_order", "id")
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class VehicleModel(TimestampedModel):
     class BodyType(models.TextChoices):
         SEDAN = "sedan", "Sedan"
@@ -535,3 +549,70 @@ class ListingFavorite(TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.user_id} saved listing {self.listing_id}"
+
+
+class ListingConversation(TimestampedModel):
+    """One private conversation per listing and interested user."""
+
+    listing = models.ForeignKey(
+        VehicleListing,
+        on_delete=models.SET_NULL,
+        related_name="conversations",
+        null=True,
+        blank=True,
+    )
+    listing_title = models.CharField(max_length=240)
+    buyer = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="listing_conversations_started",
+    )
+    owner = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="listing_conversations_received",
+    )
+    last_message_text = models.CharField(max_length=200, blank=True)
+    last_message_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-last_message_at", "-id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("listing", "buyer"),
+                condition=models.Q(listing__isnull=False),
+                name="listing_conversation_unique_buyer",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(buyer=models.F("owner")),
+                name="listing_conversation_distinct_users",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=("buyer", "-last_message_at"), name="conv_buyer_recent_idx"),
+            models.Index(fields=("owner", "-last_message_at"), name="conv_owner_recent_idx"),
+        ]
+
+
+class ListingMessage(models.Model):
+    conversation = models.ForeignKey(
+        ListingConversation,
+        on_delete=models.CASCADE,
+        related_name="messages",
+    )
+    sender = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="listing_messages_sent",
+    )
+    text = models.TextField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at", "-id")
+        indexes = [
+            models.Index(
+                fields=("conversation", "-created_at", "-id"),
+                name="listing_message_recent_idx",
+            ),
+        ]

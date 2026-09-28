@@ -15,6 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/stores/auth';
 import type { AuthUser, PreferredContactMethod } from '@/lib/account-api';
+import { ProfilePhotoUploader } from '@/components/dashboard/ProfilePhotoUploader';
 
 type ProfileMode = 'personal' | 'business';
 
@@ -137,6 +138,7 @@ function ProfileSettingsEditor({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <ProfilePhotoUploader />
       {mode === 'business' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">

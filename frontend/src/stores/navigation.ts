@@ -36,7 +36,6 @@ export type PageId =
   | 'buyer-dashboard'
   | 'seller-dashboard'
   | 'gallery-dashboard'
-  | 'agency-dashboard'
   | 'expert-dashboard'
   | 'admin-dashboard'
   | 'tariffs'
@@ -52,7 +51,7 @@ export const allPageIds: PageId[] = [
   'ownership-transfer','transportation','inspection','consultation',
   'videos','blog','article-detail','video-detail','faq','about','contact','login',
   'register','forgot-password','account-type','buyer-dashboard','seller-dashboard',
-  'gallery-dashboard','agency-dashboard','expert-dashboard','admin-dashboard','tariffs','org-panel','smart-id','terms','privacy',
+  'gallery-dashboard','expert-dashboard','admin-dashboard','tariffs','org-panel','smart-id','terms','privacy',
 ];
 
 function isValidPageId(hash: string): hash is PageId {
@@ -71,9 +70,7 @@ function getHashLocation(): {
       const params = new URLSearchParams(query);
       const listingId = params.get('id');
       const businessSlug = params.get('slug');
-      const brandSlug = params.get('brand');
-      const videoSlug = params.get('video');
-      const articleSlug = params.get('article');
+      const contentSlug = params.get('slug');
       const registrationType = params.get('type');
       const referralCode = params.get('ref');
       return {
@@ -81,13 +78,9 @@ function getHashLocation(): {
         data: listingId
           ? { vehicleId: listingId }
           : businessSlug
-            ? { businessSlug }
-            : pageId === 'brand-detail' && brandSlug
-              ? { brandSlug }
-            : pageId === 'video-detail' && videoSlug
-              ? { videoId: videoSlug }
-            : pageId === 'article-detail' && articleSlug
-              ? { articleId: articleSlug }
+            ? ['video-detail', 'article-detail'].includes(pageId)
+              ? { [pageId === 'video-detail' ? 'videoSlug' : 'articleSlug']: contentSlug }
+              : { businessSlug }
             : pageId === 'register'
               ? {
                   ...(isRegistrationAccountType(registrationType)
@@ -134,21 +127,15 @@ export const useNavigation = create<NavigationState>((set, get) => ({
 
     const listingId = data?.vehicleId;
     const businessSlug = data?.businessSlug;
-    const brandSlug = data?.brandSlug;
-    const videoId = data?.videoId;
-    const articleId = data?.articleId;
+    const contentSlug = page === 'video-detail' ? data?.videoSlug : page === 'article-detail' ? data?.articleSlug : null;
     const registrationType = data?.registrationType;
     const referralCode = data?.referralCode;
     window.location.hash = ['vehicle-details', 'sell'].includes(page) && listingId
       ? `${page}?id=${encodeURIComponent(String(listingId))}`
       : ['gallery-detail', 'dealership-detail'].includes(page) && businessSlug
         ? `${page}?slug=${encodeURIComponent(String(businessSlug))}`
-        : page === 'brand-detail' && brandSlug
-          ? `${page}?brand=${encodeURIComponent(String(brandSlug))}`
-        : page === 'video-detail' && videoId
-          ? `${page}?video=${encodeURIComponent(String(videoId))}`
-        : page === 'article-detail' && articleId
-          ? `${page}?article=${encodeURIComponent(String(articleId))}`
+        : ['video-detail', 'article-detail'].includes(page) && contentSlug
+          ? `${page}?slug=${encodeURIComponent(String(contentSlug))}`
         : page === 'register' && isRegistrationAccountType(registrationType)
           ? `register?type=${encodeURIComponent(registrationType)}${
               referralCode ? `&ref=${encodeURIComponent(String(referralCode))}` : ''

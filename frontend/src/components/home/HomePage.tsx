@@ -61,13 +61,13 @@ import {
 } from '@/lib/utils';
 import {
   heroImages,
-  brands,
-  bodyTypes,
   bodyTypeImages,
   budgetImages,
   cities,
 } from '@/lib/mock-data';
 import { useNavigation } from '@/stores/navigation';
+import { useCatalogOptions } from '@/hooks/use-catalog-options';
+import { brandLabel } from '@/lib/catalog-options';
 import { useAuth } from '@/stores/auth';
 import { useFavorites } from '@/stores/favorites';
 import {
@@ -75,15 +75,13 @@ import {
   type PublicListingSummary,
 } from '@/lib/listing-api';
 import { PublicListingCard } from '@/components/vehicle/PublicListingCard';
+import { useContentPage } from '@/hooks/use-content-page';
+import { contentDate, contentImageUrl, type Article, type EducationalVideo, type FrequentlyAskedQuestion } from '@/lib/content-api';
 import {
   fetchBusinesses,
   type BusinessKind,
   type BusinessProfile,
 } from '@/lib/business-api';
-import { fetchAllCatalogBrands, type CatalogBrand } from '@/lib/catalog-api';
-import { fetchEducationalVideos, type EducationalVideo } from '@/lib/video-api';
-import { fetchFrequentlyAskedQuestions, type FrequentlyAskedQuestion } from '@/lib/faq-api';
-import { fetchArticles, type Article } from '@/lib/article-api';
 
 /* ------------------------------------------------------------------ */
 /*  Horizontal Scroll Hook                                             */
@@ -403,6 +401,7 @@ function FilterTrigger({ label, count, children }: { label: string; count?: numb
 /* ================================================================== */
 function SmartSearch() {
   const { navigateTo } = useNavigation();
+  const { brands, bodyTypes, loading: catalogLoading, error: catalogError, reload: reloadCatalog } = useCatalogOptions();
   const [query, setQuery] = useState('');
 
   /* ---- filter state ---- */
@@ -507,8 +506,10 @@ function SmartSearch() {
 
           <FilterTrigger label="برند" count={selectedBrands.length}>
             <div className="space-y-0.5">
+              {catalogLoading && <p className="p-2 text-xs">در حال دریافت برندها...</p>}
+              {catalogError && <button type="button" onClick={reloadCatalog} className="p-2 text-xs text-destructive">تلاش دوباره</button>}
               {brands.map((b) => (
-                <MultiOptionRow key={b.id} label={b.name} selected={selectedBrands.includes(b.name)} onClick={toggleBrand} />
+                <MultiOptionRow key={b.id} label={brandLabel(b)} selected={selectedBrands.includes(brandLabel(b))} onClick={toggleBrand} />
               ))}
             </div>
           </FilterTrigger>
@@ -539,6 +540,8 @@ function SmartSearch() {
 
           <FilterTrigger label="نوع بدنه" count={selectedBodyTypes.length}>
             <div className="space-y-0.5">
+              {catalogLoading && <p className="p-2 text-xs">در حال دریافت انواع بدنه...</p>}
+              {catalogError && <button type="button" onClick={reloadCatalog} className="p-2 text-xs text-destructive">تلاش دوباره</button>}
               {bodyTypes.slice(0, 7).map((bt) => (
                 <MultiOptionRow key={bt} label={bt} selected={selectedBodyTypes.includes(bt)} onClick={toggleBodyType} />
               ))}
@@ -607,28 +610,8 @@ function FilterTag({ label, onRemove }: { label: string; onRemove: () => void })
 /* ================================================================== */
 function BrandsSection() {
   const { navigateTo } = useNavigation();
+  const { brands, loading, error, reload } = useCatalogOptions();
   const { ref, scroll } = useHorizontalScroll();
-  const [catalogBrands, setCatalogBrands] = useState<CatalogBrand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetchAllCatalogBrands('', controller.signal)
-      .then((results) => {
-        setCatalogBrands(results);
-        setError('');
-      })
-      .catch((requestError) => {
-        if (!controller.signal.aborted) {
-          setError(requestError instanceof Error ? requestError.message : 'دریافت برندها انجام نشد.');
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
 
   return (
     <Section>
@@ -642,36 +625,32 @@ function BrandsSection() {
           <ArrowLeft className="size-4" />
         </button>
       </div>
-      {error ? (
-        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
-      ) : loading ? (
-        <div className="flex h-28 items-center justify-center gap-2 text-sm text-text-muted"><Loader2 className="size-5 animate-spin" /> در حال دریافت برندها...</div>
-      ) : catalogBrands.length === 0 ? (
-        <div className="rounded-xl border border-border-light bg-muted/20 p-6 text-center text-sm text-text-muted">هنوز برندی در کاتالوگ ثبت نشده است.</div>
-      ) : <div className="relative">
+      <div className="relative">
         <div
           ref={ref}
           className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-hide pb-2"
         >
-          {catalogBrands.map((brand) => {
-            const title = brand.name_fa.trim() || brand.name;
-            return (
+          {loading && <p className="text-sm">در حال دریافت برندها...</p>}
+          {error && <button type="button" onClick={reload} className="text-sm text-destructive">دریافت برندها ناموفق بود؛ تلاش دوباره</button>}
+          {brands.map((brand) => (
             <button
               key={brand.id}
-              onClick={() => navigateTo('brand-detail', { brandSlug: brand.slug })}
+              onClick={() => navigateTo('buy', { brands: [brandLabel(brand)] })}
               className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-white rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-muted/40 transition-colors"
             >
-              {brand.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={brand.logo_url} alt={title} className="h-9 w-9 object-contain opacity-80 sm:h-11 sm:w-11 md:h-12 md:w-12" />
-              ) : (
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-xs font-bold text-white">{brand.name.slice(0, 3).toUpperCase()}</span>
-              )}
+              {brand.logo_url ? <OptimizedImage
+                src={brand.logo_url}
+                alt={brandLabel(brand)}
+                width={96}
+                height={96}
+                sizes="48px"
+                className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 object-contain opacity-80"
+              /> : <span className="text-xl font-bold text-brand">{brandLabel(brand).slice(0, 1)}</span>}
               <span className="text-[10px] sm:text-[11px] text-text-muted font-medium">
-                {title}
+                {brandLabel(brand)}
               </span>
             </button>
-          );})}
+          ))}
         </div>
         {/* Scroll buttons */}
         <button
@@ -686,7 +665,7 @@ function BrandsSection() {
         >
           <ChevronRight className="size-4 text-text-secondary" />
         </button>
-      </div>}
+      </div>
     </Section>
   );
 }
@@ -948,6 +927,7 @@ function SpecialOffersSection() {
 /* ================================================================== */
 function BodyStylesSection() {
   const { navigateTo } = useNavigation();
+  const { bodyTypes, loading, error, reload } = useCatalogOptions();
   const { ref, scroll } = useHorizontalScroll();
   const mainBodyTypes = bodyTypes.slice(0, 6);
 
@@ -962,6 +942,8 @@ function BodyStylesSection() {
       </div>
       <div className="relative">
         <div ref={ref} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+          {loading && <p className="text-sm">در حال دریافت انواع بدنه...</p>}
+          {error && <button type="button" onClick={reload} className="text-sm text-destructive">دریافت انواع بدنه ناموفق بود؛ تلاش دوباره</button>}
           {mainBodyTypes.map((type) => (
             <button
               key={type}
@@ -1024,26 +1006,8 @@ function LatestListingsSection() {
 /* ================================================================== */
 function EducationalVideos() {
   const { navigateTo } = useNavigation();
-  const { ref } = useHorizontalScroll();
-  const [videos, setVideos] = useState<EducationalVideo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetchEducationalVideos({ page: 1, pageSize: 6, signal: controller.signal })
-      .then((page) => {
-        setVideos(page.results);
-        setError('');
-      })
-      .catch((requestError) => {
-        if (!controller.signal.aborted) setError(requestError instanceof Error ? requestError.message : 'دریافت ویدیوها انجام نشد.');
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
+  const { ref, scroll } = useHorizontalScroll();
+  const { data, loading, error, reload } = useContentPage<EducationalVideo>('videos', { pageSize: 6 });
 
   return (
     <Section>
@@ -1057,26 +1021,25 @@ function EducationalVideos() {
           <ArrowLeft className="size-4" />
         </button>
       </div>
-      {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-      {loading && <div className="flex h-40 items-center justify-center gap-2 text-sm text-text-muted"><Loader2 className="size-5 animate-spin" /> در حال دریافت ویدیوها...</div>}
-      {!loading && !error && videos.length === 0 && <div className="rounded-xl border border-border-light bg-muted/20 p-6 text-center text-sm text-text-muted">هنوز ویدیوی آموزشی منتشر نشده است.</div>}
-      {!loading && !error && videos.length > 0 && (
       <div className="relative">
         <div ref={ref} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-          {videos.map((video) => (
+          {loading && <p role="status" className="py-6 text-sm">در حال دریافت ویدیوها...</p>}
+          {error && <button type="button" onClick={reload} className="py-6 text-sm text-destructive">دریافت ویدیوها ناموفق بود؛ تلاش دوباره</button>}
+          {!loading && !error && !data?.results.length && <p className="py-6 text-sm text-text-muted">ویدیوی منتشرشده‌ای وجود ندارد.</p>}
+          {data?.results.map((video) => (
             <button
               key={video.id}
-              onClick={() => navigateTo('video-detail', { videoId: video.slug })}
+              onClick={() => navigateTo('video-detail', { videoSlug: video.slug })}
               className="flex-shrink-0 w-64 md:w-72 rounded-xl overflow-hidden bg-white border border-border-light hover-lift group"
             >
               <div className="relative h-40 overflow-hidden">
-                <OptimizedImage
-                  src={video.thumbnail_url}
+                {video.thumbnail_url && <OptimizedImage
+                  src={contentImageUrl(video.thumbnail_url)}
                   alt={video.title}
                   width={576}
                   height={320}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                />}
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
                     <Play className="size-5 text-brand mr-[-2px]" />
@@ -1098,7 +1061,6 @@ function EducationalVideos() {
           ))}
         </div>
       </div>
-      )}
     </Section>
   );
 }
@@ -1108,39 +1070,20 @@ function EducationalVideos() {
 /* ================================================================== */
 function FAQSection() {
   const { navigateTo } = useNavigation();
-  const [faqs, setFaqs] = useState<FrequentlyAskedQuestion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetchFrequentlyAskedQuestions({ page: 1, pageSize: 6, signal: controller.signal })
-      .then((page) => {
-        setFaqs(page.results);
-        setError('');
-      })
-      .catch((requestError) => {
-        if (!controller.signal.aborted) setError(requestError instanceof Error ? requestError.message : 'دریافت سؤالات متداول انجام نشد.');
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
+  const { data, loading, error, reload } = useContentPage<FrequentlyAskedQuestion>('faqs', { pageSize: 6 });
 
   return (
     <Section className="bg-warm-gray">
       <div className="max-w-3xl mx-auto">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <SectionTitle subtitle="پاسخ سؤال‌های رایج درباره خدمات آزادگذر">سؤالات متداول</SectionTitle>
-          <button onClick={() => navigateTo('faq')} className="shrink-0 text-sm font-medium text-gold-dark hover:text-gold">مشاهده همه</button>
+        <div className="flex items-start justify-between gap-3">
+          <SectionTitle subtitle="پاسخ سوالات رایج درباره خدمات آزاد گذر">سوالات متداول</SectionTitle>
+          <button type="button" onClick={() => navigateTo('faq')} className="text-sm text-gold-dark">مشاهده همه</button>
         </div>
-        {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-        {loading && <div className="flex h-32 items-center justify-center gap-2 text-sm text-text-muted"><Loader2 className="size-5 animate-spin" /> در حال دریافت سؤالات...</div>}
-        {!loading && !error && faqs.length === 0 && <div className="rounded-xl border border-border-light bg-white p-6 text-center text-sm text-text-muted">هنوز سؤال متداولی منتشر نشده است.</div>}
-        {!loading && !error && faqs.length > 0 && (
+        {loading && <p role="status" className="py-4 text-sm">در حال دریافت سؤال‌ها...</p>}
+        {error && <button type="button" onClick={reload} className="py-4 text-sm text-destructive">دریافت سؤال‌ها ناموفق بود؛ تلاش دوباره</button>}
+        {!loading && !error && !data?.results.length && <p className="py-4 text-sm text-text-muted">سؤالی منتشر نشده است.</p>}
         <Accordion type="single" collapsible className="space-y-2">
-          {faqs.map((faq) => (
+          {data?.results.map((faq) => (
             <AccordionItem
               key={faq.id}
               value={String(faq.id)}
@@ -1155,7 +1098,6 @@ function FAQSection() {
             </AccordionItem>
           ))}
         </Accordion>
-        )}
       </div>
     </Section>
   );
@@ -1166,25 +1108,7 @@ function FAQSection() {
 /* ================================================================== */
 function BlogSection() {
   const { navigateTo } = useNavigation();
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetchArticles({ page: 1, pageSize: 3, signal: controller.signal })
-      .then((page) => {
-        setArticles(page.results);
-        setError('');
-      })
-      .catch((requestError) => {
-        if (!controller.signal.aborted) setError(requestError instanceof Error ? requestError.message : 'دریافت مقاله‌ها انجام نشد.');
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
+  const { data, loading, error, reload } = useContentPage<Article>('articles', { pageSize: 3 });
 
   return (
     <Section>
@@ -1198,25 +1122,24 @@ function BlogSection() {
           <ArrowLeft className="size-4" />
         </button>
       </div>
-      {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-      {loading && <div className="flex h-40 items-center justify-center gap-2 text-sm text-text-muted"><Loader2 className="size-5 animate-spin" /> در حال دریافت مقاله‌ها...</div>}
-      {!loading && !error && articles.length === 0 && <div className="rounded-xl border border-border-light bg-muted/20 p-6 text-center text-sm text-text-muted">هنوز مقاله‌ای منتشر نشده است.</div>}
-      {!loading && !error && articles.length > 0 && (
+      {loading && <p role="status" className="py-4 text-sm">در حال دریافت مقاله‌ها...</p>}
+      {error && <button type="button" onClick={reload} className="py-4 text-sm text-destructive">دریافت مقاله‌ها ناموفق بود؛ تلاش دوباره</button>}
+      {!loading && !error && !data?.results.length && <p className="py-4 text-sm text-text-muted">مقاله‌ای منتشر نشده است.</p>}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {articles.map((article) => (
+        {data?.results.map((article) => (
           <button
             key={article.id}
-            onClick={() => navigateTo('article-detail', { articleId: article.slug })}
+            onClick={() => navigateTo('article-detail', { articleSlug: article.slug })}
             className="text-right bg-white rounded-xl border border-border-light overflow-hidden hover-lift group"
           >
             <div className="relative h-48 overflow-hidden">
-              <OptimizedImage
-                src={article.cover_image_url}
+              {article.cover_image_url && <OptimizedImage
+                src={contentImageUrl(article.cover_image_url)}
                 alt={article.title}
                 width={800}
                 height={480}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
+              />}
               <div className="absolute top-2.5 right-2.5">
                 <Badge className="bg-white/90 text-text-primary text-[10px] px-2.5 py-0.5 rounded-md font-medium border-0">
                   {article.category_label}
@@ -1231,14 +1154,13 @@ function BlogSection() {
                 {article.summary}
               </p>
               <div className="flex items-center justify-between text-[11px] text-text-muted">
-                <span>{article.author}</span>
-                <span>{article.read_time || 'مطالعه مقاله'}</span>
+                <span>{contentDate(article.published_at)}</span>
+                <span>{article.read_time} مطالعه</span>
               </div>
             </div>
           </button>
         ))}
       </div>
-      )}
     </Section>
   );
 }

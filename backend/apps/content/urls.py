@@ -8,6 +8,7 @@ from apps.content.views import (
     ContactPageAPIView,
     EducationalVideoViewSet,
     FrequentlyAskedQuestionViewSet,
+    SupportChatAPIView,
 )
 
 
@@ -22,5 +23,6 @@ urlpatterns = [
     path("about/", AboutPageAPIView.as_view(), name="about"),
     path("contact/", ContactPageAPIView.as_view(), name="contact"),
     path("contact/messages/", ContactMessageCreateAPIView.as_view(), name="contact-message-create"),
+    path("chat/", SupportChatAPIView.as_view(), name="support-chat"),
     *router.urls,
 ]

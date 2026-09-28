@@ -24,6 +24,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ListingConversationsPanel } from '@/components/dashboard/ListingConversationsPanel';
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -41,6 +43,7 @@ function listingPrice(listing: { price: number | null }): string {
 export function VehicleDetailsPage() {
   const { navigateTo, pageData } = useNavigation();
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
+  const currentUser = useAuth((state) => state.currentUser);
   const hasHydrated = useAuth((state) => state._hasHydrated);
   const favoriteIds = useFavorites((state) => state.favoriteIds);
   const mutatingFavoriteIds = useFavorites((state) => state.mutatingIds);
@@ -55,6 +58,16 @@ export function VehicleDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [reloadVersion, setReloadVersion] = useState(0);
+  const [messagesOpen, setMessagesOpen] = useState(false);
+
+  const openMessages = () => {
+    if (!isAuthenticated) {
+      toast({ title: 'ابتدا وارد حساب شوید', description: 'برای پیام دادن به صاحب آگهی وارد شوید.' });
+      navigateTo('login');
+      return;
+    }
+    setMessagesOpen(true);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -297,7 +310,7 @@ export function VehicleDetailsPage() {
                 <Separator />
                 <div className="space-y-2">
                   {vehicle.contact_preference !== 'chat' && <Button asChild className="w-full gap-2" size="lg"><a href={`tel:${vehicle.contact_number}`} dir="ltr"><Phone className="size-4" />{vehicle.contact_number}</a></Button>}
-                  {vehicle.contact_preference !== 'phone' && <Button variant="outline" className="w-full gap-2" size="lg" disabled title="سامانه پیام‌رسانی هنوز راه‌اندازی نشده است"><MessageSquare className="size-4" />پیام (به‌زودی)</Button>}
+                  {vehicle.contact_preference !== 'phone' && vehicle.owner !== currentUser?.id && <Button variant="outline" className="w-full gap-2" size="lg" onClick={openMessages}><MessageSquare className="size-4" />پیام به صاحب آگهی</Button>}
                 </div>
               </CardContent>
             </Card>
@@ -333,6 +346,12 @@ export function VehicleDetailsPage() {
           </section>
         )}
       </div>
+      <Dialog open={messagesOpen} onOpenChange={setMessagesOpen}>
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto" dir="rtl">
+          <DialogHeader><DialogTitle>پیام درباره {vehicle?.brand_name} {vehicle?.model_name}</DialogTitle></DialogHeader>
+          {messagesOpen && vehicle && <ListingConversationsPanel listingId={vehicle.id} />}
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

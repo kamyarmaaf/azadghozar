@@ -16,6 +16,8 @@
 
 بک‌اند Django/DRF پروژه آزادگذر با PostgreSQL، Redis، Celery، JWT و ورود/ثبت‌نام OTP.
 
+در `GET /api/v1/auth/me/` نشانی `profile_photo` به حساب بازگردانده می‌شود. کاربر واردشده می‌تواند با `PATCH` چندبخشی همان مسیر، فایل `profile_photo` را جایگزین کند. سرور تصویر JPEG/PNG/WebP تا ۵ مگابایت را به WebP بدون فراداده، با ضلع حداکثر ۵۱۲ پیکسل و حجم حداکثر ۲۵۰ کیلوبایت تبدیل می‌کند. فایل در `MEDIA_ROOT/users/<id>/profile/` ذخیره می‌شود. برای استفاده از این قابلیت مایگریشن `accounts.0011_user_profile_photo` را اجرا کنید.
+
 ## اجرای محیط توسعه با Docker
 
 در PowerShell و از ریشه پروژه:

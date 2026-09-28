@@ -1,5 +1,6 @@
 from django.urls import path
 from apps.accounts.admin_users import AdminUserDetailView, AdminUserListView
+from apps.accounts.dashboard import DashboardSummaryView
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
@@ -29,6 +30,7 @@ app_name = "accounts"
 
 
 urlpatterns = [
+    path("dashboard/summary/", DashboardSummaryView.as_view(), name="dashboard-summary"),
     path("admin/users/", AdminUserListView.as_view(), name="admin-users"),
     path("admin/users/<int:pk>/", AdminUserDetailView.as_view(), name="admin-user-detail"),
     path(

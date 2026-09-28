@@ -38,10 +38,10 @@ test('role queue requests the next page through a validated URL', () => {
   assert.match(api, /next: response\.next/);
 });
 
-test('business and subscription queues can load beyond their first cursor page', () => {
+test('business and upgrade queues can load beyond their first cursor page', () => {
   const page = readFileSync(join(root, 'src/components/business/AdminBusinessPanel.tsx'), 'utf8');
   const api = readFileSync(join(root, 'src/lib/business-api.ts'), 'utf8');
   assert.match(page, /fetchAdminBusinesses\(\{ kind, nextUrl: businessNext \}\)/);
-  assert.match(page, /fetchAdminSubscriptions\('pending', kind, subscriptionNext\)/);
+  assert.match(page, /fetchAdminSubscriptions\('pending', subscriptionNext\)/);
   assert.match(api, /cursor\.origin !== base\.origin/);
 });

@@ -29,6 +29,7 @@ from apps.businesses.models import BusinessMembership, BusinessProfile
 from apps.businesses.services import ensure_business_profile
 from apps.catalog.models import (
     Brand,
+    BodyType,
     ListingFavorite,
     VehicleListing,
     VehicleListingImage,
@@ -49,6 +50,7 @@ from apps.catalog.selectors import (
 from apps.catalog.serializers import (
     AdminPendingListingSerializer,
     BrandSerializer,
+    BodyTypeSerializer,
     ListingFavoriteSerializer,
     VehicleModelSerializer,
     VehicleListingCandidateSerializer,
@@ -57,6 +59,23 @@ from apps.catalog.serializers import (
     VehicleListingSummarySerializer,
     VehicleTrimSerializer,
 )
+
+
+def listing_brand_filter(values):
+    """Match both names of a catalog brand in old and new listings."""
+    result = Q()
+    for value in values:
+        value = value.strip()
+        result |= Q(brand_name__iexact=value)
+        aliases = Brand.objects.filter(
+            Q(name__iexact=value) | Q(name_fa__iexact=value),
+            is_active=True,
+        ).values_list("name", "name_fa")
+        for name, name_fa in aliases:
+            result |= Q(brand_name__iexact=name)
+            if name_fa:
+                result |= Q(brand_name__iexact=name_fa)
+    return result
 
 
 class CatalogModelViewSet(ModelViewSet):
@@ -153,6 +172,18 @@ class BrandViewSet(CatalogModelViewSet):
                 Q(name__icontains=query)
                 | Q(name_fa__icontains=query)
             )
+        return queryset
+
+
+class BodyTypeViewSet(CatalogModelViewSet):
+    serializer_class = BodyTypeSerializer
+    queryset = BodyType.objects.all()
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        queryset = self.queryset
+        if not self._include_inactive():
+            queryset = queryset.filter(is_active=True)
         return queryset
 
 
@@ -298,7 +329,6 @@ class VehicleListingViewSet(ModelViewSet):
         exact_filters = {
             "status": "status",
             "plate_type": "plate_type",
-            "brand": "brand_name__iexact",
             "model": "model_name__icontains",
             "body_type": "body_type__iexact",
             "color": "color__iexact",
@@ -314,6 +344,12 @@ class VehicleListingViewSet(ModelViewSet):
             if value not in (None, ""):
                 queryset = queryset.filter(**{lookup: value})
 
+        brand = self.request.query_params.get("brand", "").strip()
+        if brand:
+            if len(brand) > 80:
+                raise ValidationError({"brand": "Brand must be at most 80 characters."})
+            queryset = queryset.filter(listing_brand_filter([brand]))
+
         for parameter, lookup in (
             ("brands", "brand_name__iexact"),
             ("body_types", "body_type__iexact"),
@@ -324,9 +360,10 @@ class VehicleListingViewSet(ModelViewSet):
                     not value.strip() or len(value) > 80 for value in values
                 ):
                     raise ValidationError({parameter: "Provide 1 to 20 short values."})
-                choices = Q()
-                for value in values:
-                    choices |= Q(**{lookup: value.strip()})
+                choices = listing_brand_filter(values) if parameter == "brands" else Q()
+                if parameter != "brands":
+                    for value in values:
+                        choices |= Q(**{lookup: value.strip()})
                 queryset = queryset.filter(choices)
 
         city = self.request.query_params.get("city", "").strip()

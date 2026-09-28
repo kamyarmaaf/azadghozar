@@ -8,10 +8,26 @@ from apps.content.models import (
     Article,
     ContactMessage,
     ContactPage,
+    SupportMessage,
     EducationalVideo,
     FrequentlyAskedQuestion,
     TeamMember,
 )
+
+
+class SupportMessageSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = SupportMessage
+        fields = ("id", "sender", "text", "created_at")
+        read_only_fields = ("id", "sender", "created_at")
+
+    def validate_text(self, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("متن پیام نمی‌تواند خالی باشد.")
+        return value
 
 
 class EducationalVideoSerializer(serializers.ModelSerializer):

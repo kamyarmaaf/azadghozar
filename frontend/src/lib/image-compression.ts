@@ -106,7 +106,7 @@ export async function compressListingImage(
   let blob: Blob | null = null;
   let quality = 0.84;
 
-  for (let resizeAttempt = 0; resizeAttempt < 4; resizeAttempt += 1) {
+  for (let resizeAttempt = 0; resizeAttempt < 9; resizeAttempt += 1) {
     canvas.width = dimensions.width;
     canvas.height = dimensions.height;
     if (!preserveTransparency) {
@@ -123,7 +123,7 @@ export async function compressListingImage(
       quality -= 0.07;
     } while (blob.size > targetBytes && quality >= 0.49);
 
-    if (blob.size <= targetBytes || Math.max(canvas.width, canvas.height) <= 960) {
+    if (blob.size <= targetBytes || Math.max(canvas.width, canvas.height) <= 320) {
       break;
     }
 
@@ -134,6 +134,9 @@ export async function compressListingImage(
   }
 
   if (!blob) throw new Error('فشرده‌سازی تصویر انجام نشد.');
+  if (blob.type !== 'image/webp' || blob.size > targetBytes) {
+    throw new Error('این تصویر به اندازهٔ موردنیاز فشرده نشد. تصویر دیگری انتخاب کنید.');
+  }
 
   const file = new File(
     [blob],

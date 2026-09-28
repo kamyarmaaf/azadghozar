@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Upload, Plus, X, Check, ChevronRight, ChevronLeft, Car, Settings, Shield, DollarSign, ImagePlus, Video, Play, Pause, Trash2, Film, Loader2 } from 'lucide-react';
-import { brands, bodyTypes } from '@/lib/mock-data';
+import { useCatalogOptions } from '@/hooks/use-catalog-options';
+import { brandLabel } from '@/lib/catalog-options';
 import { toPersianNumber } from '@/lib/utils';
 import {
   compressListingImages,
@@ -206,6 +207,7 @@ export function SellPage() {
     ? requestedListingId
     : null;
   const [currentStep, setCurrentStep] = useState(1);
+  const { brands, bodyTypes, loading: catalogLoading, error: catalogError, reload: reloadCatalog } = useCatalogOptions();
   const [form, setForm] = useState<FormData>(initialForm);
   const effectiveContactNumber = form.contactNumber || currentUser?.phoneNumber || '';
   const [uploadedImages, setUploadedImages] = useState<CompressedListingImage[]>([]);
@@ -574,13 +576,16 @@ export function SellPage() {
                   <p className="text-sm text-muted-foreground">مشخصات اصلی خودروی خود را وارد کنید</p>
                 </div>
                 <Separator />
+                {catalogLoading && <p role="status" className="text-sm">در حال دریافت برندها و انواع بدنه...</p>}
+                {catalogError && <button type="button" className="text-sm text-destructive underline" onClick={reloadCatalog}>دریافت گزینه‌ها ناموفق بود؛ تلاش دوباره</button>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>برند خودرو <span className="text-destructive">*</span></Label>
                     <Select value={form.brand} onValueChange={(v) => updateForm('brand', v)}>
                       <SelectTrigger className="w-full"><SelectValue placeholder="انتخاب برند" /></SelectTrigger>
                       <SelectContent>
-                        {brands.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
+                        {form.brand && !brands.some((b) => brandLabel(b) === form.brand) && <SelectItem value={form.brand}>{form.brand}</SelectItem>}
+                        {brands.map((b) => <SelectItem key={b.id} value={brandLabel(b)}>{brandLabel(b)}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -638,6 +643,7 @@ export function SellPage() {
                     <Select value={form.bodyType} onValueChange={(v) => updateForm('bodyType', v)}>
                       <SelectTrigger className="w-full"><SelectValue placeholder="انتخاب نوع بدنه" /></SelectTrigger>
                       <SelectContent>
+                        {form.bodyType && !bodyTypes.includes(form.bodyType) && <SelectItem value={form.bodyType}>{form.bodyType}</SelectItem>}
                         {bodyTypes.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
                       </SelectContent>
                     </Select>

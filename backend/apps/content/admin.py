@@ -12,12 +12,30 @@ from apps.content.models import (
     EducationalVideo,
     FrequentlyAskedQuestion,
     TeamMember,
+    SupportConversation,
+    SupportMessage,
 )
 from apps.image_processing import InvalidImageUpload, compress_uploaded_image
 
 
 ALLOWED_VIDEO_TYPES = {"video/mp4", "video/webm", "video/quicktime"}
 MAX_EDUCATIONAL_VIDEO_BYTES = 500 * 1024 * 1024
+
+
+class SupportMessageInline(admin.TabularInline):
+    model = SupportMessage
+    extra = 1
+    fields = ("sender", "text", "created_at")
+    readonly_fields = ("created_at",)
+
+
+@admin.register(SupportConversation)
+class SupportConversationAdmin(admin.ModelAdmin):
+    list_display = ("public_id", "user", "status", "updated_at")
+    list_filter = ("status", "updated_at")
+    search_fields = ("user__phone_number", "user__first_name", "user__last_name", "messages__text")
+    readonly_fields = ("public_id", "user", "created_at", "updated_at")
+    inlines = (SupportMessageInline,)
 
 
 class EducationalVideoAdminForm(forms.ModelForm):

@@ -16,6 +16,7 @@ import {
   isBusinessRegistration,
   isRegistrationAccountType,
   signupRoleFor,
+  type AgencyPlan,
   type RegistrationAccountType,
 } from '@/lib/business-registration';
 import {
@@ -38,6 +39,7 @@ import {
   Crown,
   MapPin,
   FileText,
+  BadgeCheck,
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
@@ -83,7 +85,7 @@ const roles: {
     id: 'agency',
     icon: Crown,
     title: 'نمایندگی',
-    subtitle: 'ویژه شرکت واردکننده خودرو',
+    subtitle: 'ثبت درخواست نمایندگی رسمی',
     color: 'text-indigo-600',
     activeBorder: 'border-indigo-500',
     activeBg: 'bg-indigo-500/10',
@@ -207,20 +209,10 @@ export function RegisterPage() {
   const [province, setProvince] = useState('');
   const [city, setCity] = useState('');
   const [address, setAddress] = useState('');
-  const [postalCode, setPostalCode] = useState('');
   const [licenseNumber, setLicenseNumber] = useState('');
-  const [licenseIssuer, setLicenseIssuer] = useState('');
-  const [licenseExpiresAt, setLicenseExpiresAt] = useState('');
   const [nationalId, setNationalId] = useState('');
-  const [companyRegistrationNumber, setCompanyRegistrationNumber] = useState('');
-  const [economicCode, setEconomicCode] = useState('');
-  const [authorizedRepresentativeName, setAuthorizedRepresentativeName] = useState('');
-  const [importLicenseNumber, setImportLicenseNumber] = useState('');
-  const [importLicenseIssuer, setImportLicenseIssuer] = useState('');
-  const [importLicenseExpiresAt, setImportLicenseExpiresAt] = useState('');
-  const [businessCardNumber, setBusinessCardNumber] = useState('');
-  const [representedBrands, setRepresentedBrands] = useState('');
   const [businessDescription, setBusinessDescription] = useState('');
+  const [agencyPlan, setAgencyPlan] = useState<AgencyPlan>('agency_monthly');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -363,11 +355,7 @@ export function RegisterPage() {
     }
     if (businessRegistration) {
       if (businessName.trim().length < 2) {
-        setRegistrationError(
-          agencyRegistration
-            ? 'نام حقوقی شرکت واردکننده را وارد کنید'
-            : 'نام نمایشگاه را وارد کنید',
-        );
+        setRegistrationError('نام نمایشگاه را وارد کنید');
         return;
       }
       if (businessPhone.replace(/\D/g, '').length < 7) {
@@ -382,31 +370,9 @@ export function RegisterPage() {
         setRegistrationError('آدرس کامل کسب‌وکار را وارد کنید');
         return;
       }
-      if (postalCode.replace(/\D/g, '').length !== 10) {
-        setRegistrationError('کد پستی ۱۰ رقمی کسب‌وکار را وارد کنید');
+      if (!licenseNumber.trim() && !nationalId.trim()) {
+        setRegistrationError('حداقل شماره مجوز یا شناسه ملی را وارد کنید');
         return;
-      }
-      if (!agencyRegistration && (!licenseNumber.trim() || !licenseIssuer.trim())) {
-        setRegistrationError('شماره و مرجع صادرکننده پروانه کسب نمایشگاه را وارد کنید');
-        return;
-      }
-      if (agencyRegistration) {
-        if (!nationalId.trim() || !companyRegistrationNumber.trim()) {
-          setRegistrationError('شناسه ملی و شماره ثبت شرکت را وارد کنید');
-          return;
-        }
-        if (!authorizedRepresentativeName.trim()) {
-          setRegistrationError('نام نماینده قانونی شرکت را وارد کنید');
-          return;
-        }
-        if (!importLicenseNumber.trim() || !importLicenseIssuer.trim()) {
-          setRegistrationError('اطلاعات مجوز واردات شرکت را کامل کنید');
-          return;
-        }
-        if (!representedBrands.split(/[,،\n]/).some((brand) => brand.trim())) {
-          setRegistrationError('حداقل یک برند وارداتی را وارد کنید');
-          return;
-        }
       }
     }
     try {
@@ -416,36 +382,16 @@ export function RegisterPage() {
         passwordConfirmation: confirmPassword,
         acceptTerms,
         ...(businessRegistration && {
-          businessKind: agencyRegistration ? 'agency' : 'gallery',
           businessName: businessName.trim(),
           businessPhone: businessPhone.trim(),
           province: province.trim(),
           city: city.trim(),
           address: address.trim(),
-          postalCode: postalCode.trim(),
           businessDescription: businessDescription.trim(),
-          ...(agencyRegistration
-            ? {
-                nationalId: nationalId.trim(),
-                companyRegistrationNumber: companyRegistrationNumber.trim(),
-                economicCode: economicCode.trim(),
-                authorizedRepresentativeName: authorizedRepresentativeName.trim(),
-                importLicenseNumber: importLicenseNumber.trim(),
-                importLicenseIssuer: importLicenseIssuer.trim(),
-                importLicenseExpiresAt: importLicenseExpiresAt || null,
-                businessCardNumber: businessCardNumber.trim(),
-                representedBrands: representedBrands
-                  .split(/[,،\n]/)
-                  .map((brand) => brand.trim())
-                  .filter(Boolean),
-              }
-            : {
-                licenseNumber: licenseNumber.trim(),
-                licenseIssuer: licenseIssuer.trim(),
-                licenseExpiresAt: licenseExpiresAt || null,
-                nationalId: nationalId.trim(),
-              }),
+          licenseNumber: licenseNumber.trim(),
+          nationalId: nationalId.trim(),
         }),
+        ...(agencyRegistration && { agencyPlan }),
       });
       if (businessRegistration && typeof window !== 'undefined') {
         window.sessionStorage.setItem(
@@ -582,8 +528,8 @@ export function RegisterPage() {
               })}
               {agencyRegistration && (
                 <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-xs leading-6 text-indigo-800">
-                  این حساب مخصوص شرکت‌های حقوقی واردکننده خودرو است و از ابتدا به‌عنوان نمایندگی ثبت می‌شود.
-                  فعال‌سازی پس از بررسی اطلاعات ثبتی و مجوز واردات توسط مدیریت انجام خواهد شد.
+                  ابتدا پروفایل نمایشگاه و درخواست اشتراک نمایندگی ثبت می‌شود. فعال‌سازی نمایندگی پس از
+                  بررسی مدارک کسب‌وکار و تأیید مدیریت انجام خواهد شد؛ پرداخت آنلاین در این مرحله لازم نیست.
                 </div>
               )}
               <Button onClick={goToStep2} disabled={!selectedRole} className="w-full h-11 text-base mt-3">
@@ -808,7 +754,7 @@ export function RegisterPage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground">
-                        {agencyRegistration ? 'اطلاعات شرکت واردکننده خودرو' : 'اطلاعات نمایشگاه خودرو'}
+                        {agencyRegistration ? 'اطلاعات نمایشگاه و درخواست نمایندگی' : 'اطلاعات نمایشگاه'}
                       </p>
                       <p className="mt-1 text-xs leading-5 text-muted-foreground">
                         این اطلاعات برای احراز کسب‌وکار بررسی می‌شود و تا زمان تأیید عمومی نخواهد شد.
@@ -818,16 +764,14 @@ export function RegisterPage() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="flex flex-col gap-2 sm:col-span-2">
-                      <Label htmlFor="business-name">
-                        {agencyRegistration ? 'نام حقوقی شرکت' : 'نام نمایشگاه'}
-                      </Label>
+                      <Label htmlFor="business-name">نام نمایشگاه</Label>
                       <div className="relative">
                         <Building2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           id="business-name"
                           value={businessName}
                           onChange={(e) => setBusinessName(e.target.value)}
-                          placeholder={agencyRegistration ? 'شرکت واردکننده خودروی پارس' : 'نمایشگاه خودروی پارس'}
+                          placeholder="نمایشگاه خودروی پارس"
                           className="pr-10"
                           required
                         />
@@ -890,159 +834,37 @@ export function RegisterPage() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <Label htmlFor="postal-code">کد پستی *</Label>
-                      <Input
-                        id="postal-code"
-                        value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                        placeholder="کد پستی ۱۰ رقمی"
-                        className="text-left"
-                        dir="ltr"
-                        inputMode="numeric"
-                        required
-                      />
+                      <Label htmlFor="license-number">شماره مجوز</Label>
+                      <div className="relative">
+                        <FileText className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="license-number"
+                          value={licenseNumber}
+                          onChange={(e) => setLicenseNumber(e.target.value)}
+                          placeholder="شماره پروانه کسب"
+                          className="pr-10"
+                        />
+                      </div>
                     </div>
 
-                    {!agencyRegistration ? (
-                      <>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="license-number">شماره پروانه کسب نمایشگاه *</Label>
-                          <div className="relative">
-                            <FileText className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                              id="license-number"
-                              value={licenseNumber}
-                              onChange={(e) => setLicenseNumber(e.target.value)}
-                              placeholder="شماره پروانه کسب"
-                              className="pr-10"
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="license-issuer">مرجع صادرکننده پروانه *</Label>
-                          <Input
-                            id="license-issuer"
-                            value={licenseIssuer}
-                            onChange={(e) => setLicenseIssuer(e.target.value)}
-                            placeholder="اتحادیه نمایشگاه‌داران خودرو"
-                            required
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="license-expires-at">تاریخ اعتبار پروانه</Label>
-                          <Input
-                            id="license-expires-at"
-                            type="date"
-                            value={licenseExpiresAt}
-                            onChange={(e) => setLicenseExpiresAt(e.target.value)}
-                            dir="ltr"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="national-id">شناسه ملی (در صورت حقوقی بودن)</Label>
-                          <Input
-                            id="national-id"
-                            value={nationalId}
-                            onChange={(e) => setNationalId(e.target.value.replace(/\D/g, ''))}
-                            className="text-left"
-                            dir="ltr"
-                            inputMode="numeric"
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="national-id">شناسه ملی شرکت *</Label>
-                          <Input
-                            id="national-id"
-                            value={nationalId}
-                            onChange={(e) => setNationalId(e.target.value.replace(/\D/g, ''))}
-                            className="text-left"
-                            dir="ltr"
-                            inputMode="numeric"
-                            required
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="company-registration-number">شماره ثبت شرکت *</Label>
-                          <Input
-                            id="company-registration-number"
-                            value={companyRegistrationNumber}
-                            onChange={(e) => setCompanyRegistrationNumber(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="economic-code">کد اقتصادی</Label>
-                          <Input
-                            id="economic-code"
-                            value={economicCode}
-                            onChange={(e) => setEconomicCode(e.target.value.replace(/\D/g, ''))}
-                            className="text-left"
-                            dir="ltr"
-                            inputMode="numeric"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="authorized-representative">نام نماینده قانونی شرکت *</Label>
-                          <Input
-                            id="authorized-representative"
-                            value={authorizedRepresentativeName}
-                            onChange={(e) => setAuthorizedRepresentativeName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="import-license-number">شماره مجوز واردات *</Label>
-                          <Input
-                            id="import-license-number"
-                            value={importLicenseNumber}
-                            onChange={(e) => setImportLicenseNumber(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="import-license-issuer">مرجع صادرکننده مجوز واردات *</Label>
-                          <Input
-                            id="import-license-issuer"
-                            value={importLicenseIssuer}
-                            onChange={(e) => setImportLicenseIssuer(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="import-license-expires-at">تاریخ اعتبار مجوز واردات</Label>
-                          <Input
-                            id="import-license-expires-at"
-                            type="date"
-                            value={importLicenseExpiresAt}
-                            onChange={(e) => setImportLicenseExpiresAt(e.target.value)}
-                            dir="ltr"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="business-card-number">شماره کارت بازرگانی</Label>
-                          <Input
-                            id="business-card-number"
-                            value={businessCardNumber}
-                            onChange={(e) => setBusinessCardNumber(e.target.value)}
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2 sm:col-span-2">
-                          <Label htmlFor="represented-brands">برندهای وارداتی *</Label>
-                          <Input
-                            id="represented-brands"
-                            value={representedBrands}
-                            onChange={(e) => setRepresentedBrands(e.target.value)}
-                            placeholder="تویوتا، کیا، هیوندای"
-                            required
-                          />
-                          <p className="text-[11px] text-muted-foreground">نام برندها را با ویرگول جدا کنید.</p>
-                        </div>
-                      </>
-                    )}
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="national-id">شناسه ملی</Label>
+                      <div className="relative">
+                        <BadgeCheck className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="national-id"
+                          value={nationalId}
+                          onChange={(e) => setNationalId(e.target.value.replace(/\D/g, ''))}
+                          placeholder="شناسه ملی شرکت"
+                          className="pr-10 text-left"
+                          dir="ltr"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    </div>
+                    <p className="-mt-1 text-[11px] text-muted-foreground sm:col-span-2">
+                      وارد کردن حداقل یکی از «شماره مجوز» یا «شناسه ملی» الزامی است.
+                    </p>
 
                     <div className="flex flex-col gap-2 sm:col-span-2">
                       <Label htmlFor="business-description">معرفی کوتاه (اختیاری)</Label>
@@ -1056,6 +878,38 @@ export function RegisterPage() {
                     </div>
                   </div>
 
+                  {agencyRegistration && (
+                    <div className="space-y-3 border-t border-border pt-4">
+                      <div>
+                        <Label>دوره اشتراک نمایندگی</Label>
+                        <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
+                          درخواست بدون پرداخت آنلاین ثبت می‌شود و مبلغ پس از بررسی مدیریت هماهنگ خواهد شد.
+                        </p>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {([
+                          { id: 'agency_monthly' as const, title: 'اشتراک ماهانه', subtitle: 'تمدید هر ماه' },
+                          { id: 'agency_yearly' as const, title: 'اشتراک سالانه', subtitle: 'اعتبار یک‌ساله' },
+                        ]).map((plan) => (
+                          <button
+                            key={plan.id}
+                            type="button"
+                            onClick={() => setAgencyPlan(plan.id)}
+                            className={cn(
+                              'rounded-xl border-2 p-3 text-right transition-colors',
+                              agencyPlan === plan.id
+                                ? 'border-indigo-500 bg-indigo-50'
+                                : 'border-border bg-background hover:border-indigo-300',
+                            )}
+                            aria-pressed={agencyPlan === plan.id}
+                          >
+                            <span className="block text-sm font-bold">{plan.title}</span>
+                            <span className="mt-1 block text-xs text-muted-foreground">{plan.subtitle}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1143,7 +997,7 @@ export function RegisterPage() {
               <Button type="submit" className="w-full h-11 text-base mt-2" disabled={!acceptTerms || isLoading}>
                 {isLoading && <Loader2 className="size-4 animate-spin" />}
                 {agencyRegistration
-                  ? 'ثبت نمایندگی و ارسال برای بررسی'
+                  ? 'ثبت نمایشگاه و ارسال درخواست نمایندگی'
                   : businessRegistration
                     ? 'ثبت نمایشگاه و ارسال برای بررسی'
                     : `ثبت‌نام به عنوان ${roleData?.title}`}

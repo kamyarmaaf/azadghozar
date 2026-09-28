@@ -7,12 +7,21 @@ from apps.image_processing import InvalidImageUpload, compress_uploaded_image
 
 from apps.catalog.models import (
     Brand,
+    BodyType,
     ListingFavorite,
     VehicleListing,
     VehicleListingImage,
     VehicleModel,
     VehicleTrim,
 )
+
+
+@admin.register(BodyType)
+class BodyTypeAdmin(admin.ModelAdmin):
+    list_display = ("name", "is_active", "sort_order")
+    list_filter = ("is_active",)
+    search_fields = ("name",)
+    ordering = ("sort_order", "id")
 
 
 class BrandAdminForm(forms.ModelForm):

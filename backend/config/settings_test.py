@@ -20,6 +20,10 @@ CACHES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+}
+
 # Celery tasks run synchronously only when a test explicitly calls apply().
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True

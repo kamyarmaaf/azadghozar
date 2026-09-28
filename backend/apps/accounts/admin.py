@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any, cast
 
 from django.contrib import admin
@@ -58,6 +59,7 @@ class CustomUserAdmin(UserAdmin):
                         "city",
                         "address",
                         "preferred_contact_method",
+                        "profile_photo",
                         "business_name",
                         "business_phone",
                         "business_description",
@@ -85,6 +87,19 @@ class CustomUserAdmin(UserAdmin):
             ),
         ],
     )
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = deepcopy(super().get_fieldsets(request, obj))
+        if obj is None or obj.role in {User.Role.BUYER, User.Role.SELLER}:
+            return fieldsets
+
+        for _, options in fieldsets:
+            fields = options.get("fields")
+            if fields:
+                options["fields"] = tuple(
+                    field for field in fields if field != "profile_photo"
+                )
+        return fieldsets
 
 
 @admin.register(Referral)

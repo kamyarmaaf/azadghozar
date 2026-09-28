@@ -10,12 +10,45 @@ from PIL import Image
 from apps.accounts.models import User
 from apps.catalog.models import (
     Brand,
+    BodyType,
     ListingFavorite,
     VehicleListing,
     VehicleListingImage,
     VehicleModel,
     VehicleTrim,
 )
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_body_types_are_public_and_staff_can_manage_them(api_client, staff_user):
+    visible = BodyType.objects.create(name="لیموزین", sort_order=99)
+    hidden = BodyType.objects.create(name="مخفی", is_active=False)
+
+    response = api_client.get(reverse("catalog:body-type-list"))
+    assert response.status_code == 200
+    names = [item["name"] for item in response.data["results"]]
+    assert visible.name in names
+    assert hidden.name not in names
+
+    denied = api_client.post(reverse("catalog:body-type-list"), {"name": "ون مسافری"})
+    assert denied.status_code in (401, 403)
+    api_client.force_authenticate(user=staff_user)
+    created = api_client.post(reverse("catalog:body-type-list"), {"name": "ون مسافری"})
+    assert created.status_code == 201
+
+
+@pytest.mark.api
+@pytest.mark.django_db
+def test_brand_filters_match_both_catalog_names(api_client, buyer_user):
+    Brand.objects.create(name="BMW", name_fa="بی‌ام‌و", slug="bmw")
+    english = create_active_listing(buyer_user, brand_name="BMW")
+    persian = create_active_listing(buyer_user, brand_name="بی‌ام‌و")
+
+    for params in ({"brand": "بی‌ام‌و"}, {"brands": "BMW"}):
+        response = api_client.get(reverse("catalog:vehicle-listing-list"), params)
+        assert response.status_code == 200
+        assert {item["id"] for item in response.data["results"]} == {english.id, persian.id}
 
 
 def listing_payload() -> dict:

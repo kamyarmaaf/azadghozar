@@ -36,17 +36,6 @@ interface BusinessFormState {
   description: string;
   licenseNumber: string;
   nationalId: string;
-  postalCode: string;
-  licenseIssuer: string;
-  licenseExpiresAt: string;
-  companyRegistrationNumber: string;
-  economicCode: string;
-  authorizedRepresentativeName: string;
-  importLicenseNumber: string;
-  importLicenseIssuer: string;
-  importLicenseExpiresAt: string;
-  businessCardNumber: string;
-  representedBrands: string;
 }
 
 const emptyForm: BusinessFormState = {
@@ -58,17 +47,6 @@ const emptyForm: BusinessFormState = {
   description: '',
   licenseNumber: '',
   nationalId: '',
-  postalCode: '',
-  licenseIssuer: '',
-  licenseExpiresAt: '',
-  companyRegistrationNumber: '',
-  economicCode: '',
-  authorizedRepresentativeName: '',
-  importLicenseNumber: '',
-  importLicenseIssuer: '',
-  importLicenseExpiresAt: '',
-  businessCardNumber: '',
-  representedBrands: '',
 };
 
 const profileToForm = (profile: BusinessProfile): BusinessFormState => ({
@@ -80,17 +58,6 @@ const profileToForm = (profile: BusinessProfile): BusinessFormState => ({
   description: profile.description ?? '',
   licenseNumber: profile.license_number ?? '',
   nationalId: profile.national_id ?? '',
-  postalCode: profile.postal_code ?? '',
-  licenseIssuer: profile.license_issuer ?? '',
-  licenseExpiresAt: profile.license_expires_at ?? '',
-  companyRegistrationNumber: profile.company_registration_number ?? '',
-  economicCode: profile.economic_code ?? '',
-  authorizedRepresentativeName: profile.authorized_representative_name ?? '',
-  importLicenseNumber: profile.import_license_number ?? '',
-  importLicenseIssuer: profile.import_license_issuer ?? '',
-  importLicenseExpiresAt: profile.import_license_expires_at ?? '',
-  businessCardNumber: profile.business_card_number ?? '',
-  representedBrands: (profile.represented_brands ?? []).join('، '),
 });
 
 const statusPresentation: Record<VerificationStatus, {
@@ -175,37 +142,14 @@ export function BusinessVerificationForm() {
       setMessage({ type: 'error', text: 'استان، شهر و آدرس کامل کسب‌وکار را وارد کنید.' });
       return;
     }
-    if (form.postalCode.replace(/\D/g, '').length !== 10) {
-      setMessage({ type: 'error', text: 'کد پستی ۱۰ رقمی کسب‌وکار را وارد کنید.' });
+    if (!form.licenseNumber.trim() && !form.nationalId.trim()) {
+      setMessage({ type: 'error', text: 'حداقل شماره مجوز یا شناسه ملی را وارد کنید.' });
       return;
-    }
-    if (profile?.kind === 'gallery' && (!form.licenseNumber.trim() || !form.licenseIssuer.trim())) {
-      setMessage({ type: 'error', text: 'شماره و مرجع صادرکننده پروانه کسب نمایشگاه را وارد کنید.' });
-      return;
-    }
-    if (profile?.kind === 'agency') {
-      if (!form.nationalId.trim() || !form.companyRegistrationNumber.trim()) {
-        setMessage({ type: 'error', text: 'شناسه ملی و شماره ثبت شرکت را وارد کنید.' });
-        return;
-      }
-      if (!form.authorizedRepresentativeName.trim()) {
-        setMessage({ type: 'error', text: 'نام نماینده قانونی شرکت را وارد کنید.' });
-        return;
-      }
-      if (!form.importLicenseNumber.trim() || !form.importLicenseIssuer.trim()) {
-        setMessage({ type: 'error', text: 'اطلاعات مجوز واردات شرکت را کامل کنید.' });
-        return;
-      }
-      if (!form.representedBrands.split(/[,،\n]/).some((brand) => brand.trim())) {
-        setMessage({ type: 'error', text: 'حداقل یک برند وارداتی را وارد کنید.' });
-        return;
-      }
     }
 
     setSaving(true);
     try {
       const result = await updateMyBusiness({
-        kind: profile?.kind ?? 'gallery',
         name: form.name.trim(),
         phone: form.phone.trim(),
         province: form.province.trim(),
@@ -214,20 +158,6 @@ export function BusinessVerificationForm() {
         description: form.description.trim(),
         licenseNumber: form.licenseNumber.trim(),
         nationalId: form.nationalId.trim(),
-        postalCode: form.postalCode.trim(),
-        licenseIssuer: form.licenseIssuer.trim(),
-        licenseExpiresAt: form.licenseExpiresAt || null,
-        companyRegistrationNumber: form.companyRegistrationNumber.trim(),
-        economicCode: form.economicCode.trim(),
-        authorizedRepresentativeName: form.authorizedRepresentativeName.trim(),
-        importLicenseNumber: form.importLicenseNumber.trim(),
-        importLicenseIssuer: form.importLicenseIssuer.trim(),
-        importLicenseExpiresAt: form.importLicenseExpiresAt || null,
-        businessCardNumber: form.businessCardNumber.trim(),
-        representedBrands: form.representedBrands
-          .split(/[,،\n]/)
-          .map((brand) => brand.trim())
-          .filter(Boolean),
       });
       setProfile(result);
       setForm(profileToForm(result));
@@ -281,9 +211,7 @@ export function BusinessVerificationForm() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2 md:col-span-2">
-          <Label htmlFor="verification-business-name">
-            {profile?.kind === 'agency' ? 'نام حقوقی شرکت واردکننده *' : 'نام نمایشگاه *'}
-          </Label>
+          <Label htmlFor="verification-business-name">نام نمایشگاه یا نمایندگی *</Label>
           <div className="relative">
             <Building2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -353,87 +281,40 @@ export function BusinessVerificationForm() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="verification-postal-code">کد پستی *</Label>
-          <Input
-            id="verification-postal-code"
-            value={form.postalCode}
-            onChange={(event) => updateField('postalCode', event.target.value.replace(/\D/g, '').slice(0, 10))}
-            className="text-left"
-            dir="ltr"
-            inputMode="numeric"
-            required
-          />
+          <Label htmlFor="verification-license-number">شماره مجوز</Label>
+          <div className="relative">
+            <FileText className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="verification-license-number"
+              value={form.licenseNumber}
+              onChange={(event) => updateField('licenseNumber', event.target.value)}
+              className="pr-10"
+              maxLength={80}
+            />
+          </div>
         </div>
 
-        {profile?.kind !== 'agency' ? (
-          <>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-license-number">شماره پروانه کسب نمایشگاه *</Label>
-              <div className="relative">
-                <FileText className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="verification-license-number" value={form.licenseNumber} onChange={(event) => updateField('licenseNumber', event.target.value)} className="pr-10" maxLength={80} required />
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-license-issuer">مرجع صادرکننده پروانه *</Label>
-              <Input id="verification-license-issuer" value={form.licenseIssuer} onChange={(event) => updateField('licenseIssuer', event.target.value)} maxLength={200} required />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-license-expires">تاریخ اعتبار پروانه</Label>
-              <Input id="verification-license-expires" type="date" value={form.licenseExpiresAt} onChange={(event) => updateField('licenseExpiresAt', event.target.value)} dir="ltr" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-national-id">شناسه ملی (در صورت حقوقی بودن)</Label>
-              <Input id="verification-national-id" value={form.nationalId} onChange={(event) => updateField('nationalId', event.target.value.replace(/\D/g, ''))} className="text-left" dir="ltr" inputMode="numeric" maxLength={32} />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-national-id">شناسه ملی شرکت *</Label>
-              <div className="relative">
-                <BadgeCheck className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="verification-national-id" value={form.nationalId} onChange={(event) => updateField('nationalId', event.target.value.replace(/\D/g, ''))} className="pr-10 text-left" dir="ltr" inputMode="numeric" maxLength={32} required />
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-registration-number">شماره ثبت شرکت *</Label>
-              <Input id="verification-registration-number" value={form.companyRegistrationNumber} onChange={(event) => updateField('companyRegistrationNumber', event.target.value)} maxLength={80} required />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-economic-code">کد اقتصادی</Label>
-              <Input id="verification-economic-code" value={form.economicCode} onChange={(event) => updateField('economicCode', event.target.value.replace(/\D/g, ''))} className="text-left" dir="ltr" inputMode="numeric" maxLength={32} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-representative">نماینده قانونی شرکت *</Label>
-              <Input id="verification-representative" value={form.authorizedRepresentativeName} onChange={(event) => updateField('authorizedRepresentativeName', event.target.value)} maxLength={200} required />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-import-license">شماره مجوز واردات *</Label>
-              <Input id="verification-import-license" value={form.importLicenseNumber} onChange={(event) => updateField('importLicenseNumber', event.target.value)} maxLength={80} required />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-import-issuer">مرجع صادرکننده مجوز واردات *</Label>
-              <Input id="verification-import-issuer" value={form.importLicenseIssuer} onChange={(event) => updateField('importLicenseIssuer', event.target.value)} maxLength={200} required />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-import-expires">تاریخ اعتبار مجوز واردات</Label>
-              <Input id="verification-import-expires" type="date" value={form.importLicenseExpiresAt} onChange={(event) => updateField('importLicenseExpiresAt', event.target.value)} dir="ltr" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="verification-business-card">شماره کارت بازرگانی</Label>
-              <Input id="verification-business-card" value={form.businessCardNumber} onChange={(event) => updateField('businessCardNumber', event.target.value)} maxLength={80} />
-            </div>
-            <div className="flex flex-col gap-2 md:col-span-2">
-              <Label htmlFor="verification-brands">برندهای وارداتی *</Label>
-              <Input id="verification-brands" value={form.representedBrands} onChange={(event) => updateField('representedBrands', event.target.value)} placeholder="تویوتا، کیا، هیوندای" required />
-              <p className="text-[11px] text-muted-foreground">نام برندها را با ویرگول جدا کنید.</p>
-            </div>
-          </>
-        )}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="verification-national-id">شناسه ملی</Label>
+          <div className="relative">
+            <BadgeCheck className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="verification-national-id"
+              value={form.nationalId}
+              onChange={(event) => updateField('nationalId', event.target.value.replace(/\D/g, ''))}
+              className="pr-10 text-left"
+              dir="ltr"
+              inputMode="numeric"
+              maxLength={32}
+            />
+          </div>
+        </div>
+        <p className="-mt-1 text-[11px] text-muted-foreground md:col-span-2">
+          حداقل یکی از شماره مجوز یا شناسه ملی باید ثبت شده باشد.
+        </p>
 
         <div className="flex flex-col gap-2 md:col-span-2">
-          <Label htmlFor="verification-description">{profile?.kind === 'agency' ? 'معرفی شرکت واردکننده' : 'معرفی نمایشگاه'}</Label>
+          <Label htmlFor="verification-description">معرفی نمایشگاه یا نمایندگی</Label>
           <Textarea
             id="verification-description"
             value={form.description}
