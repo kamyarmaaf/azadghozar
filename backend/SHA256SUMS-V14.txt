@@ -1,0 +1,3 @@
+b71140741fe087224814aaf68d6fe30a3191d26f0a7f1305cd33d5b665bb3687  frontend-v14-campaign-sales.zip
+28964176bf3bdbf52cb2ed3c502dfc141db3a5630c6437c6a2efbc1d055096e4  karvo-v14-campaign-sales-complete.zip
+348c08b728f98bfdb7c0aa24d87f73d2224a7a370083e22067ad36c2c3d71e46  karvo-v14-campaign-sales-patch-from-v13.zip

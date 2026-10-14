@@ -1,0 +1,55 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --tb=short"
+markers = [
+    "unit: isolated business-logic tests",
+    "component: serializer/view/model component tests",
+    "integration: PostgreSQL, Redis, or Celery integration tests",
+    "migration: database migration tests",
+    "e2e: complete backend user journeys",
+    "regression: previously working behavior that must remain stable",
+    "smoke: minimal service-health tests",
+    "api: API contract and HTTP behavior tests",
+    "security: authentication and OTP security tests",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["apps", "config"]
+omit = [
+    "*/migrations/*",
+    "config/settings.py",
+    "config/settings_test.py",
+    "manage.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
+
+[tool.mypy]
+python_version = "3.13"
+plugins = ["mypy_django_plugin.main"]
+check_untyped_defs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+exclude = [
+    "migrations/",
+    "tests/",
+]
+
+[tool.django-stubs]
+django_settings_module = "config.settings_test"
+strict_settings = false
+strict_model_abstract_attrs = false

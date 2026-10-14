@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ListingConversationsPanel } from '@/components/dashboard/ListingConversationsPanel';
+import { VisitRequestSection } from '@/components/vehicle/VisitRequestSection';
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -291,7 +292,22 @@ export function VehicleDetailsPage() {
             <Separator />
             <section><h2 className="text-lg font-semibold mb-3">توضیحات فروشنده</h2><p className="text-sm text-muted-foreground leading-7 whitespace-pre-line">{vehicle.description || 'توضیحی ثبت نشده است.'}</p></section>
             <Separator />
-            <ComingSoonNotice title="درخواست بازدید حضوری" detail="تقویم و ثبت نوبت هنوز به سرویس واقعی متصل نشده‌اند؛ فرم نمایشی حذف شده تا درخواست ثبت‌نشده موفق نشان داده نشود." />
+            {currentUser?.id === vehicle.owner || (
+              Boolean(currentUser?.businessAccess?.can_manage_listings)
+              && currentUser?.businessAccess?.slug === vehicle.business_slug
+            ) ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-muted-foreground">
+                این آگهی متعلق به شماست؛ درخواست‌های بازدید خریداران در پنل فروشنده نمایش داده می‌شود.
+              </div>
+            ) : (
+              <VisitRequestSection
+                listingId={vehicle.id}
+                vehicleBrand={vehicle.brand_name}
+                vehicleModel={vehicle.model_name}
+                sellerName={vehicle.business_name || vehicle.owner_name}
+                city={vehicle.city}
+              />
+            )}
 
             <div className="lg:hidden flex flex-wrap gap-2">
               <Button className="flex-1" disabled={isFavoriteLoading} onClick={() => void handleFavorite()}>{isFavoriteLoading ? <Loader2 className="size-4 animate-spin" /> : <Heart className={`size-4 ${isFavorite ? 'fill-destructive' : ''}`} />}{isFavorite ? 'حذف از علاقه‌مندی' : 'افزودن به علاقه‌مندی'}</Button>

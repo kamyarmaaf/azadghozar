@@ -1,9 +1,10 @@
 from django.db.models import F, Q
 from django.utils import timezone
+from uuid import UUID
 from rest_framework import generics, mixins, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.permissions import AllowAny
 from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -32,6 +33,7 @@ from apps.content.serializers import (
     ContactPageSerializer,
     SupportMessageSerializer,
 )
+from apps.content.support_ai import ai_support_enabled, generate_support_reply
 
 
 class AboutPageAPIView(APIView):
@@ -66,23 +68,66 @@ class ContactMessageCreateAPIView(generics.CreateAPIView):
 
 
 class SupportChatAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
+    throttle_classes = (ScopedRateThrottle,)
+    throttle_scope = "support_chat"
+
+    def _guest_id(self, request) -> UUID:
+        raw_value = request.query_params.get("session_id") or request.data.get("session_id")
+        if not raw_value:
+            raise ValidationError({"session_id": "شناسه نشست پشتیبانی ارسال نشده است."})
+        try:
+            return UUID(str(raw_value))
+        except (TypeError, ValueError, AttributeError) as exc:
+            raise ValidationError({"session_id": "شناسه نشست پشتیبانی معتبر نیست."}) from exc
+
+    def _conversation(self, request, *, create: bool = False):
+        if request.user.is_authenticated:
+            query = {"user": request.user}
+        else:
+            query = {"guest_id": self._guest_id(request)}
+        if create:
+            return SupportConversation.objects.get_or_create(**query)[0]
+        return SupportConversation.objects.filter(**query).first()
 
     def get(self, request):
-        conversation = SupportConversation.objects.filter(user=request.user).first()
+        conversation = self._conversation(request)
         messages = conversation.messages.all() if conversation else SupportMessage.objects.none()
-        return Response({"messages": SupportMessageSerializer(messages, many=True).data})
+        return Response(
+            {
+                "conversation_id": str(conversation.public_id) if conversation else None,
+                "messages": SupportMessageSerializer(messages, many=True).data,
+                "ai_enabled": ai_support_enabled(),
+            }
+        )
 
-    @transaction.atomic
     def post(self, request):
         serializer = SupportMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        conversation, _ = SupportConversation.objects.get_or_create(user=request.user)
-        if conversation.status == SupportConversation.Status.CLOSED:
-            conversation.status = SupportConversation.Status.OPEN
-        conversation.save(update_fields=("status", "updated_at"))
-        message = serializer.save(conversation=conversation, sender=SupportMessage.Sender.USER)
-        return Response(SupportMessageSerializer(message).data, status=201)
+        with transaction.atomic():
+            conversation = self._conversation(request, create=True)
+            history = list(conversation.messages.order_by("-created_at", "-id")[:10])
+            history.reverse()
+            if conversation.status == SupportConversation.Status.CLOSED:
+                conversation.status = SupportConversation.Status.OPEN
+            conversation.save(update_fields=("status", "updated_at"))
+            message = serializer.save(conversation=conversation, sender=SupportMessage.Sender.USER)
+
+        reply_text = generate_support_reply(question=message.text, history=history)
+        reply = SupportMessage.objects.create(
+            conversation=conversation,
+            sender=SupportMessage.Sender.AI,
+            text=reply_text,
+        )
+        return Response(
+            {
+                **SupportMessageSerializer(message).data,
+                "reply": SupportMessageSerializer(reply).data,
+                "conversation_id": str(conversation.public_id),
+                "ai_enabled": ai_support_enabled(),
+            },
+            status=201,
+        )
 
 
 class EducationalVideoViewSet(

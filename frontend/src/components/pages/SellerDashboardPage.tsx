@@ -19,7 +19,8 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@
 import { Separator } from '@/components/ui/separator';
 import {
   Car, Eye, ArrowLeftRight, BarChart3, MessageSquare,
-  Settings, Pencil, Trash2, Plus, TrendingUp, DollarSign, UserPlus, Loader2, RefreshCw
+  Settings, Pencil, Trash2, Plus, TrendingUp, DollarSign, UserPlus, Loader2, RefreshCw,
+  CalendarDays,
 } from 'lucide-react';
 import { ReferralTab } from '@/components/dashboard/ReferralTab';
 import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
@@ -27,6 +28,7 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 import { MyServiceRequestsPanel } from '@/components/services/MyServiceRequestsPanel';
 import { ComingSoonNotice } from '@/components/ui/coming-soon';
 import { ListingConversationsPanel } from '@/components/dashboard/ListingConversationsPanel';
+import { VisitRequestsPanel } from '@/components/vehicle/VisitRequestsPanel';
 
 const statusMap: Record<string, { label: string; className: string }> = {
   active: { label: 'فعال', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
@@ -94,6 +96,7 @@ export function SellerDashboardPage() {
 
   const tabs = [
     { value: 'listings', label: 'آگهی‌های من', icon: Car },
+    { value: 'visits', label: 'درخواست‌های بازدید', icon: CalendarDays },
     { value: 'inspections', label: 'درخواست‌های بازرسی', icon: BarChart3 },
     { value: 'stats', label: 'آمار محدود', icon: TrendingUp },
     { value: 'messages', label: 'پیام‌ها', icon: MessageSquare },
@@ -233,6 +236,11 @@ export function SellerDashboardPage() {
               </CardContent>
             </Card>
             {listingsError && <div role="alert" className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"><span>{listingsError}</span><Button size="sm" variant="outline" onClick={() => void loadListings()}>تلاش دوباره</Button></div>}
+          </TabsContent>
+
+          {/* Inspections Tab */}
+          <TabsContent value="visits" className="mt-6">
+            <VisitRequestsPanel mode="managed" />
           </TabsContent>
 
           {/* Inspections Tab */}

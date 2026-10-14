@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { toJalaali, toGregorian, jalaaliMonthLength } from 'jalaali-js';
 import {
   CalendarDays, Clock, MapPin, User, CheckCircle2,
@@ -13,6 +13,8 @@ import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
+import { createListingVisitRequest, fetchVisitAvailability } from '@/lib/visit-request-api';
+import { useAuth } from '@/stores/auth';
 
 const persianWeekDays = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 const persianMonthNames = [
@@ -35,51 +37,16 @@ function toPersian(n: number) {
   return n.toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[parseInt(d)]);
 }
 
-/** Iranian official holidays for 1405 (Mordad to Esfand). Format: 'month/day': name */
-const iranianHolidays1405: Record<string, string> = {
-  // شهریور
-  '6/31': 'آخرین روز شهریور',
-  // مهر
-  '7/20': 'روز بزرگداشت حافظ',
-  // آبان
-  '8/13': 'روز دانشجو',
-  // آذر
-  '9/5': 'روز بزرگداشت خواجه نصیر',
-  '9/16': 'روز دانشجو (آذر)',
-  // دی
-  '10/5': 'وفات حضرت رسول اکرم و شهادت امام حسن مجتبی(ع)',
-  '10/6': 'شهادت امام رضا(ع)',
-  '10/7': 'شهادت امام محمد تقی(ج)',
-  '10/17': 'میلاد حضرت رسول اکرم و امام صادق(ع)',
-  // بهمن
-  '11/12': 'روز بصیرت',
-  '11/19': 'انقلاب اسلامی (۱۲ بهمن)',
-  '11/20': 'پیروزی انقلاب اسلامی (۲۲ بهمن)',
-  '11/22': 'روز وطن‌دوستی',
-  // اسفند
-  '12/1': 'روز بزرگداشت ابوعلی سینا',
-  '12/5': 'روز بزرگداشت خواجوی کرمانی',
-  '12/14': 'روز نیروی هوایی',
-  '12/15': 'روز درختکاری',
-  '12/29': 'ملی شدن صنعت نفت',
-};
-
-function getHolidayName(jy: number, jm: number, jd: number): string | null {
-  if (jy === 1405) {
-    const key = `${jm}/${jd}`;
-    return iranianHolidays1405[key] || null;
-  }
-  return null;
-}
-
 interface VisitRequestSectionProps {
+  listingId: number;
   vehicleBrand: string;
   vehicleModel: string;
   sellerName: string;
   city: string;
 }
 
-export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, city }: VisitRequestSectionProps) {
+export function VisitRequestSection({ listingId, vehicleBrand, vehicleModel, sellerName, city }: VisitRequestSectionProps) {
+  const currentUser = useAuth((state) => state.currentUser);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [currentJMonth, setCurrentJMonth] = useState(() => {
@@ -92,10 +59,17 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
     const { jy } = toJalaali(now.getFullYear(), now.getMonth() + 1, now.getDate());
     return jy;
   });
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState(() => currentUser?.name || `${currentUser?.firstName || ''} ${currentUser?.lastName || ''}`.trim());
+  const [phone, setPhone] = useState(() => currentUser?.phoneNumber || '');
+  const [note, setNote] = useState('');
+  const [unavailableHours, setUnavailableHours] = useState<number[]>([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [trackingCode, setTrackingCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [currentHour] = useState(() => new Date().getHours());
+  const availabilityRequest = useRef(0);
 
   const today = useMemo(() => {
     const now = new Date();
@@ -106,6 +80,11 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
     return toJalaali(today.gy, today.gm, today.gd);
   }, [today]);
 
+  const maxVisitJ = useMemo(() => {
+    const maxDate = new Date(today.gy, today.gm - 1, today.gd + 60);
+    return toJalaali(maxDate.getFullYear(), maxDate.getMonth() + 1, maxDate.getDate());
+  }, [today]);
+
   const calendarDays = useMemo(() => {
     const { jy, jm } = { jy: currentJYear, jm: currentJMonth };
     const firstDayG = toGregorian(jy, jm, 1);
@@ -113,7 +92,7 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
     const offset = (dayOfWeek + 1) % 7;
     const monthLength = jalaaliMonthLength(jy, jm);
 
-    const days: Array<{ day: number; isCurrentMonth: boolean; isToday: boolean; isPast: boolean; isDisabled: boolean; isFriday: boolean; isHoliday: boolean; holidayName: string; dateKey: string }> = [];
+    const days: Array<{ day: number; isCurrentMonth: boolean; isToday: boolean; isPast: boolean; isDisabled: boolean; isFriday: boolean; dateKey: string }> = [];
 
     let prevMonth = jm - 1;
     let prevYear = jy;
@@ -127,8 +106,6 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
         isPast: true,
         isDisabled: true,
         isFriday: false,
-        isHoliday: false,
-        holidayName: '',
         dateKey: `${prevYear}/${prevMonth}/${prevMonthLength - i}`,
       });
     }
@@ -138,19 +115,17 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
       const isToday = jy === todayJ.jy && jm === todayJ.jm && d === todayJ.jd;
       const isPast = new Date(gy, gm - 1, gd) < new Date(today.gy, today.gm - 1, today.gd);
       const gregorianDate = new Date(gy, gm - 1, gd);
+      const maxDate = new Date(today.gy, today.gm - 1, today.gd + 60);
+      const isBeyondMax = gregorianDate > maxDate;
       const dayIndex = (gregorianDate.getDay() + 1) % 7;
       const isFriday = dayIndex === 6;
-      const holidayName = getHolidayName(jy, jm, d);
-      const isHoliday = !!holidayName;
       days.push({
         day: d,
         isCurrentMonth: true,
         isToday,
         isPast,
-        isDisabled: isPast || isFriday || isHoliday,
+        isDisabled: isPast || isBeyondMax || isFriday,
         isFriday,
-        isHoliday,
-        holidayName: holidayName || '',
         dateKey: `${jy}/${jm}/${d}`,
       });
     }
@@ -167,8 +142,6 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
         isPast: false,
         isDisabled: true,
         isFriday: false,
-        isHoliday: false,
-        holidayName: '',
         dateKey: `${nextYear2}/${nextMonth2}/${d}`,
       });
     }
@@ -177,51 +150,93 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
   }, [currentJYear, currentJMonth, todayJ, today]);
 
   const prevMonth = useCallback(() => {
+    if (currentJYear === todayJ.jy && currentJMonth === todayJ.jm) return;
     let newMonth = currentJMonth - 1;
     let newYear = currentJYear;
     if (newMonth < 1) { newMonth = 12; newYear -= 1; }
     setCurrentJMonth(newMonth);
     setCurrentJYear(newYear);
-  }, [currentJMonth, currentJYear]);
+  }, [currentJMonth, currentJYear, todayJ]);
 
   const nextMonth = useCallback(() => {
     let newMonth = currentJMonth + 1;
     let newYear = currentJYear;
     if (newMonth > 12) { newMonth = 1; newYear += 1; }
-    // Allow up to Esfand (month 12) of current year
-    if (newYear > todayJ.jy || (newYear === todayJ.jy && newMonth > 12)) return;
+    if (newYear > maxVisitJ.jy || (newYear === maxVisitJ.jy && newMonth > maxVisitJ.jm)) return;
     setCurrentJMonth(newMonth);
     setCurrentJYear(newYear);
-  }, [currentJMonth, currentJYear, todayJ]);
+  }, [currentJMonth, currentJYear, maxVisitJ]);
 
   const canGoNext = useMemo(() => {
-    // Allow navigation up to Esfand of the current year
-    return currentJYear < todayJ.jy || (currentJYear === todayJ.jy && currentJMonth < 12);
-  }, [currentJYear, currentJMonth, todayJ]);
+    return currentJYear < maxVisitJ.jy || (currentJYear === maxVisitJ.jy && currentJMonth < maxVisitJ.jm);
+  }, [currentJYear, currentJMonth, maxVisitJ]);
 
-  const handleDateSelect = (dateKey: string, isDisabled: boolean) => {
+  const canGoPrev = currentJYear > todayJ.jy || (currentJYear === todayJ.jy && currentJMonth > todayJ.jm);
+
+  const handleDateSelect = async (dateKey: string, isDisabled: boolean) => {
     if (isDisabled) return;
+    const requestNumber = availabilityRequest.current + 1;
+    availabilityRequest.current = requestNumber;
     setSelectedDate(dateKey);
     setSelectedTime(null);
+    setUnavailableHours([]);
+    const [jy, jm, jd] = dateKey.split('/').map(Number);
+    const { gy, gm, gd } = toGregorian(jy, jm, jd);
+    const gregorianDate = `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`;
+    setAvailabilityLoading(true);
+    try {
+      const result = await fetchVisitAvailability(listingId, gregorianDate);
+      if (availabilityRequest.current !== requestNumber) return;
+      setUnavailableHours(result.unavailable_hours);
+    } catch {
+      if (availabilityRequest.current !== requestNumber) return;
+      setUnavailableHours([]);
+    } finally {
+      if (availabilityRequest.current === requestNumber) setAvailabilityLoading(false);
+    }
   };
 
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime || !name.trim() || !phone.trim()) return;
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsSubmitting(false);
-    setShowSuccess(true);
+    setSubmitError('');
+    try {
+      const [jy, jm, jd] = selectedDate.split('/').map(Number);
+      const { gy, gm, gd } = toGregorian(jy, jm, jd);
+      const slot = timeSlots.find((item) => item.id === selectedTime);
+      if (!slot) return;
+      const scheduledFor = new Date(gy, gm - 1, gd, slot.hour, 0, 0, 0);
+      const result = await createListingVisitRequest({
+        listingId,
+        contactName: name.trim(),
+        contactPhone: phone,
+        scheduledFor: scheduledFor.toISOString(),
+        note: note.trim(),
+      });
+      setTrackingCode(result.id);
+      setShowSuccess(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'ثبت درخواست بازدید انجام نشد.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
     setShowSuccess(false);
+    availabilityRequest.current += 1;
     setSelectedDate(null);
     setSelectedTime(null);
-    setName('');
-    setPhone('');
+    setName(currentUser?.name || `${currentUser?.firstName || ''} ${currentUser?.lastName || ''}`.trim());
+    setPhone(currentUser?.phoneNumber || '');
+    setNote('');
+    setUnavailableHours([]);
+    setSubmitError('');
+    setTrackingCode('');
   };
 
   const selectedTimeSlot = timeSlots.find((t) => t.id === selectedTime);
+  const selectedDateIsToday = selectedDate === `${todayJ.jy}/${todayJ.jm}/${todayJ.jd}`;
   const selectedDateParts = selectedDate?.split('/').map(Number);
   const selectedDateStr = selectedDateParts
     ? `${toPersian(selectedDateParts[2])} ${persianMonthNames[selectedDateParts[1] - 1]} ${toPersian(selectedDateParts[0])}`
@@ -250,7 +265,8 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
             <div className="flex items-center justify-between mb-5">
               <button
                 onClick={prevMonth}
-                className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                disabled={!canGoPrev}
+                className="p-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-30 disabled:pointer-events-none"
               >
                 <ChevronRight className="size-5" />
               </button>
@@ -282,19 +298,17 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((d, idx) => {
                 const isSelected = selectedDate === d.dateKey && d.isCurrentMonth;
-                const isHolidayNonPast = d.isHoliday && d.isCurrentMonth && !d.isPast;
                 return (
                   <button
                     key={idx}
                     disabled={d.isDisabled}
-                    onClick={() => handleDateSelect(d.dateKey, d.isDisabled)}
-                    title={d.holidayName || (d.isFriday && d.isCurrentMonth ? 'جمعه' : '')}
+                    onClick={() => void handleDateSelect(d.dateKey, d.isDisabled)}
+                    title={d.isFriday && d.isCurrentMonth ? 'جمعه' : ''}
                     className={`group/day relative aspect-square rounded-xl text-sm font-medium transition-all duration-200
                       ${d.isCurrentMonth ? 'text-foreground' : 'text-muted-foreground/30'}
                       ${d.isDisabled && d.isCurrentMonth ? 'cursor-not-allowed' : ''}
                       ${d.isPast && d.isCurrentMonth ? 'text-muted-foreground/30' : ''}
-                      ${isHolidayNonPast ? 'text-destructive' : ''}
-                      ${d.isFriday && d.isCurrentMonth && !d.isPast && !d.isHoliday ? 'text-destructive/60' : ''}
+                      ${d.isFriday && d.isCurrentMonth && !d.isPast ? 'text-destructive/60' : ''}
                       ${!d.isDisabled && d.isCurrentMonth ? 'hover:bg-gold/10 cursor-pointer' : ''}
                       ${d.isToday ? 'ring-2 ring-gold/50' : ''}
                       ${isSelected
@@ -304,16 +318,8 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
                     `}
                   >
                     {toPersian(d.day)}
-                    {isHolidayNonPast && (
-                      <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-destructive" />
-                    )}
-                    {d.isFriday && d.isCurrentMonth && !d.isPast && !d.isHoliday && (
+                    {d.isFriday && d.isCurrentMonth && !d.isPast && (
                       <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-destructive/50" />
-                    )}
-                    {d.holidayName && d.isCurrentMonth && !d.isPast && (
-                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-destructive text-white text-[9px] rounded-md whitespace-nowrap opacity-0 group-hover/day:opacity-100 transition-opacity pointer-events-none z-10">
-                        {d.holidayName}
-                      </span>
                     )}
                   </button>
                 );
@@ -329,10 +335,6 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="w-2.5 h-2.5 rounded-full ring-2 ring-gold/50" />
                 امروز
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="w-2.5 h-2.5 rounded-full bg-destructive" />
-                تعطیل رسمی
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="w-2.5 h-2.5 rounded-full bg-destructive/40" />
@@ -359,20 +361,26 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  {timeSlots.map((slot) => (
+                  {timeSlots.map((slot) => {
+                    const isPastTime = selectedDateIsToday && slot.hour <= currentHour;
+                    const isUnavailable = unavailableHours.includes(slot.hour) || isPastTime;
+                    return (
                     <button
                       key={slot.id}
+                      disabled={availabilityLoading || isUnavailable}
                       onClick={() => setSelectedTime(slot.id)}
                       className={`p-2.5 rounded-xl text-xs font-medium border transition-all duration-200
                         ${selectedTime === slot.id
                           ? 'bg-gold/10 border-gold text-gold-dark shadow-sm'
                           : 'border-border hover:border-gold/50 hover:bg-gold/5'
                         }
+                        disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-muted-foreground disabled:opacity-60
                       `}
                     >
-                      {slot.label}
+                      {slot.label}{unavailableHours.includes(slot.hour) ? ' (رزرو)' : isPastTime ? ' (گذشته)' : ''}
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -408,7 +416,20 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
                     className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/40 transition-colors text-right"
                   />
                 </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">توضیحات (اختیاری)</label>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    maxLength={1000}
+                    rows={3}
+                    placeholder="اگر نکته‌ای درباره هماهنگی بازدید دارید بنویسید"
+                    className="w-full resize-none rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/40"
+                  />
+                </div>
               </div>
+
+              {submitError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-6 text-red-700">{submitError}</p>}
 
               <Button
                 className="w-full gap-2"
@@ -472,13 +493,20 @@ export function VisitRequestSection({ vehicleBrand, vehicleModel, sellerName, ci
               <h3 className="text-lg font-bold">درخواست شما ثبت شد</h3>
               <p className="text-sm text-muted-foreground mt-2 leading-7">
                 درخواست بازدید حضوری شما با موفقیت ثبت شد.
-                کارشناسان ما در اسرع وقت با شما تماس خواهند گرفت.
+                {currentUser
+                  ? ' مالک آگهی درخواست را بررسی می‌کند و نتیجه در پنل کاربری شما نمایش داده می‌شود.'
+                  : ' مالک آگهی درخواست را بررسی می‌کند و برای هماهنگی با شما تماس می‌گیرد.'}
               </p>
             </div>
             <div className="bg-secondary/50 rounded-xl p-4 space-y-2.5 text-sm text-right">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">خودرو</span>
                 <span className="font-medium">{vehicleBrand} {vehicleModel}</span>
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">کد پیگیری</span>
+                <span className="font-medium" dir="ltr">{trackingCode.slice(0, 8)}</span>
               </div>
               <Separator />
               <div className="flex items-center justify-between">

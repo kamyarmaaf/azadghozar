@@ -31,11 +31,14 @@ class SupportMessageInline(admin.TabularInline):
 
 @admin.register(SupportConversation)
 class SupportConversationAdmin(admin.ModelAdmin):
-    list_display = ("public_id", "user", "status", "updated_at")
+    list_display = ("public_id", "user", "guest_id", "status", "updated_at")
     list_filter = ("status", "updated_at")
     search_fields = ("user__phone_number", "user__first_name", "user__last_name", "messages__text")
-    readonly_fields = ("public_id", "user", "created_at", "updated_at")
+    readonly_fields = ("public_id", "user", "guest_id", "created_at", "updated_at")
     inlines = (SupportMessageInline,)
+
+    def has_add_permission(self, request):
+        return False
 
 
 class EducationalVideoAdminForm(forms.ModelForm):

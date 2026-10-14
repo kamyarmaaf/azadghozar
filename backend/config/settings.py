@@ -192,6 +192,8 @@ REST_FRAMEWORK = {
         "contact_message_create": "5/hour",
         "listing_conversation_create": "10/hour",
         "listing_message_create": "30/hour",
+        "support_chat": "60/hour",
+        "visit_request_create": "8/hour",
     },
 }
 

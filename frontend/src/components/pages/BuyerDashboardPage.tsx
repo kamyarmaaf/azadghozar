@@ -29,6 +29,7 @@ import { OptimizedImage } from '@/components/ui/optimized-image';
 import { ComingSoonNotice } from '@/components/ui/coming-soon';
 import { MyServiceRequestsPanel } from '@/components/services/MyServiceRequestsPanel';
 import { ListingConversationsPanel } from '@/components/dashboard/ListingConversationsPanel';
+import { VisitRequestsPanel } from '@/components/vehicle/VisitRequestsPanel';
 
 export function BuyerDashboardPage() {
   const navigateTo = useNavigation((s) => s.navigateTo);
@@ -270,7 +271,16 @@ export function BuyerDashboardPage() {
 
           {/* Requests Tab */}
           <TabsContent value="requests" className="mt-6">
-            <MyServiceRequestsPanel />
+            <div className="space-y-8">
+              <section>
+                <h2 className="mb-3 text-lg font-bold">بازدیدهای حضوری من</h2>
+                <VisitRequestsPanel mode="mine" />
+              </section>
+              <section>
+                <h2 className="mb-3 text-lg font-bold">سایر درخواست‌های خدماتی</h2>
+                <MyServiceRequestsPanel />
+              </section>
+            </div>
           </TabsContent>
 
           {/* Messages Tab */}

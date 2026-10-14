@@ -20,6 +20,7 @@ import {
   Car, Eye, BarChart3, Settings,
   Bell, Pencil, Trash2, Plus, Star, Loader2, RefreshCw, Users, CreditCard,
   CheckCircle2, Crown,
+  CalendarDays,
 } from 'lucide-react';
 import { BusinessMediaUploader } from '@/components/dashboard/BusinessMediaUploader';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -28,6 +29,7 @@ import { BusinessSubscriptionPanel } from '@/components/business/BusinessSubscri
 import { BusinessVerificationForm } from '@/components/business/BusinessVerificationForm';
 import { ListingConversationsPanel } from '@/components/dashboard/ListingConversationsPanel';
 import { ProfileSettingsForm } from '@/components/dashboard/ProfileSettingsForm';
+import { VisitRequestsPanel } from '@/components/vehicle/VisitRequestsPanel';
 import {
   fetchBusinessDashboard,
   type BusinessDashboard,
@@ -125,6 +127,7 @@ export function GalleryDashboardPage({ expectedKind }: { expectedKind?: 'gallery
 
   const tabs = [
     { value: 'vehicles', label: 'مدیریت خودروها', icon: Car },
+    { value: 'visits', label: 'درخواست‌های بازدید', icon: CalendarDays },
     { value: 'messages', label: 'پیام‌ها', icon: Bell },
     { value: 'add', label: 'افزودن خودرو', icon: Plus },
     { value: 'team', label: 'کارمندان', icon: Users },
@@ -298,7 +301,11 @@ export function GalleryDashboardPage({ expectedKind }: { expectedKind?: 'gallery
             {listingsError && <div role="alert" className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"><span>{listingsError}</span><Button size="sm" variant="outline" onClick={() => void loadListings()}>تلاش دوباره</Button></div>}
           </TabsContent>
 
-          {/* Add Vehicle Tab */}
+          <TabsContent value="visits" className="mt-6">
+            <VisitRequestsPanel mode="managed" />
+          </TabsContent>
+
+          {/* Messages Tab */}
           <TabsContent value="messages" className="mt-6">
             <ListingConversationsPanel />
           </TabsContent>

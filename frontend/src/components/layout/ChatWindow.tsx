@@ -1,240 +1,296 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-  MessageCircle,
-  X,
-  Send,
-  Search,
-  FileText,
-  ClipboardCheck,
-  HelpCircle,
-  ShoppingCart,
-  Tag,
-  Phone,
   Bot,
+  CircleUserRound,
+  Headphones,
+  LoaderCircle,
+  MessageCircle,
+  RotateCcw,
+  Send,
+  ShieldCheck,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  fetchSupportHistory,
+  sendSupportMessage,
+  type SupportMessage,
+  type SupportSender,
+} from '@/lib/support-chat-api';
 import { useNavigation } from '@/stores/navigation';
 import { cn } from '@/lib/utils';
 
-interface ChatOption {
-  label: string;
-  icon: React.ElementType;
-  pageId?: string;
-  description: string;
+interface ChatItem {
+  id: string;
+  sender: SupportSender;
+  text: string;
+  pending?: boolean;
 }
 
-const chatOptions: ChatOption[] = [
-  {
-    label: 'جستجوی خودرو',
-    icon: Search,
-    pageId: 'buy',
-    description: 'پیدا کردن خودروی دلخواه',
-  },
-  {
-    label: 'ثبت آگهی',
-    icon: Tag,
-    pageId: 'sell',
-    description: 'ثبت آگهی فروش خودرو',
-  },
-  {
-    label: 'درخواست بازرسی',
-    icon: ClipboardCheck,
-    pageId: 'inspection',
-    description: 'بازرسی تخصصی خودرو',
-  },
-  {
-    label: 'مشاوره خرید',
-    icon: ShoppingCart,
-    pageId: 'consultation',
-    description: 'راهنمایی در خرید خودرو',
-  },
-  {
-    label: 'مشاوره فروش',
-    icon: FileText,
-    pageId: 'sell',
-    description: 'قیمت‌گذاری و فروش خودرو',
-  },
-  {
-    label: 'پیگیری درخواست',
-    icon: HelpCircle,
-    pageId: 'contact',
-    description: 'پیگیری وضعیت درخواست',
-  },
-  {
-    label: 'تماس با پشتیبانی',
-    icon: Phone,
-    pageId: 'contact',
-    description: 'صحبت با کارشناسان ما',
-  },
+const quickQuestions = [
+  'چطور آگهی خودرو ثبت کنم؟',
+  'تفاوت نمایشگاه و نمایندگی چیست؟',
+  'فروش فوری و فروش ویژه چطور کار می‌کند؟',
 ];
+
+const welcomeMessage: ChatItem = {
+  id: 'welcome',
+  sender: 'ai',
+  text: 'سلام! من دستیار هوشمند آزادگذر هستم. درباره خرید و فروش خودرو، آگهی‌ها، حساب کاربری و خدمات سایت راهنمایی‌تان می‌کنم.',
+};
+
+function toChatItem(message: SupportMessage): ChatItem {
+  return { id: String(message.id), sender: message.sender, text: message.text };
+}
+
+function SenderIcon({ sender }: { sender: SupportSender }) {
+  if (sender === 'user') return <CircleUserRound className="size-3.5" />;
+  if (sender === 'support') return <Headphones className="size-3.5" />;
+  return <Bot className="size-3.5" />;
+}
 
 export function ChatWindow() {
   const { navigateTo } = useNavigation();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<
-    { text: string; isBot: boolean }[]
-  >([
-    {
-      text: 'سلام! به آزاد گذر خوش آمدید. چطور می‌تونم کمکتون کنم؟',
-      isBot: true,
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatItem[]>([welcomeMessage]);
+  const [loaded, setLoaded] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+  const scrollAnchor = useRef<HTMLDivElement>(null);
+  const historyRequested = useRef(false);
+  const pendingSequence = useRef(0);
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim()) return;
+  useEffect(() => {
+    if (!open || loaded || historyRequested.current) return;
+    historyRequested.current = true;
+    fetchSupportHistory()
+      .then((result) => {
+        setMessages(result.messages.length ? result.messages.map(toChatItem) : [welcomeMessage]);
+        setLoaded(true);
+        setError('');
+      })
+      .catch(() => {
+        historyRequested.current = false;
+        setError('تاریخچه گفتگو بارگذاری نشد؛ می‌توانید دوباره تلاش کنید.');
+      });
+  }, [loaded, open]);
 
-    const userMsg = message.trim();
+  useEffect(() => {
+    if (open) scrollAnchor.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, open, sending]);
+
+  const handleSendMessage = async (text = message) => {
+    const cleanText = text.trim();
+    if (!cleanText || sending) return;
+
+    pendingSequence.current += 1;
+    const temporaryId = `pending-${pendingSequence.current}`;
     setMessage('');
-    setMessages((prev) => [...prev, { text: userMsg, isBot: false }]);
-
-    // Simulated bot response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          text: 'پیام شما دریافت شد. کارشناسان ما در اسرع وقت با شما تماس خواهند گرفت. در حال حاضر می‌تونید از گزینه‌های زیر استفاده کنید.',
-          isBot: true,
-        },
-      ]);
-    }, 800);
-  };
-
-  const handleOptionClick = (option: ChatOption) => {
-    setMessages((prev) => [
-      ...prev,
-      { text: option.label, isBot: false },
+    setError('');
+    setSending(true);
+    setMessages((current) => [
+      ...current,
+      { id: temporaryId, sender: 'user', text: cleanText, pending: true },
     ]);
 
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          text: `باشه! شما رو به بخش "${option.label}" هدایت می‌کنم.`,
-          isBot: true,
-        },
+    try {
+      const result = await sendSupportMessage(cleanText);
+      setMessages((current) => [
+        ...current.filter((item) => item.id !== temporaryId),
+        toChatItem(result),
+        toChatItem(result.reply),
       ]);
-      if (option.pageId) {
-        navigateTo(option.pageId as never);
-      }
-    }, 500);
+      setLoaded(true);
+    } catch {
+      setMessages((current) => current.filter((item) => item.id !== temporaryId));
+      setMessage(cleanText);
+      setError('ارسال پیام انجام نشد. اتصال اینترنت یا وضعیت سرور را بررسی کنید.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      {/* Chat panel */}
-      <div
+    <div className="fixed bottom-4 right-4 z-[70] sm:bottom-6 sm:right-6" dir="rtl">
+      <section
+        aria-label="پشتیبانی آنلاین هوش مصنوعی"
+        aria-hidden={!open}
         className={cn(
-          'absolute bottom-16 right-0 w-80 sm:w-96 bg-white rounded-2xl shadow-premium-lg border border-silver-light overflow-hidden transition-all duration-300 origin-bottom-right',
+          'absolute bottom-[4.5rem] right-0 flex h-[min(620px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-[390px] origin-bottom-right flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl transition duration-200',
           open
-            ? 'opacity-100 scale-100 pointer-events-auto'
-            : 'opacity-0 scale-95 pointer-events-none'
+            ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
+            : 'pointer-events-none translate-y-3 scale-95 opacity-0',
         )}
       >
-        {/* Header */}
-        <div className="bg-gradient-navy text-white p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-powder/20 flex items-center justify-center">
-              <Bot className="size-5 text-powder" />
+        <header className="bg-gradient-brand px-4 py-3.5 text-white">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="relative grid size-10 shrink-0 place-items-center rounded-full bg-white/10">
+                <Bot className="size-5 text-gold" />
+                <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-navy bg-emerald-400" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-bold">دستیار هوشمند آزادگذر</h2>
+                <p className="mt-0.5 flex items-center gap-1 text-[11px] text-white/65">
+                  <ShieldCheck className="size-3" /> پاسخ‌گویی آنلاین
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-sm">چت آنلاین</h3>
-              <p className="text-xs text-white/60">پشتیبانی آزاد گذر</p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
-            onClick={() => setOpen(false)}
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
-
-        {/* Messages area */}
-        <div className="h-64 overflow-y-auto p-4 flex flex-col gap-3 scrollbar-thin">
-          {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={cn(
-                'max-w-[85%] px-3 py-2 rounded-xl text-sm leading-6',
-                msg.isBot
-                  ? 'bg-secondary text-foreground self-start rounded-tr-sm'
-                  : 'bg-powder text-navy self-end rounded-tl-sm'
-              )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 text-white/70 hover:bg-white/10 hover:text-white"
+              onClick={() => setOpen(false)}
+              aria-label="بستن پنجره پشتیبانی"
             >
-              {msg.text}
-            </div>
-          ))}
+              <X className="size-4" />
+            </Button>
+          </div>
+        </header>
 
-          {/* Quick options - show after last bot message */}
-          {messages.length <= 2 && (
-            <div className="flex flex-col gap-1.5 mt-2">
-              {chatOptions.map((option) => (
-                <button
-                  key={option.label}
-                  onClick={() => handleOptionClick(option)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-silver-light hover:border-powder hover:bg-powder/5 transition-all text-right group"
+        <div className="flex-1 overflow-y-auto bg-slate-50/70 p-3.5 scrollbar-thin" aria-live="polite">
+          {!loaded && !error && (
+            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+              <LoaderCircle className="ml-2 size-4 animate-spin" /> در حال دریافت گفتگو...
+            </div>
+          )}
+
+          {(loaded || error) && (
+            <div className="flex flex-col gap-3">
+              {messages.map((item) => (
+                <div
+                  key={item.id}
+                  className={cn(
+                    'flex max-w-[88%] flex-col gap-1',
+                    item.sender === 'user' ? 'self-end items-end' : 'self-start items-start',
+                  )}
                 >
-                  <option.icon className="size-4 text-powder-dark group-hover:text-powder transition-colors flex-shrink-0" />
-                  <div>
-                    <span className="text-sm font-medium text-foreground block">
-                      {option.label}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {option.description}
-                    </span>
+                  <span className="flex items-center gap-1 px-1 text-[10px] text-muted-foreground">
+                    <SenderIcon sender={item.sender} />
+                    {item.sender === 'user'
+                      ? 'شما'
+                      : item.sender === 'support'
+                        ? 'کارشناس پشتیبانی'
+                        : 'دستیار هوشمند'}
+                  </span>
+                  <div
+                    className={cn(
+                      'whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm leading-6 shadow-sm',
+                      item.sender === 'user'
+                        ? 'rounded-tr-md bg-navy text-white'
+                        : 'rounded-tl-md border border-slate-200 bg-white text-foreground',
+                      item.pending && 'opacity-60',
+                    )}
+                  >
+                    {item.text}
                   </div>
-                </button>
+                </div>
               ))}
+
+              {messages.length === 1 && (
+                <div className="mt-1 grid gap-1.5">
+                  {quickQuestions.map((question) => (
+                    <button
+                      key={question}
+                      type="button"
+                      onClick={() => void handleSendMessage(question)}
+                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-right text-xs leading-5 text-slate-700 transition hover:border-gold hover:bg-amber-50"
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {sending && (
+                <div className="flex items-center gap-2 self-start rounded-2xl rounded-tl-md border border-slate-200 bg-white px-3 py-2 text-xs text-muted-foreground shadow-sm">
+                  <LoaderCircle className="size-3.5 animate-spin" /> در حال آماده‌کردن پاسخ...
+                </div>
+              )}
+              <div ref={scrollAnchor} />
             </div>
           )}
         </div>
 
-        {/* Input area */}
-        <form
-          onSubmit={handleSendMessage}
-          className="border-t border-silver-light p-3 flex gap-2"
-        >
-          <Input
-            type="text"
-            placeholder="پیام خود را بنویسید..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="flex-1 h-9 text-sm rounded-lg"
-          />
-          <Button
-            type="submit"
-            size="icon"
-            className="h-9 w-9 rounded-lg bg-powder hover:bg-powder-dark text-navy flex-shrink-0"
-          >
-            <Send className="size-4" />
-          </Button>
-        </form>
-      </div>
+        {error && (
+          <div className="flex items-center justify-between gap-2 border-t border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-700">
+            <span>{error}</span>
+            <button
+              type="button"
+              className="shrink-0 rounded-md p-1 hover:bg-red-100"
+              onClick={() => {
+                historyRequested.current = false;
+                setLoaded(false);
+                setError('');
+              }}
+              aria-label="تلاش دوباره"
+            >
+              <RotateCcw className="size-3.5" />
+            </button>
+          </div>
+        )}
 
-      {/* Toggle button */}
+        <form
+          className="border-t border-slate-200 bg-white p-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSendMessage();
+          }}
+        >
+          <div className="flex gap-2">
+            <Input
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              maxLength={2000}
+              disabled={sending}
+              placeholder="سؤالتان را بنویسید..."
+              className="h-10 flex-1 rounded-xl text-sm"
+              aria-label="متن پیام پشتیبانی"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              disabled={sending || !message.trim()}
+              className="size-10 shrink-0 rounded-xl bg-gold text-navy hover:bg-gold-dark"
+              aria-label="ارسال پیام"
+            >
+              {sending ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />}
+            </Button>
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-muted-foreground">
+            <span>پاسخ‌ها خودکارند؛ اطلاعات حساس ارسال نکنید.</span>
+            <button
+              type="button"
+              className="shrink-0 font-medium text-gold-dark hover:underline"
+              onClick={() => {
+                setOpen(false);
+                navigateTo('contact');
+              }}
+            >
+              پشتیبانی انسانی
+            </button>
+          </div>
+        </form>
+      </section>
+
       <Button
-        onClick={() => setOpen(!open)}
+        type="button"
+        onClick={() => setOpen((current) => !current)}
         className={cn(
-          'w-14 h-14 rounded-full shadow-premium-lg transition-all duration-300 hover-lift',
-          open
-            ? 'bg-navy hover:bg-navy-light text-white'
-            : 'bg-powder hover:bg-powder-dark text-navy animate-pulse-glow'
+          'relative size-14 rounded-full border-2 border-white shadow-xl transition hover:-translate-y-0.5 sm:size-16',
+          open ? 'bg-navy text-white hover:bg-navy-light' : 'bg-gold text-navy hover:bg-gold-dark',
         )}
         size="icon"
-        aria-label={open ? 'بستن چت' : 'چت آنلاین'}
+        aria-expanded={open}
+        aria-label={open ? 'بستن پشتیبانی آنلاین' : 'باز کردن پشتیبانی آنلاین هوش مصنوعی'}
       >
-        {open ? (
-          <X className="size-6" />
-        ) : (
-          <MessageCircle className="size-6" />
-        )}
+        {open ? <X className="size-6" /> : <MessageCircle className="size-7" />}
+        {!open && <span className="absolute right-0 top-0 size-3 rounded-full border-2 border-white bg-emerald-500" />}
       </Button>
     </div>
   );

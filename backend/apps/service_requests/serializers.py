@@ -1,10 +1,17 @@
+from datetime import timedelta
+
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.accounts.models import User
 from apps.accounts.services.otp import normalize_phone_number
 from apps.catalog.models import VehicleListing
-from apps.service_requests.models import ServiceRequest, ServiceRequestEvent
+from apps.service_requests.models import (
+    ListingVisitRequest,
+    ServiceRequest,
+    ServiceRequestEvent,
+)
 from apps.service_requests.services import update_service_request
 
 
@@ -179,3 +186,156 @@ class ExpertOptionSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "phone_number")
         read_only_fields = fields
 
+
+VISIT_HOURS = (9, 10, 11, 13, 14, 15, 16, 17)
+
+
+class ListingVisitRequestCreateSerializer(serializers.ModelSerializer):
+    listing = serializers.PrimaryKeyRelatedField(
+        queryset=VehicleListing.objects.filter(status=VehicleListing.Status.ACTIVE)
+    )
+
+    class Meta:
+        model = ListingVisitRequest
+        fields = (
+            "listing",
+            "contact_name",
+            "contact_phone",
+            "scheduled_for",
+            "requester_note",
+        )
+
+    def validate_contact_name(self, value: str) -> str:
+        value = value.strip()
+        if len(value) < 3:
+            raise serializers.ValidationError("نام و نام خانوادگی را کامل وارد کنید.")
+        return value
+
+    def validate_contact_phone(self, value: str) -> str:
+        return normalize_phone_number(value)
+
+    def validate_scheduled_for(self, value):
+        now = timezone.now()
+        if value <= now:
+            raise serializers.ValidationError("زمان بازدید باید در آینده باشد.")
+        local_value = timezone.localtime(value)
+        if local_value.date() > timezone.localdate() + timedelta(days=60):
+            raise serializers.ValidationError("زمان بازدید حداکثر تا ۶۰ روز آینده قابل انتخاب است.")
+        if local_value.weekday() == 4:
+            raise serializers.ValidationError("ثبت بازدید در روز جمعه امکان‌پذیر نیست.")
+        if local_value.hour not in VISIT_HOURS or local_value.minute != 0:
+            raise serializers.ValidationError("بازه زمانی انتخاب‌شده معتبر نیست.")
+        return value
+
+    def validate(self, attrs: dict) -> dict:
+        listing = attrs["listing"]
+        request = self.context["request"]
+        if request.user.is_authenticated and (
+            listing.owner_id == request.user.id
+            or (
+                listing.business_id
+                and (
+                    listing.business.owner_id == request.user.id
+                    or listing.business.memberships.filter(
+                        user=request.user,
+                        status="active",
+                        can_manage_listings=True,
+                    ).exists()
+                )
+            )
+        ):
+            raise serializers.ValidationError("برای آگهی خودتان نمی‌توانید درخواست بازدید ثبت کنید.")
+        if ListingVisitRequest.objects.filter(
+            listing=listing,
+            scheduled_for=attrs["scheduled_for"],
+            status__in=(
+                ListingVisitRequest.Status.PENDING,
+                ListingVisitRequest.Status.CONFIRMED,
+            ),
+        ).exists():
+            raise serializers.ValidationError({"scheduled_for": "این ساعت قبلاً رزرو شده است."})
+        return attrs
+
+
+class ListingVisitRequestSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source="public_id", read_only=True)
+    listing_id = serializers.IntegerField(source="listing.id", read_only=True)
+    listing_title = serializers.SerializerMethodField()
+    listing_city = serializers.CharField(source="listing.city", read_only=True)
+    status_label = serializers.CharField(source="get_status_display", read_only=True)
+
+    class Meta:
+        model = ListingVisitRequest
+        fields = (
+            "id",
+            "listing_id",
+            "listing_title",
+            "listing_city",
+            "contact_name",
+            "contact_phone",
+            "scheduled_for",
+            "requester_note",
+            "owner_note",
+            "status",
+            "status_label",
+            "responded_at",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = fields
+
+    def get_listing_title(self, obj: ListingVisitRequest) -> str:
+        return f"{obj.listing.brand_name} {obj.listing.model_name} {obj.listing.trim_name}".strip()
+
+
+class ListingVisitRequestOwnerUpdateSerializer(serializers.ModelSerializer):
+    status = serializers.ChoiceField(
+        choices=(
+            ListingVisitRequest.Status.CONFIRMED,
+            ListingVisitRequest.Status.REJECTED,
+            ListingVisitRequest.Status.CANCELLED,
+            ListingVisitRequest.Status.COMPLETED,
+        )
+    )
+    owner_note = serializers.CharField(required=False, allow_blank=True, max_length=1000)
+
+    class Meta:
+        model = ListingVisitRequest
+        fields = ("status", "owner_note")
+
+    def validate_status(self, value: str) -> str:
+        transitions = {
+            ListingVisitRequest.Status.PENDING: {
+                ListingVisitRequest.Status.CONFIRMED,
+                ListingVisitRequest.Status.REJECTED,
+                ListingVisitRequest.Status.CANCELLED,
+            },
+            ListingVisitRequest.Status.CONFIRMED: {
+                ListingVisitRequest.Status.COMPLETED,
+                ListingVisitRequest.Status.CANCELLED,
+            },
+        }
+        if value not in transitions.get(self.instance.status, set()):
+            raise serializers.ValidationError("تغییر وضعیت درخواست در این مرحله مجاز نیست.")
+        return value
+
+    def validate(self, attrs: dict) -> dict:
+        if (
+            attrs.get("status") == ListingVisitRequest.Status.REJECTED
+            and not attrs.get("owner_note", "").strip()
+        ):
+            raise serializers.ValidationError(
+                {"owner_note": "برای رد درخواست، علت را وارد کنید."}
+            )
+        return attrs
+
+    def update(self, instance: ListingVisitRequest, validated_data: dict) -> ListingVisitRequest:
+        instance.status = validated_data.get("status", instance.status)
+        instance.owner_note = validated_data.get("owner_note", instance.owner_note).strip()
+        if instance.status in {
+            ListingVisitRequest.Status.CONFIRMED,
+            ListingVisitRequest.Status.REJECTED,
+        }:
+            instance.responded_at = timezone.now()
+        instance.save(update_fields=("status", "owner_note", "responded_at", "updated_at"))
+        return instance

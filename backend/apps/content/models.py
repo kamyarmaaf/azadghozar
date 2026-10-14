@@ -422,23 +422,37 @@ class SupportConversation(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="support_conversation",
+        null=True,
+        blank=True,
     )
+    guest_id = models.UUIDField(null=True, blank=True, unique=True, editable=False)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.OPEN, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ("-updated_at", "-id")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(user__isnull=False, guest_id__isnull=True)
+                    | models.Q(user__isnull=True, guest_id__isnull=False)
+                ),
+                name="content_support_identity_ck",
+            ),
+        ]
         verbose_name = "گفتگوی پشتیبانی"
         verbose_name_plural = "گفتگوهای پشتیبانی"
 
     def __str__(self) -> str:
-        return f"{self.user.display_name} - {self.get_status_display()}"
+        identity = self.user.display_name if self.user_id else f"مهمان {str(self.guest_id)[:8]}"
+        return f"{identity} - {self.get_status_display()}"
 
 
 class SupportMessage(models.Model):
     class Sender(models.TextChoices):
         USER = "user", "کاربر"
+        AI = "ai", "دستیار هوش مصنوعی"
         SUPPORT = "support", "پشتیبانی"
 
     conversation = models.ForeignKey(SupportConversation, on_delete=models.CASCADE, related_name="messages")

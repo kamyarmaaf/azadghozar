@@ -3,6 +3,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
+from django.db.models import Q
 
 
 class ServiceRequest(models.Model):
@@ -152,3 +153,72 @@ class ServiceRequestEvent(models.Model):
     def __str__(self) -> str:
         return f"{self.service_request_id}: {self.from_status} -> {self.to_status}"
 
+
+class ListingVisitRequest(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "در انتظار پاسخ"
+        CONFIRMED = "confirmed", "تأییدشده"
+        REJECTED = "rejected", "ردشده"
+        CANCELLED = "cancelled", "لغوشده"
+        COMPLETED = "completed", "انجام‌شده"
+
+    public_id = models.UUIDField(
+        default=uuid4,
+        unique=True,
+        editable=False,
+        verbose_name="شناسه پیگیری",
+    )
+    listing = models.ForeignKey(
+        "catalog.VehicleListing",
+        on_delete=models.CASCADE,
+        related_name="visit_requests",
+        verbose_name="آگهی",
+    )
+    requester = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="listing_visit_requests",
+        verbose_name="درخواست‌دهنده",
+    )
+    contact_name = models.CharField(max_length=120, verbose_name="نام تماس")
+    contact_phone = models.CharField(max_length=16, verbose_name="شماره تماس")
+    scheduled_for = models.DateTimeField(verbose_name="زمان پیشنهادی بازدید")
+    requester_note = models.TextField(blank=True, max_length=1000, verbose_name="توضیح متقاضی")
+    owner_note = models.TextField(blank=True, max_length=1000, verbose_name="پاسخ مالک")
+    status = models.CharField(
+        max_length=16,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+        verbose_name="وضعیت",
+    )
+    responded_at = models.DateTimeField(null=True, blank=True, verbose_name="زمان پاسخ")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at", "-id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("listing", "scheduled_for"),
+                condition=Q(status__in=("pending", "confirmed")),
+                name="visit_open_listing_slot_unique",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                fields=("listing", "status", "scheduled_for"),
+                name="visit_listing_slot_idx",
+            ),
+            models.Index(
+                fields=("requester", "-created_at", "-id"),
+                name="visit_requester_feed_idx",
+            ),
+        ]
+        verbose_name = "درخواست بازدید حضوری"
+        verbose_name_plural = "درخواست‌های بازدید حضوری"
+
+    def __str__(self) -> str:
+        return f"{self.listing} - {self.contact_name}"

@@ -1,0 +1,126 @@
+from django.urls import path
+from apps.accounts.admin_users import AdminUserDetailView, AdminUserListView
+from apps.accounts.dashboard import DashboardSummaryView
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+)
+
+from apps.accounts.views import (
+    LoginRequestOTPView,
+    LoginVerifyOTPView,
+    MeView,
+    PasswordLoginView,
+    PasswordResetConfirmView,
+    PasswordResetRequestView,
+    ReferralClaimView,
+    ReferralStatsView,
+    ReferralVerifyView,
+    RoleChangeApproveView,
+    RoleChangePendingView,
+    RoleChangeRejectView,
+    RoleChangeRequestView,
+    RoleChoicesView,
+    SignupRequestOTPView,
+    SignupCompleteView,
+    SignupVerifyOTPView,
+)
+
+
+app_name = "accounts"
+
+
+urlpatterns = [
+    path("dashboard/summary/", DashboardSummaryView.as_view(), name="dashboard-summary"),
+    path("admin/users/", AdminUserListView.as_view(), name="admin-users"),
+    path("admin/users/<int:pk>/", AdminUserDetailView.as_view(), name="admin-user-detail"),
+    path(
+        "roles/",
+        RoleChoicesView.as_view(),
+        name="role-choices",
+    ),
+    path(
+        "signup/request-otp/",
+        SignupRequestOTPView.as_view(),
+        name="signup-request-otp",
+    ),
+    path(
+        "signup/verify-otp/",
+        SignupVerifyOTPView.as_view(),
+        name="signup-verify-otp",
+    ),
+    path(
+        "signup/complete/",
+        SignupCompleteView.as_view(),
+        name="signup-complete",
+    ),
+    path(
+        "login/request-otp/",
+        LoginRequestOTPView.as_view(),
+        name="login-request-otp",
+    ),
+    path(
+        "login/verify-otp/",
+        LoginVerifyOTPView.as_view(),
+        name="login-verify-otp",
+    ),
+    path(
+        "login/password/",
+        PasswordLoginView.as_view(),
+        name="password-login",
+    ),
+    path(
+        "password-reset/request-otp/",
+        PasswordResetRequestView.as_view(),
+        name="password-reset-request",
+    ),
+    path(
+        "password-reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
+    ),
+    path(
+        "token/refresh/",
+        TokenRefreshView.as_view(),
+        name="token-refresh",
+    ),
+    path(
+        "me/",
+        MeView.as_view(),
+        name="me",
+    ),
+    path(
+        "referrals/verify/",
+        ReferralVerifyView.as_view(),
+        name="referral-verify",
+    ),
+    path(
+        "referrals/stats/",
+        ReferralStatsView.as_view(),
+        name="referral-stats",
+    ),
+    path(
+        "referrals/<int:pk>/claim/",
+        ReferralClaimView.as_view(),
+        name="referral-claim",
+    ),
+    path(
+        "role-changes/",
+        RoleChangeRequestView.as_view(),
+        name="role-change-list-create",
+    ),
+    path(
+        "role-changes/pending/",
+        RoleChangePendingView.as_view(),
+        name="role-change-pending",
+    ),
+    path(
+        "role-changes/<int:pk>/approve/",
+        RoleChangeApproveView.as_view(),
+        name="role-change-approve",
+    ),
+    path(
+        "role-changes/<int:pk>/reject/",
+        RoleChangeRejectView.as_view(),
+        name="role-change-reject",
+    ),
+]

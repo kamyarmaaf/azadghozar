@@ -1,13 +1,20 @@
+from datetime import date, datetime, time, timedelta
+
+from django.db import IntegrityError
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import generics, status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.views import APIView
 
 from apps.accounts.models import User
 from apps.accounts.services.otp import normalize_phone_number
-from apps.service_requests.models import ServiceRequest
+from apps.businesses.models import BusinessMembership
+from apps.catalog.models import VehicleListing
+from apps.service_requests.models import ListingVisitRequest, ServiceRequest
 from apps.service_requests.pagination import (
     ExpertCursorPagination,
     ServiceRequestCursorPagination,
@@ -17,6 +24,9 @@ from apps.service_requests.serializers import (
     AdminServiceRequestUpdateSerializer,
     ExpertOptionSerializer,
     ExpertServiceRequestUpdateSerializer,
+    ListingVisitRequestCreateSerializer,
+    ListingVisitRequestOwnerUpdateSerializer,
+    ListingVisitRequestSerializer,
     ServiceRequestCreateSerializer,
     ServiceRequestSerializer,
 )
@@ -175,3 +185,148 @@ class AdminExpertListView(generics.ListAPIView):
                 | Q(phone_number__icontains=query)
             )
         return queryset.order_by("-id")
+
+
+def managed_listing_filter(user) -> Q:
+    managed_businesses = BusinessMembership.objects.filter(
+        user=user,
+        status=BusinessMembership.Status.ACTIVE,
+        can_manage_listings=True,
+    ).values("business_id")
+    return (
+        Q(owner=user)
+        | Q(business__owner=user)
+        | Q(business_id__in=managed_businesses)
+    )
+
+
+def visit_request_queryset():
+    return ListingVisitRequest.objects.select_related(
+        "listing",
+        "listing__owner",
+        "listing__business",
+        "requester",
+    )
+
+
+class ListingVisitAvailabilityView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        try:
+            listing_id = int(request.query_params.get("listing", ""))
+            requested_date = date.fromisoformat(request.query_params.get("date", ""))
+        except (TypeError, ValueError):
+            raise ValidationError("آگهی و تاریخ معتبر ارسال کنید.")
+        if not VehicleListing.objects.filter(
+            pk=listing_id,
+            status=VehicleListing.Status.ACTIVE,
+        ).exists():
+            raise NotFound("آگهی فعال پیدا نشد.")
+
+        today = timezone.localdate()
+        if requested_date < today or requested_date > today + timedelta(days=60):
+            raise ValidationError("تاریخ باید در بازه ۶۰ روز آینده باشد.")
+        tz = timezone.get_current_timezone()
+        start = timezone.make_aware(datetime.combine(requested_date, time.min), tz)
+        end = start + timedelta(days=1)
+        unavailable_hours = list(
+            ListingVisitRequest.objects.filter(
+                listing_id=listing_id,
+                scheduled_for__gte=start,
+                scheduled_for__lt=end,
+                status__in=(
+                    ListingVisitRequest.Status.PENDING,
+                    ListingVisitRequest.Status.CONFIRMED,
+                ),
+            )
+            .order_by("scheduled_for")
+            .values_list("scheduled_for", flat=True)
+        )
+        return Response(
+            {
+                "date": requested_date.isoformat(),
+                "unavailable_hours": [timezone.localtime(value).hour for value in unavailable_hours],
+            }
+        )
+
+
+class ListingVisitRequestCreateView(generics.CreateAPIView):
+    permission_classes = (AllowAny,)
+    throttle_classes = (ScopedRateThrottle,)
+    throttle_scope = "visit_request_create"
+    serializer_class = ListingVisitRequestCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        requester = request.user if request.user.is_authenticated else None
+        try:
+            instance = serializer.save(requester=requester)
+        except IntegrityError as exc:
+            raise ValidationError({"scheduled_for": "این ساعت همین حالا رزرو شد؛ ساعت دیگری انتخاب کنید."}) from exc
+        return Response(
+            ListingVisitRequestSerializer(instance).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class MyListingVisitRequestListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ListingVisitRequestSerializer
+    pagination_class = ServiceRequestCursorPagination
+
+    def get_queryset(self):
+        return visit_request_queryset().filter(requester=self.request.user)
+
+
+class MyListingVisitRequestCancelView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, request_id):
+        instance = visit_request_queryset().filter(
+            public_id=request_id,
+            requester=request.user,
+        ).first()
+        if instance is None:
+            raise NotFound("درخواست بازدید پیدا نشد.")
+        if instance.status not in {
+            ListingVisitRequest.Status.PENDING,
+            ListingVisitRequest.Status.CONFIRMED,
+        }:
+            raise ValidationError("این درخواست دیگر قابل لغو نیست.")
+        instance.status = ListingVisitRequest.Status.CANCELLED
+        instance.save(update_fields=("status", "updated_at"))
+        return Response(ListingVisitRequestSerializer(instance).data)
+
+
+class ManagedListingVisitRequestListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ListingVisitRequestSerializer
+    pagination_class = ServiceRequestCursorPagination
+
+    def get_queryset(self):
+        queryset = visit_request_queryset().filter(
+            managed_listing_filter(self.request.user)
+        )
+        request_status = self.request.query_params.get("status", "").strip()
+        if request_status in ListingVisitRequest.Status.values:
+            queryset = queryset.filter(status=request_status)
+        return queryset
+
+
+class ManagedListingVisitRequestDetailView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ListingVisitRequestOwnerUpdateSerializer
+    lookup_field = "public_id"
+    lookup_url_kwarg = "request_id"
+
+    def get_queryset(self):
+        return visit_request_queryset().filter(managed_listing_filter(self.request.user))
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        updated = serializer.save()
+        return Response(ListingVisitRequestSerializer(updated).data)

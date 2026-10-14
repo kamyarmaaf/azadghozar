@@ -6,6 +6,12 @@ from apps.service_requests.views import (
     AdminServiceRequestListView,
     ExpertServiceRequestDetailView,
     ExpertServiceRequestListView,
+    ListingVisitAvailabilityView,
+    ListingVisitRequestCreateView,
+    ManagedListingVisitRequestDetailView,
+    ManagedListingVisitRequestListView,
+    MyListingVisitRequestCancelView,
+    MyListingVisitRequestListView,
     MyServiceRequestListView,
     ServiceRequestCreateView,
 )
@@ -29,5 +35,26 @@ urlpatterns = [
         ExpertServiceRequestDetailView.as_view(),
         name="expert-detail",
     ),
+    path(
+        "visits/availability/",
+        ListingVisitAvailabilityView.as_view(),
+        name="visit-availability",
+    ),
+    path("visits/", ListingVisitRequestCreateView.as_view(), name="visit-create"),
+    path("visits/mine/", MyListingVisitRequestListView.as_view(), name="visit-mine"),
+    path(
+        "visits/mine/<uuid:request_id>/cancel/",
+        MyListingVisitRequestCancelView.as_view(),
+        name="visit-cancel",
+    ),
+    path(
+        "visits/managed/",
+        ManagedListingVisitRequestListView.as_view(),
+        name="visit-managed-list",
+    ),
+    path(
+        "visits/managed/<uuid:request_id>/",
+        ManagedListingVisitRequestDetailView.as_view(),
+        name="visit-managed-detail",
+    ),
 ]
-

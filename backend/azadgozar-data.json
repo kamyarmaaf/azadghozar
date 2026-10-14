@@ -1,0 +1,3315 @@
+[
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$SSVAYBfoa15SOHevusUHzs$zqgydTn84X2YoYppCiKxr+X2Yg0cS8lEy4JH/extgAA=",
+    "last_login": "2026-09-19T14:21:00.951Z",
+    "is_superuser": true,
+    "username": "kamyar",
+    "first_name": "",
+    "last_name": "",
+    "email": "kamyarmf1@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-07-28T18:22:29.553Z",
+    "role": "admin",
+    "phone_number": null,
+    "is_phone_verified": false,
+    "referral_code": "AZ-PHUQ5N9Z",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": null,
+    "profile_completed_at": null,
+    "province": "",
+    "city": "",
+    "address": "",
+    "preferred_contact_method": "both",
+    "business_name": "",
+    "business_phone": "",
+    "business_description": "",
+    "business_logo": "",
+    "business_cover": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "!NPONehHtDy3qFlGJ32A7AZOjjxSEMSELKBivigEU",
+    "last_login": "2026-07-28T19:45:16.972Z",
+    "is_superuser": false,
+    "username": "+989120000001",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-07-28T19:45:16.960Z",
+    "role": "buyer",
+    "phone_number": "+989120000001",
+    "is_phone_verified": true,
+    "referral_code": "AZ-QDWW5WAT",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": null,
+    "profile_completed_at": null,
+    "province": "",
+    "city": "",
+    "address": "",
+    "preferred_contact_method": "both",
+    "business_name": "",
+    "business_phone": "",
+    "business_description": "",
+    "business_logo": "",
+    "business_cover": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "!IJY0YpUnUK3kZhHtCFzASfov8Ljy3md1azvAGtjB",
+    "last_login": "2026-07-28T19:54:26.816Z",
+    "is_superuser": false,
+    "username": "+989120000002",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-07-28T19:49:48.517Z",
+    "role": "buyer",
+    "phone_number": "+989120000002",
+    "is_phone_verified": true,
+    "referral_code": "AZ-LJ4KN4GB",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": null,
+    "profile_completed_at": null,
+    "province": "",
+    "city": "",
+    "address": "",
+    "preferred_contact_method": "both",
+    "business_name": "",
+    "business_phone": "",
+    "business_description": "",
+    "business_logo": "",
+    "business_cover": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$coYEvXYJCrZhS0bjG1rxlh$vA9beVquUF0p7CUkVT5Zac87oHKyZLEiC4CNvPdW0Dg=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "kamyarmf",
+    "first_name": "",
+    "last_name": "",
+    "email": "kamyarmf@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-09-04T18:51:52.304Z",
+    "role": "admin",
+    "phone_number": null,
+    "is_phone_verified": false,
+    "referral_code": "AZ-8U2AEPZQ",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": null,
+    "profile_completed_at": null,
+    "province": "",
+    "city": "",
+    "address": "",
+    "preferred_contact_method": "both",
+    "business_name": "",
+    "business_phone": "",
+    "business_description": "",
+    "business_logo": "",
+    "business_cover": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$DM0U9qHmYoannNspccJw42$3Aooqzr0UJmjkoevDyAFHPnfLGTLn59lg3qf/wvD0wo=",
+    "last_login": "2026-09-08T13:21:05.309Z",
+    "is_superuser": false,
+    "username": "+989382989027",
+    "first_name": "kamyarmf1@gmail.com",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-05T11:57:38.458Z",
+    "role": "buyer",
+    "phone_number": "+989382989027",
+    "is_phone_verified": true,
+    "referral_code": "AZ-TPTSDRYV",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": "2026-09-05T11:57:58.782Z",
+    "profile_completed_at": "2026-09-05T11:57:58.782Z",
+    "province": "",
+    "city": "",
+    "address": "",
+    "preferred_contact_method": "both",
+    "business_name": "",
+    "business_phone": "",
+    "business_description": "",
+    "business_logo": "",
+    "business_cover": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$GGSEpe6DfQ5DtjMvbZ65rp$RUB1We0kxFfPiQyXGHgrkIHd8VDd98paRgzZarIQwUQ=",
+    "last_login": "2026-09-05T12:17:44.689Z",
+    "is_superuser": false,
+    "username": "+989050047981",
+    "first_name": "نرجس",
+    "last_name": "حسینی",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-05T11:59:39.840Z",
+    "role": "seller",
+    "phone_number": "+989050047981",
+    "is_phone_verified": true,
+    "referral_code": "AZ-QNEP8XQM",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": "2026-09-05T12:00:22.305Z",
+    "profile_completed_at": "2026-09-05T12:00:22.305Z",
+    "province": "",
+    "city": "",
+    "address": "",
+    "preferred_contact_method": "both",
+    "business_name": "",
+    "business_phone": "",
+    "business_description": "",
+    "business_logo": "",
+    "business_cover": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$UpAKN4NupdVi4z7pSu8GGW$A40Izui6vWKrruHgtahgTfBuNmRYU0rR03heK1i5pYQ=",
+    "last_login": "2026-09-08T14:05:11.041Z",
+    "is_superuser": false,
+    "username": "+989133939394",
+    "first_name": "رضا",
+    "last_name": "غفاری",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-08T14:05:11.033Z",
+    "role": "seller",
+    "phone_number": "+989133939394",
+    "is_phone_verified": true,
+    "referral_code": "AZ-X8LHX4AZ",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": "2026-09-08T14:05:41.115Z",
+    "profile_completed_at": "2026-09-08T14:05:41.115Z",
+    "province": "",
+    "city": "",
+    "address": "",
+    "preferred_contact_method": "both",
+    "business_name": "",
+    "business_phone": "",
+    "business_description": "",
+    "business_logo": "",
+    "business_cover": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$mJrCZIh6rXh61L1pd1fPkc$Kc4Y49XdABCd94AHL5VqPciRgAuxYngj/JolTAMrT00=",
+    "last_login": "2026-09-17T16:21:53.125Z",
+    "is_superuser": false,
+    "username": "+989118160753",
+    "first_name": "محمد",
+    "last_name": "عابدزاده",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-17T16:21:53.067Z",
+    "role": "gallery",
+    "phone_number": "+989118160753",
+    "is_phone_verified": true,
+    "referral_code": "AZ-R9UQ973E",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": "2026-09-17T16:35:32.336Z",
+    "profile_completed_at": "2026-09-17T16:35:32.336Z",
+    "province": "گیلان",
+    "city": "انزلی",
+    "address": "انزلی ،بلوار شهید محلاتی،انتهای جاده",
+    "preferred_contact_method": "both",
+    "business_name": "نمایشگاه خودرو دهقانپور",
+    "business_phone": "01344691534",
+    "business_description": "هیچی",
+    "business_logo": "",
+    "business_cover": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$E7FEX2WqpmTha2UOLMNKqp$5+ZdTxtXi9ZCLMic7bOL6oNvyPiwtp14kv8ZWSCfmDw=",
+    "last_login": "2026-09-18T18:47:52.351Z",
+    "is_superuser": false,
+    "username": "+989988376353",
+    "first_name": "کامران",
+    "last_name": "احمدی",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-18T18:14:43.919Z",
+    "role": "agency",
+    "phone_number": "+989988376353",
+    "is_phone_verified": true,
+    "referral_code": "AZ-NHK4QUTZ",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": "2026-09-18T18:17:52.497Z",
+    "profile_completed_at": "2026-09-18T18:17:52.497Z",
+    "province": "قزوین",
+    "city": "قزوین",
+    "address": "قزوین،دهدشت",
+    "preferred_contact_method": "both",
+    "business_name": "نمایندگی خودرو وطن دوست",
+    "business_phone": "0133893893",
+    "business_description": "تازه کار",
+    "business_logo": "businesses/10/logo/b6359b1bfce943148ab10041f8ad4ed0.webp",
+    "business_cover": "businesses/10/cover/6276a4d47cc441c688602a2f59f22da9.webp",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$sNPcdyaxeSlYd1lW2TK6Y2$5nLNNRhuYhFGcrvjcfVUxPtEfIZPqkBDsRFAU1i5e/c=",
+    "last_login": "2026-09-19T14:07:28.022Z",
+    "is_superuser": false,
+    "username": "+989931576401",
+    "first_name": "احمد",
+    "last_name": "ولی زاده",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-09-19T14:07:27.935Z",
+    "role": "gallery",
+    "phone_number": "+989931576401",
+    "is_phone_verified": true,
+    "referral_code": "AZ-D24EXMAU",
+    "referred_by": null,
+    "referral_credit": 0,
+    "referral_earnings": 0,
+    "terms_accepted_at": "2026-09-19T14:09:33.860Z",
+    "profile_completed_at": "2026-09-19T14:09:33.860Z",
+    "province": "استان تهران",
+    "city": "تهران",
+    "address": "شهید لشگری، کنار مسجد",
+    "preferred_contact_method": "both",
+    "business_name": "نمایشگاه خودرو آذرین",
+    "business_phone": "01458948473",
+    "business_description": "ما همه چی رو ارزون میدیم",
+    "business_logo": "businesses/11/logo/0a4396b0794c4f6f997e20765548a8a0.webp",
+    "business_cover": "businesses/11/cover/1c9c3b146f8e4a2d850b063c9c450bb9.webp",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.otpchallenge",
+  "pk": 1,
+  "fields": {
+    "phone_number": "+989382989027",
+    "purpose": "login",
+    "code_hash": "a453e154306f2038aed94aec87069714e73e100a66d6e4ceb58e1a0a989a52e7",
+    "metadata": {},
+    "attempts": 0,
+    "expires_at": "2026-09-08T13:22:50.522Z",
+    "cooldown_until": "2026-09-08T13:21:50.522Z",
+    "request_window_started_at": "2026-09-08T13:19:47.005Z",
+    "request_count": 2,
+    "consumed_at": "2026-09-08T13:21:05.272Z",
+    "created_at": "2026-09-06T18:53:58.894Z",
+    "updated_at": "2026-09-08T13:21:05.272Z"
+  }
+},
+{
+  "model": "accounts.otpchallenge",
+  "pk": 2,
+  "fields": {
+    "phone_number": "+989133939393",
+    "purpose": "signup",
+    "code_hash": "1b73835da1f242d81a82f4d424fd7fbe4f4e56b5c771ef23a28cc4464df9938c",
+    "metadata": {
+      "role": "seller",
+      "referral_code": ""
+    },
+    "attempts": 0,
+    "expires_at": "2026-09-08T14:06:18.230Z",
+    "cooldown_until": "2026-09-08T14:05:18.230Z",
+    "request_window_started_at": "2026-09-08T14:04:18.230Z",
+    "request_count": 1,
+    "consumed_at": null,
+    "created_at": "2026-09-08T14:04:18.246Z",
+    "updated_at": "2026-09-08T14:04:18.246Z"
+  }
+},
+{
+  "model": "accounts.otpchallenge",
+  "pk": 3,
+  "fields": {
+    "phone_number": "+989133939394",
+    "purpose": "signup",
+    "code_hash": "844fece6f3b0f5d148033b8d39a2d45b9a3ecf79a704dfefce87866f81012916",
+    "metadata": {
+      "role": "seller",
+      "referral_code": ""
+    },
+    "attempts": 0,
+    "expires_at": "2026-09-08T14:07:00.596Z",
+    "cooldown_until": "2026-09-08T14:06:00.596Z",
+    "request_window_started_at": "2026-09-08T14:05:00.596Z",
+    "request_count": 1,
+    "consumed_at": "2026-09-08T14:05:11.017Z",
+    "created_at": "2026-09-08T14:05:00.611Z",
+    "updated_at": "2026-09-08T14:05:11.017Z"
+  }
+},
+{
+  "model": "accounts.otpchallenge",
+  "pk": 4,
+  "fields": {
+    "phone_number": "+989137552991",
+    "purpose": "signup",
+    "code_hash": "9fb6c88c787d102b83c324feb625f2556ce90a651f5a0869417a415cffcfd6e4",
+    "metadata": {
+      "role": "gallery",
+      "referral_code": ""
+    },
+    "attempts": 0,
+    "expires_at": "2026-09-15T11:03:15.842Z",
+    "cooldown_until": "2026-09-15T11:02:15.842Z",
+    "request_window_started_at": "2026-09-15T10:52:37.547Z",
+    "request_count": 3,
+    "consumed_at": "2026-09-15T11:01:32.219Z",
+    "created_at": "2026-09-15T10:52:37.580Z",
+    "updated_at": "2026-09-15T11:01:32.219Z"
+  }
+},
+{
+  "model": "accounts.otpchallenge",
+  "pk": 5,
+  "fields": {
+    "phone_number": "+989118160753",
+    "purpose": "signup",
+    "code_hash": "10339408f8a636835f94d1e58e50ce8bbc5589b78a730d06ed62fa672d83f7eb",
+    "metadata": {
+      "role": "gallery",
+      "referral_code": ""
+    },
+    "attempts": 0,
+    "expires_at": "2026-09-17T16:23:34.786Z",
+    "cooldown_until": "2026-09-17T16:22:34.786Z",
+    "request_window_started_at": "2026-09-17T16:21:34.786Z",
+    "request_count": 1,
+    "consumed_at": "2026-09-17T16:21:53.043Z",
+    "created_at": "2026-09-17T16:21:34.799Z",
+    "updated_at": "2026-09-17T16:21:53.043Z"
+  }
+},
+{
+  "model": "accounts.otpchallenge",
+  "pk": 6,
+  "fields": {
+    "phone_number": "+989393447883",
+    "purpose": "signup",
+    "code_hash": "f68a484e99ef94a7d9c18daed418224c2d58acef25832082ee337d7bacc17e8b",
+    "metadata": {
+      "role": "agency",
+      "referral_code": ""
+    },
+    "attempts": 0,
+    "expires_at": "2026-09-18T18:14:42.042Z",
+    "cooldown_until": "2026-09-18T18:13:42.042Z",
+    "request_window_started_at": "2026-09-18T18:12:42.042Z",
+    "request_count": 1,
+    "consumed_at": null,
+    "created_at": "2026-09-18T18:12:42.055Z",
+    "updated_at": "2026-09-18T18:12:42.055Z"
+  }
+},
+{
+  "model": "accounts.otpchallenge",
+  "pk": 7,
+  "fields": {
+    "phone_number": "+989988376353",
+    "purpose": "signup",
+    "code_hash": "df024eb9fa24d1b21ef9e67de014b99614cf90e989f3923a5648e564464f7a45",
+    "metadata": {
+      "role": "agency",
+      "referral_code": ""
+    },
+    "attempts": 0,
+    "expires_at": "2026-09-18T18:16:25.270Z",
+    "cooldown_until": "2026-09-18T18:15:25.270Z",
+    "request_window_started_at": "2026-09-18T18:14:25.270Z",
+    "request_count": 1,
+    "consumed_at": "2026-09-18T18:14:43.905Z",
+    "created_at": "2026-09-18T18:14:25.275Z",
+    "updated_at": "2026-09-18T18:14:43.906Z"
+  }
+},
+{
+  "model": "accounts.otpchallenge",
+  "pk": 8,
+  "fields": {
+    "phone_number": "+989931576401",
+    "purpose": "signup",
+    "code_hash": "016134b41384693a4fafb4026b0b61ea7906a8d48afe74b64e08ee968403c59f",
+    "metadata": {
+      "role": "gallery",
+      "referral_code": ""
+    },
+    "attempts": 0,
+    "expires_at": "2026-09-19T14:09:07.523Z",
+    "cooldown_until": "2026-09-19T14:08:07.523Z",
+    "request_window_started_at": "2026-09-19T14:07:07.523Z",
+    "request_count": 1,
+    "consumed_at": "2026-09-19T14:07:27.922Z",
+    "created_at": "2026-09-19T14:07:07.562Z",
+    "updated_at": "2026-09-19T14:07:27.922Z"
+  }
+},
+{
+  "model": "accounts.referral",
+  "pk": 1,
+  "fields": {
+    "referrer": [
+      "+989050047981"
+    ],
+    "referee": [
+      "+989988376353"
+    ],
+    "code": "63683793",
+    "reward_type": "credit",
+    "reward_value": 500000,
+    "reward_claimed": true,
+    "claimed_at": null,
+    "created_at": "2026-09-18T18:26:12.423Z"
+  }
+},
+{
+  "model": "businesses.businessprofile",
+  "pk": 2,
+  "fields": {
+    "owner": [
+      "+989118160753"
+    ],
+    "kind": "gallery",
+    "name": "نمایشگاه خودرو دهقانپور",
+    "slug": "نمایندگی-خودرو-دهقانپور-9",
+    "phone": "01344691534",
+    "province": "گیلان",
+    "city": "انزلی",
+    "address": "انزلی ،بلوار شهید محلاتی،انتهای جاده",
+    "description": "هیچی",
+    "established_year": null,
+    "working_hours": "",
+    "website": "",
+    "license_number": "",
+    "national_id": "8383838",
+    "postal_code": "",
+    "license_issuer": "",
+    "license_expires_at": null,
+    "company_registration_number": "",
+    "economic_code": "",
+    "authorized_representative_name": "",
+    "import_license_number": "",
+    "import_license_issuer": "",
+    "import_license_expires_at": null,
+    "business_card_number": "",
+    "represented_brands": [],
+    "verification_status": "verified",
+    "verification_note": "",
+    "reviewed_by": [
+      "kamyar"
+    ],
+    "verified_at": "2026-09-18T17:46:30.212Z",
+    "created_at": "2026-09-17T16:21:53.099Z",
+    "updated_at": "2026-09-18T17:46:30.213Z"
+  }
+},
+{
+  "model": "businesses.businessprofile",
+  "pk": 3,
+  "fields": {
+    "owner": [
+      "+989988376353"
+    ],
+    "kind": "agency",
+    "name": "نمایندگی خودرو وطن دوست",
+    "slug": "نمایندگی-خودرو-وطن-دوست-10",
+    "phone": "0133893893",
+    "province": "قزوین",
+    "city": "قزوین",
+    "address": "قزوین،دهدشت",
+    "description": "تازه کار",
+    "established_year": null,
+    "working_hours": "",
+    "website": "",
+    "license_number": "",
+    "national_id": "63573782",
+    "postal_code": "4385134578",
+    "license_issuer": "",
+    "license_expires_at": null,
+    "company_registration_number": "457647",
+    "economic_code": "4484884",
+    "authorized_representative_name": "وطن آریان",
+    "import_license_number": "635356373",
+    "import_license_issuer": "صمت",
+    "import_license_expires_at": "2026-09-16",
+    "business_card_number": "635637837",
+    "represented_brands": [
+      "کیا",
+      "تویوتا",
+      "نیسان"
+    ],
+    "verification_status": "verified",
+    "verification_note": "",
+    "reviewed_by": [
+      "kamyar"
+    ],
+    "verified_at": "2026-09-18T18:27:45.177Z",
+    "created_at": "2026-09-18T18:14:43.934Z",
+    "updated_at": "2026-09-18T18:31:02.863Z"
+  }
+},
+{
+  "model": "businesses.businessprofile",
+  "pk": 5,
+  "fields": {
+    "owner": [
+      "+989931576401"
+    ],
+    "kind": "gallery",
+    "name": "نمایشگاه خودرو آذرین",
+    "slug": "نمایشگاه-خودرو-آذرین-11",
+    "phone": "01458948473",
+    "province": "استان تهران",
+    "city": "تهران",
+    "address": "شهید لشگری، کنار مسجد",
+    "description": "ما همه چی رو ارزون میدیم",
+    "established_year": null,
+    "working_hours": "",
+    "website": "",
+    "license_number": "83877777777773",
+    "national_id": "09382989027",
+    "postal_code": "9389389393",
+    "license_issuer": "صمت",
+    "license_expires_at": "2026-09-29",
+    "company_registration_number": "",
+    "economic_code": "",
+    "authorized_representative_name": "",
+    "import_license_number": "",
+    "import_license_issuer": "",
+    "import_license_expires_at": null,
+    "business_card_number": "",
+    "represented_brands": [],
+    "verification_status": "verified",
+    "verification_note": "",
+    "reviewed_by": [
+      "kamyar"
+    ],
+    "verified_at": "2026-09-19T14:21:10.140Z",
+    "created_at": "2026-09-19T14:07:27.977Z",
+    "updated_at": "2026-09-19T14:21:10.140Z"
+  }
+},
+{
+  "model": "businesses.businesssubscription",
+  "pk": 1,
+  "fields": {
+    "business": 2,
+    "plan": "gallery_monthly",
+    "status": "active",
+    "starts_at": "2026-09-18T17:32:18.600Z",
+    "ends_at": "2026-10-18T17:32:18.600Z",
+    "requested_by": [
+      "+989118160753"
+    ],
+    "reviewed_by": [
+      "kamyar"
+    ],
+    "admin_note": "",
+    "reviewed_at": "2026-09-18T17:32:18.600Z",
+    "created_at": "2026-09-17T16:35:32.355Z",
+    "updated_at": "2026-09-18T17:32:18.600Z"
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 1,
+  "fields": {
+    "created_at": "2026-09-18T19:14:25.397Z",
+    "updated_at": "2026-09-18T19:14:25.397Z",
+    "name": "فورد",
+    "name_fa": "فورد",
+    "slug": "فورد",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 2,
+  "fields": {
+    "created_at": "2026-09-18T19:14:25.412Z",
+    "updated_at": "2026-09-18T19:14:25.412Z",
+    "name": "نیسان",
+    "name_fa": "نیسان",
+    "slug": "نیسان",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-09-18T19:14:25.414Z",
+    "updated_at": "2026-09-18T19:14:25.414Z",
+    "name": "کیا",
+    "name_fa": "کیا",
+    "slug": "کیا",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "کره جنوبی",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 4,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.712Z",
+    "updated_at": "2026-09-19T13:55:59.013Z",
+    "name": "Abarth",
+    "name_fa": "آبارث",
+    "slug": "abarth",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 2
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 5,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.730Z",
+    "updated_at": "2026-09-19T13:58:42.600Z",
+    "name": "Acura",
+    "name_fa": "آکورا",
+    "slug": "acura",
+    "logo": "catalog/brands/3856b659f6c0431f93244232e16211b5.webp",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 6,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.735Z",
+    "updated_at": "2026-09-19T13:59:31.456Z",
+    "name": "Alfa Romeo",
+    "name_fa": "آلفارومئو",
+    "slug": "alfa-romeo",
+    "logo": "catalog/brands/b24ebf92f9c848758d15722cb9923a39.webp",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 7,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.740Z",
+    "updated_at": "2026-09-19T14:00:11.827Z",
+    "name": "Aston Martin",
+    "name_fa": "استون مارتین",
+    "slug": "aston-martin",
+    "logo": "catalog/brands/f1fb50f0943d4fef9efb1731d456a69a.webp",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 8,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.748Z",
+    "updated_at": "2026-09-19T09:39:07.748Z",
+    "name": "Audi",
+    "name_fa": "آئودی",
+    "slug": "audi",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آلمان",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 9,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.754Z",
+    "updated_at": "2026-09-19T09:39:07.754Z",
+    "name": "Bentley",
+    "name_fa": "بنتلی",
+    "slug": "bentley",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 10,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.767Z",
+    "updated_at": "2026-09-19T09:39:07.767Z",
+    "name": "BMW",
+    "name_fa": "بی‌ام‌و",
+    "slug": "bmw",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آلمان",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 11,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.773Z",
+    "updated_at": "2026-09-19T09:39:07.773Z",
+    "name": "Bugatti",
+    "name_fa": "بوگاتی",
+    "slug": "bugatti",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "فرانسه",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 12,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.793Z",
+    "updated_at": "2026-09-19T09:39:07.793Z",
+    "name": "Buick",
+    "name_fa": "بیوک",
+    "slug": "buick",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 13,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.799Z",
+    "updated_at": "2026-09-19T09:39:07.799Z",
+    "name": "Cadillac",
+    "name_fa": "کادیلاک",
+    "slug": "cadillac",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 14,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.810Z",
+    "updated_at": "2026-09-19T09:39:07.810Z",
+    "name": "Chevrolet",
+    "name_fa": "شورولت",
+    "slug": "chevrolet",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 15,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.825Z",
+    "updated_at": "2026-09-19T09:39:07.825Z",
+    "name": "Chrysler",
+    "name_fa": "کرایسلر",
+    "slug": "chrysler",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 16,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.830Z",
+    "updated_at": "2026-09-19T09:39:07.830Z",
+    "name": "Citroen",
+    "name_fa": "سیتروئن",
+    "slug": "citroen",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "فرانسه",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 17,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.838Z",
+    "updated_at": "2026-09-19T09:39:07.838Z",
+    "name": "Cupra",
+    "name_fa": "کوپرا",
+    "slug": "cupra",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "اسپانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 18,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.846Z",
+    "updated_at": "2026-09-19T09:39:07.846Z",
+    "name": "Dacia",
+    "name_fa": "داچیا",
+    "slug": "dacia",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "رومانی",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 19,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.852Z",
+    "updated_at": "2026-09-19T09:39:07.852Z",
+    "name": "Daewoo",
+    "name_fa": "دوو",
+    "slug": "daewoo",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "کره جنوبی",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 20,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.857Z",
+    "updated_at": "2026-09-19T09:39:07.857Z",
+    "name": "Daihatsu",
+    "name_fa": "دایهاتسو",
+    "slug": "daihatsu",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 21,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.872Z",
+    "updated_at": "2026-09-19T13:55:31.100Z",
+    "name": "Dodge",
+    "name_fa": "دوج",
+    "slug": "dodge",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 1
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 22,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.877Z",
+    "updated_at": "2026-09-19T09:39:07.877Z",
+    "name": "DS Automobiles",
+    "name_fa": "دی‌اس",
+    "slug": "ds-automobiles",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "فرانسه",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 23,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.887Z",
+    "updated_at": "2026-09-19T09:39:07.887Z",
+    "name": "Ferrari",
+    "name_fa": "فراری",
+    "slug": "ferrari",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 24,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.894Z",
+    "updated_at": "2026-09-19T09:39:07.894Z",
+    "name": "Fiat",
+    "name_fa": "فیات",
+    "slug": "fiat",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 25,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.919Z",
+    "updated_at": "2026-09-19T09:39:07.919Z",
+    "name": "Genesis",
+    "name_fa": "جنسیس",
+    "slug": "genesis",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "کره جنوبی",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 26,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.925Z",
+    "updated_at": "2026-09-19T09:39:07.925Z",
+    "name": "GMC",
+    "name_fa": "جی‌ام‌سی",
+    "slug": "gmc",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 27,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.932Z",
+    "updated_at": "2026-09-19T09:39:07.932Z",
+    "name": "Honda",
+    "name_fa": "هوندا",
+    "slug": "honda",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 28,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.937Z",
+    "updated_at": "2026-09-19T09:39:07.937Z",
+    "name": "Hyundai",
+    "name_fa": "هیوندای",
+    "slug": "hyundai",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "کره جنوبی",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 29,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.943Z",
+    "updated_at": "2026-09-19T09:39:07.943Z",
+    "name": "Infiniti",
+    "name_fa": "اینفینیتی",
+    "slug": "infiniti",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 30,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.956Z",
+    "updated_at": "2026-09-19T09:39:07.956Z",
+    "name": "Isuzu",
+    "name_fa": "ایسوزو",
+    "slug": "isuzu",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 31,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.961Z",
+    "updated_at": "2026-09-19T09:39:07.961Z",
+    "name": "Iveco",
+    "name_fa": "ایویکو",
+    "slug": "iveco",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 32,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.973Z",
+    "updated_at": "2026-09-19T09:39:07.973Z",
+    "name": "Jaguar",
+    "name_fa": "جگوار",
+    "slug": "jaguar",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 33,
+  "fields": {
+    "created_at": "2026-09-19T09:39:07.977Z",
+    "updated_at": "2026-09-19T09:39:07.977Z",
+    "name": "Jeep",
+    "name_fa": "جیپ",
+    "slug": "jeep",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 34,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.004Z",
+    "updated_at": "2026-09-19T09:39:08.004Z",
+    "name": "Koenigsegg",
+    "name_fa": "کونیگزگ",
+    "slug": "koenigsegg",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "سوئد",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 35,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.009Z",
+    "updated_at": "2026-09-19T09:39:08.009Z",
+    "name": "Lamborghini",
+    "name_fa": "لامبورگینی",
+    "slug": "lamborghini",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 36,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.032Z",
+    "updated_at": "2026-09-19T09:39:08.032Z",
+    "name": "Lancia",
+    "name_fa": "لانچیا",
+    "slug": "lancia",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 37,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.046Z",
+    "updated_at": "2026-09-19T09:39:08.046Z",
+    "name": "Land Rover",
+    "name_fa": "لندروور",
+    "slug": "land-rover",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 38,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.074Z",
+    "updated_at": "2026-09-19T09:39:08.074Z",
+    "name": "Lexus",
+    "name_fa": "لکسوس",
+    "slug": "lexus",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 39,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.079Z",
+    "updated_at": "2026-09-19T09:39:08.079Z",
+    "name": "Lincoln",
+    "name_fa": "لینکلن",
+    "slug": "lincoln",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 40,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.084Z",
+    "updated_at": "2026-09-19T09:39:08.093Z",
+    "name": "Lotus",
+    "name_fa": "لوتوس",
+    "slug": "lotus",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 41,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.099Z",
+    "updated_at": "2026-09-19T09:39:08.099Z",
+    "name": "Maserati",
+    "name_fa": "مازراتی",
+    "slug": "maserati",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 42,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.105Z",
+    "updated_at": "2026-09-19T09:39:08.105Z",
+    "name": "Mazda",
+    "name_fa": "مزدا",
+    "slug": "mazda",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 43,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.118Z",
+    "updated_at": "2026-09-19T09:39:08.118Z",
+    "name": "McLaren",
+    "name_fa": "مک‌لارن",
+    "slug": "mclaren",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 44,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.131Z",
+    "updated_at": "2026-09-19T09:39:08.131Z",
+    "name": "Mercedes-Benz",
+    "name_fa": "مرسدس بنز",
+    "slug": "mercedes-benz",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آلمان",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 45,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.136Z",
+    "updated_at": "2026-09-19T09:39:08.136Z",
+    "name": "MG",
+    "name_fa": "ام‌جی",
+    "slug": "mg",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 46,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.149Z",
+    "updated_at": "2026-09-19T09:39:08.150Z",
+    "name": "MINI",
+    "name_fa": "مینی",
+    "slug": "mini",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 47,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.155Z",
+    "updated_at": "2026-09-19T09:39:08.155Z",
+    "name": "Mitsubishi",
+    "name_fa": "میتسوبیشی",
+    "slug": "mitsubishi",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 48,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.181Z",
+    "updated_at": "2026-09-19T09:39:08.181Z",
+    "name": "Opel",
+    "name_fa": "اوپل",
+    "slug": "opel",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آلمان",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 49,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.194Z",
+    "updated_at": "2026-09-19T09:39:08.195Z",
+    "name": "Peugeot",
+    "name_fa": "پژو",
+    "slug": "peugeot",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "فرانسه",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 50,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.199Z",
+    "updated_at": "2026-09-19T09:39:08.199Z",
+    "name": "Polestar",
+    "name_fa": "پل‌استار",
+    "slug": "polestar",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "سوئد",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 51,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.212Z",
+    "updated_at": "2026-09-19T09:39:08.212Z",
+    "name": "Porsche",
+    "name_fa": "پورشه",
+    "slug": "porsche",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آلمان",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 52,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.216Z",
+    "updated_at": "2026-09-19T09:39:08.216Z",
+    "name": "Renault",
+    "name_fa": "رنو",
+    "slug": "renault",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "فرانسه",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 53,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.228Z",
+    "updated_at": "2026-09-19T09:39:08.229Z",
+    "name": "Rolls-Royce",
+    "name_fa": "رولزرویس",
+    "slug": "rolls-royce",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "بریتانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 54,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.233Z",
+    "updated_at": "2026-09-19T09:39:08.233Z",
+    "name": "Saab",
+    "name_fa": "ساب",
+    "slug": "saab",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "سوئد",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 55,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.245Z",
+    "updated_at": "2026-09-19T09:39:08.245Z",
+    "name": "SEAT",
+    "name_fa": "سئات",
+    "slug": "seat",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "اسپانیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 56,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.250Z",
+    "updated_at": "2026-09-19T09:39:08.250Z",
+    "name": "Skoda",
+    "name_fa": "اشکودا",
+    "slug": "skoda",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "جمهوری چک",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 57,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.262Z",
+    "updated_at": "2026-09-19T09:39:08.262Z",
+    "name": "Smart",
+    "name_fa": "اسمارت",
+    "slug": "smart",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آلمان",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 58,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.267Z",
+    "updated_at": "2026-09-19T09:39:08.267Z",
+    "name": "Subaru",
+    "name_fa": "سوبارو",
+    "slug": "subaru",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 59,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.281Z",
+    "updated_at": "2026-09-19T09:39:08.281Z",
+    "name": "Suzuki",
+    "name_fa": "سوزوکی",
+    "slug": "suzuki",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 60,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.286Z",
+    "updated_at": "2026-09-19T09:39:08.286Z",
+    "name": "Tesla",
+    "name_fa": "تسلا",
+    "slug": "tesla",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 61,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.291Z",
+    "updated_at": "2026-09-19T09:39:08.291Z",
+    "name": "Toyota",
+    "name_fa": "تویوتا",
+    "slug": "toyota",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ژاپن",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 62,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.303Z",
+    "updated_at": "2026-09-19T09:39:08.303Z",
+    "name": "Volkswagen",
+    "name_fa": "فولکس‌واگن",
+    "slug": "volkswagen",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آلمان",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 63,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.307Z",
+    "updated_at": "2026-09-19T09:39:08.307Z",
+    "name": "Volvo",
+    "name_fa": "ولوو",
+    "slug": "volvo",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "سوئد",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 64,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.321Z",
+    "updated_at": "2026-09-19T09:39:08.321Z",
+    "name": "Lada",
+    "name_fa": "لادا",
+    "slug": "lada",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "روسیه",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 65,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.326Z",
+    "updated_at": "2026-09-19T09:39:08.326Z",
+    "name": "Proton",
+    "name_fa": "پروتون",
+    "slug": "proton",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "مالزی",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 66,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.338Z",
+    "updated_at": "2026-09-19T09:39:08.338Z",
+    "name": "KGM",
+    "name_fa": "کی‌جی‌ام (سانگ‌یانگ)",
+    "slug": "kgm",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "کره جنوبی",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 67,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.342Z",
+    "updated_at": "2026-09-19T09:39:08.343Z",
+    "name": "Tata",
+    "name_fa": "تاتا",
+    "slug": "tata",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "هند",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 68,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.354Z",
+    "updated_at": "2026-09-19T09:39:08.354Z",
+    "name": "Mahindra",
+    "name_fa": "ماهیندرا",
+    "slug": "mahindra",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "هند",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 69,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.367Z",
+    "updated_at": "2026-09-19T09:39:08.367Z",
+    "name": "BAIC",
+    "name_fa": "بایک",
+    "slug": "baic",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 70,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.373Z",
+    "updated_at": "2026-09-19T09:39:08.373Z",
+    "name": "Bestune",
+    "name_fa": "بستیون",
+    "slug": "bestune",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 71,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.385Z",
+    "updated_at": "2026-09-19T09:39:08.385Z",
+    "name": "Borgward",
+    "name_fa": "بورگوارد",
+    "slug": "borgward",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آلمان",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 72,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.391Z",
+    "updated_at": "2026-09-19T09:39:08.391Z",
+    "name": "Brilliance",
+    "name_fa": "برلیانس",
+    "slug": "brilliance",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 73,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.397Z",
+    "updated_at": "2026-09-19T09:39:08.397Z",
+    "name": "BYD",
+    "name_fa": "بی‌وای‌دی",
+    "slug": "byd",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 74,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.403Z",
+    "updated_at": "2026-09-19T09:39:08.403Z",
+    "name": "Changan",
+    "name_fa": "چانگان",
+    "slug": "changan",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 75,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.414Z",
+    "updated_at": "2026-09-19T09:39:08.414Z",
+    "name": "Chery",
+    "name_fa": "چری",
+    "slug": "chery",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 76,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.420Z",
+    "updated_at": "2026-09-19T09:39:08.420Z",
+    "name": "Dongfeng",
+    "name_fa": "دانگ‌فنگ",
+    "slug": "dongfeng",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 77,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.425Z",
+    "updated_at": "2026-09-19T09:39:08.425Z",
+    "name": "Exeed",
+    "name_fa": "اکسید",
+    "slug": "exeed",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 78,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.437Z",
+    "updated_at": "2026-09-19T09:39:08.437Z",
+    "name": "FAW",
+    "name_fa": "فاو",
+    "slug": "faw",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 79,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.451Z",
+    "updated_at": "2026-09-19T09:39:08.451Z",
+    "name": "Foton",
+    "name_fa": "فوتون",
+    "slug": "foton",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 80,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.466Z",
+    "updated_at": "2026-09-19T09:39:08.466Z",
+    "name": "GAC",
+    "name_fa": "گک",
+    "slug": "gac",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 81,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.472Z",
+    "updated_at": "2026-09-19T09:39:08.472Z",
+    "name": "Geely",
+    "name_fa": "جیلی",
+    "slug": "geely",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 82,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.479Z",
+    "updated_at": "2026-09-19T09:39:08.480Z",
+    "name": "Great Wall",
+    "name_fa": "گریت وال",
+    "slug": "great-wall",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 83,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.485Z",
+    "updated_at": "2026-09-19T09:39:08.485Z",
+    "name": "Haima",
+    "name_fa": "هایما",
+    "slug": "haima",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 84,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.491Z",
+    "updated_at": "2026-09-19T09:39:08.491Z",
+    "name": "Haval",
+    "name_fa": "هاوال",
+    "slug": "haval",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 85,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.497Z",
+    "updated_at": "2026-09-19T09:39:08.497Z",
+    "name": "Hongqi",
+    "name_fa": "هونگچی",
+    "slug": "hongqi",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 86,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.510Z",
+    "updated_at": "2026-09-19T09:39:08.511Z",
+    "name": "JAC",
+    "name_fa": "جک",
+    "slug": "jac",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 87,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.516Z",
+    "updated_at": "2026-09-19T09:39:08.516Z",
+    "name": "Jaecoo",
+    "name_fa": "جیکو",
+    "slug": "jaecoo",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 88,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.526Z",
+    "updated_at": "2026-09-19T09:39:08.526Z",
+    "name": "Jetour",
+    "name_fa": "جتور",
+    "slug": "jetour",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 89,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.541Z",
+    "updated_at": "2026-09-19T09:39:08.541Z",
+    "name": "Kaiyi",
+    "name_fa": "کایی",
+    "slug": "kaiyi",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 90,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.548Z",
+    "updated_at": "2026-09-19T09:39:08.548Z",
+    "name": "Leapmotor",
+    "name_fa": "لیپ‌موتور",
+    "slug": "leapmotor",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 91,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.563Z",
+    "updated_at": "2026-09-19T09:39:08.563Z",
+    "name": "Li Auto",
+    "name_fa": "لی اتو",
+    "slug": "li-auto",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 92,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.571Z",
+    "updated_at": "2026-09-19T09:39:08.571Z",
+    "name": "Lifan",
+    "name_fa": "لیفان",
+    "slug": "lifan",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 93,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.576Z",
+    "updated_at": "2026-09-19T09:39:08.576Z",
+    "name": "Lynk & Co",
+    "name_fa": "لینک اند کو",
+    "slug": "lynk-co",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 94,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.587Z",
+    "updated_at": "2026-09-19T09:39:08.587Z",
+    "name": "Maxus",
+    "name_fa": "مکسوس",
+    "slug": "maxus",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 95,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.592Z",
+    "updated_at": "2026-09-19T09:39:08.592Z",
+    "name": "NIO",
+    "name_fa": "نیو",
+    "slug": "nio",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 96,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.598Z",
+    "updated_at": "2026-09-19T09:39:08.598Z",
+    "name": "Omoda",
+    "name_fa": "اومودا",
+    "slug": "omoda",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 97,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.604Z",
+    "updated_at": "2026-09-19T09:39:08.604Z",
+    "name": "Roewe",
+    "name_fa": "رووی",
+    "slug": "roewe",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 98,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.616Z",
+    "updated_at": "2026-09-19T09:39:08.616Z",
+    "name": "Soueast",
+    "name_fa": "سوئیست",
+    "slug": "soueast",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 99,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.623Z",
+    "updated_at": "2026-09-19T09:39:08.623Z",
+    "name": "SWM",
+    "name_fa": "اس‌دبلیوام",
+    "slug": "swm",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 100,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.630Z",
+    "updated_at": "2026-09-19T09:39:08.630Z",
+    "name": "Tank",
+    "name_fa": "تانک",
+    "slug": "tank",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 101,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.637Z",
+    "updated_at": "2026-09-19T09:39:08.637Z",
+    "name": "Voyah",
+    "name_fa": "وویا",
+    "slug": "voyah",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 102,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.642Z",
+    "updated_at": "2026-09-19T09:39:08.642Z",
+    "name": "Wey",
+    "name_fa": "وی",
+    "slug": "wey",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 103,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.652Z",
+    "updated_at": "2026-09-19T09:39:08.652Z",
+    "name": "XPeng",
+    "name_fa": "اکسپنگ",
+    "slug": "xpeng",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 104,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.657Z",
+    "updated_at": "2026-09-19T09:39:08.657Z",
+    "name": "Zeekr",
+    "name_fa": "زیکر",
+    "slug": "zeekr",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 105,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.663Z",
+    "updated_at": "2026-09-19T09:39:08.663Z",
+    "name": "Zotye",
+    "name_fa": "زوتی",
+    "slug": "zotye",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 106,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.676Z",
+    "updated_at": "2026-09-19T09:39:08.676Z",
+    "name": "IKCO",
+    "name_fa": "ایران خودرو",
+    "slug": "ikco",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایران",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 107,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.681Z",
+    "updated_at": "2026-09-19T09:39:08.681Z",
+    "name": "Saipa",
+    "name_fa": "سایپا",
+    "slug": "saipa",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایران",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 108,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.694Z",
+    "updated_at": "2026-09-19T09:39:08.694Z",
+    "name": "Pars Khodro",
+    "name_fa": "پارس خودرو",
+    "slug": "pars-khodro",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایران",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 109,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.700Z",
+    "updated_at": "2026-09-19T09:39:08.700Z",
+    "name": "MVM",
+    "name_fa": "ام‌وی‌ام",
+    "slug": "mvm",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایران",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 110,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.706Z",
+    "updated_at": "2026-09-19T09:39:08.706Z",
+    "name": "KMC",
+    "name_fa": "کی‌ام‌سی",
+    "slug": "kmc",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایران",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 111,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.719Z",
+    "updated_at": "2026-09-19T09:39:08.719Z",
+    "name": "FMC",
+    "name_fa": "اف‌ام‌سی",
+    "slug": "fmc",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایران",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 112,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.735Z",
+    "updated_at": "2026-09-19T09:39:08.735Z",
+    "name": "Lamari",
+    "name_fa": "لاماری",
+    "slug": "lamari",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایران",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 113,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.741Z",
+    "updated_at": "2026-09-19T09:39:08.741Z",
+    "name": "Bahman Motor",
+    "name_fa": "بهمن موتور",
+    "slug": "bahman-motor",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایران",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 114,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.753Z",
+    "updated_at": "2026-09-19T09:39:08.753Z",
+    "name": "Dayun",
+    "name_fa": "دایون",
+    "slug": "dayun",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 115,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.766Z",
+    "updated_at": "2026-09-19T09:39:08.766Z",
+    "name": "Shacman",
+    "name_fa": "شاکمان",
+    "slug": "shacman",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "چین",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 116,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.772Z",
+    "updated_at": "2026-09-19T09:39:08.772Z",
+    "name": "Rivian",
+    "name_fa": "ریویان",
+    "slug": "rivian",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 117,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.784Z",
+    "updated_at": "2026-09-19T09:39:08.784Z",
+    "name": "Lucid",
+    "name_fa": "لوسید",
+    "slug": "lucid",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "آمریکا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 118,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.790Z",
+    "updated_at": "2026-09-19T09:39:08.790Z",
+    "name": "VinFast",
+    "name_fa": "وین‌فست",
+    "slug": "vinfast",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ویتنام",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 119,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.805Z",
+    "updated_at": "2026-09-19T09:39:08.805Z",
+    "name": "Rimac",
+    "name_fa": "ریماک",
+    "slug": "rimac",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "کرواسی",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.brand",
+  "pk": 120,
+  "fields": {
+    "created_at": "2026-09-19T09:39:08.810Z",
+    "updated_at": "2026-09-19T09:39:08.810Z",
+    "name": "Pagani",
+    "name_fa": "پاگانی",
+    "slug": "pagani",
+    "logo": "",
+    "banner": "",
+    "logo_url": "",
+    "country": "ایتالیا",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "catalog.vehiclelisting",
+  "pk": 2,
+  "fields": {
+    "created_at": "2026-09-10T13:16:10.213Z",
+    "updated_at": "2026-09-10T13:38:12.097Z",
+    "owner": [
+      "+989133939394"
+    ],
+    "business": null,
+    "status": "active",
+    "brand_name": "فورد",
+    "model_name": "موستانگ",
+    "trim_name": "gt500",
+    "production_year": 2023,
+    "plate_type": "free_zone",
+    "free_zone": "انزلی",
+    "province": "گیلان",
+    "city": "رشت",
+    "color": "مشکی",
+    "body_type": "اسپرت",
+    "engine_description": "2000",
+    "transmission": "manual",
+    "fuel_type": "gasoline",
+    "drivetrain": "rwd",
+    "mileage": 30000,
+    "condition": "like_new",
+    "body_condition": "no_paint",
+    "chassis_condition": "sealed",
+    "engine_condition": "healthy",
+    "insurance_months": 5,
+    "ownership_status": "owner",
+    "description": "خودرو به شدت سرپا و سالم است",
+    "price_type": "negotiable",
+    "price": 1280000000,
+    "trade_possible": false,
+    "is_instant_sale": false,
+    "is_special_sale": true,
+    "is_inspected": false,
+    "view_count": 8,
+    "contact_number": "+989133939394",
+    "contact_preference": "both",
+    "video": "listings/7/videos/24d742423c3d4418a34b5281b7452930.mp4",
+    "rejection_reason": "",
+    "published_at": "2026-09-10T13:30:26Z"
+  }
+},
+{
+  "model": "catalog.vehiclelisting",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-09-10T13:35:27.297Z",
+    "updated_at": "2026-09-10T13:39:09.518Z",
+    "owner": [
+      "+989133939394"
+    ],
+    "business": null,
+    "status": "active",
+    "brand_name": "نیسان",
+    "model_name": "e",
+    "trim_name": "GTR",
+    "production_year": 2019,
+    "plate_type": "free_zone",
+    "free_zone": "قشم",
+    "province": "هرمزگان",
+    "city": "کیش",
+    "color": "آبی",
+    "body_type": "کابریوله",
+    "engine_description": "2000",
+    "transmission": "manual",
+    "fuel_type": "gasoline",
+    "drivetrain": "fwd",
+    "mileage": 389990,
+    "condition": "clean_used",
+    "body_condition": "around_paint",
+    "chassis_condition": "minor_damage",
+    "engine_condition": "needs_service",
+    "insurance_months": 4,
+    "ownership_status": "ready",
+    "description": "اندکی نیاز به تعمیر دارد",
+    "price_type": "negotiable",
+    "price": 6000000000,
+    "trade_possible": true,
+    "is_instant_sale": true,
+    "is_special_sale": false,
+    "is_inspected": false,
+    "view_count": 1,
+    "contact_number": "+989133939394",
+    "contact_preference": "both",
+    "video": "",
+    "rejection_reason": "",
+    "published_at": "2026-09-10T13:35:35Z"
+  }
+},
+{
+  "model": "catalog.vehiclelisting",
+  "pk": 4,
+  "fields": {
+    "created_at": "2026-09-18T18:28:20.857Z",
+    "updated_at": "2026-09-18T18:28:51.279Z",
+    "owner": [
+      "+989988376353"
+    ],
+    "business": 3,
+    "status": "active",
+    "brand_name": "کیا",
+    "model_name": "کوپه",
+    "trim_name": "t790",
+    "production_year": 2021,
+    "plate_type": "temporary_import",
+    "free_zone": "",
+    "province": "قزوین",
+    "city": "قزوین",
+    "color": "نقره‌ای",
+    "body_type": "کوپه",
+    "engine_description": "1998",
+    "transmission": "manual",
+    "fuel_type": "gasoline",
+    "drivetrain": "fwd",
+    "mileage": 59000,
+    "condition": "like_new",
+    "body_condition": "one_spot",
+    "chassis_condition": "minor_damage",
+    "engine_condition": "needs_service",
+    "insurance_months": 6,
+    "ownership_status": "owner",
+    "description": "همه چی آرومه",
+    "price_type": "negotiable",
+    "price": 38000000,
+    "trade_possible": false,
+    "is_instant_sale": false,
+    "is_special_sale": false,
+    "is_inspected": false,
+    "view_count": 0,
+    "contact_number": "+989988376353",
+    "contact_preference": "both",
+    "video": "",
+    "rejection_reason": "",
+    "published_at": "2026-09-18T18:28:51.279Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 6,
+  "fields": {
+    "listing": 2,
+    "file": "listings/2/images/d80aaaa1e6a64c14be98b2642a8e55e8.webp",
+    "sort_order": 0,
+    "file_size": 55424,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:16:10.935Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 7,
+  "fields": {
+    "listing": 2,
+    "file": "listings/2/images/69ecca16a0de4a25aae9a1391a76cd5d.webp",
+    "sort_order": 1,
+    "file_size": 30068,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:16:11.171Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 8,
+  "fields": {
+    "listing": 2,
+    "file": "listings/2/images/5ce38b83fb5a4156a9e01b296f878636.webp",
+    "sort_order": 2,
+    "file_size": 53010,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:16:11.288Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 9,
+  "fields": {
+    "listing": 2,
+    "file": "listings/2/images/9e05b572b0b94c37a62f55e863228e27.webp",
+    "sort_order": 3,
+    "file_size": 20728,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:16:11.373Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 10,
+  "fields": {
+    "listing": 2,
+    "file": "listings/2/images/aa85e5a80cef4b0b91dff58591569121.webp",
+    "sort_order": 4,
+    "file_size": 53010,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:16:11.438Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 12,
+  "fields": {
+    "listing": 3,
+    "file": "listings/3/images/8d4f3c312b9d4689966f69ec6947bfb7.webp",
+    "sort_order": 0,
+    "file_size": 18020,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:35:27.740Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 13,
+  "fields": {
+    "listing": 3,
+    "file": "listings/3/images/55cae40561d04344be7abac985df4fb0.webp",
+    "sort_order": 1,
+    "file_size": 70590,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:35:27.785Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 14,
+  "fields": {
+    "listing": 3,
+    "file": "listings/3/images/fee3c734c7dd470e9a667393568396a9.webp",
+    "sort_order": 2,
+    "file_size": 69096,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:35:27.825Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 15,
+  "fields": {
+    "listing": 3,
+    "file": "listings/3/images/2720302bc75f4087ab5a24582c5e813b.webp",
+    "sort_order": 3,
+    "file_size": 40976,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:35:27.882Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 16,
+  "fields": {
+    "listing": 3,
+    "file": "listings/3/images/42a8e613887b4c6eae06f450d0b68122.webp",
+    "sort_order": 4,
+    "file_size": 27812,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-10T13:35:27.938Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 17,
+  "fields": {
+    "listing": 4,
+    "file": "listings/4/images/c427cad50a4d42f6b03f92c342b40dfc.webp",
+    "sort_order": 0,
+    "file_size": 85512,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-18T18:28:20.927Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 18,
+  "fields": {
+    "listing": 4,
+    "file": "listings/4/images/7c4e5bbf63d9409da462e7df85b37da5.webp",
+    "sort_order": 1,
+    "file_size": 131904,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-18T18:28:20.975Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 19,
+  "fields": {
+    "listing": 4,
+    "file": "listings/4/images/d1db97efcf6b4f1f89f3f707587ed0f5.webp",
+    "sort_order": 2,
+    "file_size": 23036,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-18T18:28:21.019Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 20,
+  "fields": {
+    "listing": 4,
+    "file": "listings/4/images/303453e9884546dea013961eb5b72725.webp",
+    "sort_order": 3,
+    "file_size": 40976,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-18T18:28:21.368Z"
+  }
+},
+{
+  "model": "catalog.vehiclelistingimage",
+  "pk": 21,
+  "fields": {
+    "listing": 4,
+    "file": "listings/4/images/fe28fee8b8504c83b652157aa0b24413.webp",
+    "sort_order": 4,
+    "file_size": 219252,
+    "mime_type": "image/webp",
+    "created_at": "2026-09-18T18:28:21.424Z"
+  }
+},
+{
+  "model": "catalog.listingfavorite",
+  "pk": 3,
+  "fields": {
+    "created_at": "2026-09-18T15:06:07.942Z",
+    "updated_at": "2026-09-18T15:06:07.942Z",
+    "user": [
+      "kamyar"
+    ],
+    "listing": 2
+  }
+},
+{
+  "model": "content.educationalvideo",
+  "pk": 1,
+  "fields": {
+    "title": "نگاهی به سوناتا 2025 | Hyundai Sonata",
+    "slug": "sonata-2025",
+    "category": "review",
+    "description": "هرمس خودرو یکی از عرضه‌کنندگان رسمی محصولات متعلق به برندهای کیا و هیوندای در کشور است. این دو برند کره‌ای محبوبیت بسیاری نزد مشتریان ایرانی دارند و ماشین‌های آن‌ها به سبب طراحی جذاب خارجی و داخلی و همین‌طور مشخصات فنی مقبول و ایمنی بالا مورد استقبال قرار می‌گیرند.",
+    "content": "به طور خاص، سدان سایزمتوسط سوناتا یک خودرو شناخته‌شده در سطح جهان است که طرفداران بسیاری در کشور دارد.\r\nاز این رو هرمس خودرو تصمیم گرفته جدیدترین مدل آن را روانه بازار کند. در ادامه نگاهی به نسل هشتم هیوندای سوناتا وارداتی هرمس خودرو می‌اندازیم. سوناتا 2025 با ظاهری اسپرت‌تر از همیشه به ایران می‌آید. چراغ‌های جلو، جلوپنجره مشبک و دریچه‌های هوا به صورت یکپارچه با هم ترکیب شده و نمایی عریض را به نمایش می‌گذارد.\r\nیک چراغ افقی باریک درخشنده نیز در بالای این مجموعه به چشم می‌خورد که جلوه‌ای مدرن و آینده‌نگرانه را به وجود می‌آورد. نمای عقب ماشین نیز شامل چراغ باریک و یکپارچه با طراحی H، اسپویلر، آنتن باله کوسه‌ای و سپر اسپرت می‌شود.\r\n\r\n##سخن آغازین\r\n\r\n##نمای داخلی",
+    "author": "تیم تحریریه آزادگذر",
+    "duration": "02:17",
+    "thumbnail": "content/video-thumbnails/957e1bcf28364d45bd0fef14d7418050.webp",
+    "video": "content/videos/d742eca845e74b019c9c1de960e512ec.mp4",
+    "is_published": true,
+    "published_at": "2026-09-19T17:50:03Z",
+    "view_count": 3,
+    "sort_order": 0,
+    "created_at": "2026-09-19T17:50:09.961Z",
+    "updated_at": "2026-09-19T17:50:09.961Z"
+  }
+},
+{
+  "model": "content.educationalvideo",
+  "pk": 2,
+  "fields": {
+    "title": "نگاهی به ونوسیا وی آنلاین | Venucia V-Online",
+    "slug": "Venucia-V-Online",
+    "category": "review",
+    "description": "‌ خودروهای چینی، بخش بزرگی از محصولات وارداتی به بازار ایران در دور جدید را تشکیل می‌دهند. یکی از محصولات دوست‌داشتنی و معتبر که اکنون در صف ورود به ایران قرار دارد، ونوسیا وی آنلاین است. البته این خودرو با نام ونوسیا بیگ وی نیز شناخته می‌شود. ونوسیا V-Online همانند بسیاری از خودروهای وارداتی به بازار، در بخش کراس‌اوورها قرار می‌گیرد. این خودرو در بخش طراحی و همچنین ساختار فنی، برگ‌های برنده‌ای دارد که برای موفقیت آن در ایران کارآمد خواهد بود.",
+    "content": "...",
+    "author": "تیم تحریریه آزادگذر",
+    "duration": "03:00",
+    "thumbnail": "content/video-thumbnails/3a92c40ff7924a9a93bce5c29a233939.webp",
+    "video": "content/videos/554283ec11de4116b7ecfff36df2be13.mp4",
+    "is_published": true,
+    "published_at": "2026-09-19T17:56:09Z",
+    "view_count": 2,
+    "sort_order": 0,
+    "created_at": "2026-09-19T17:56:50.333Z",
+    "updated_at": "2026-09-19T17:57:40.639Z"
+  }
+},
+{
+  "model": "content.frequentlyaskedquestion",
+  "pk": 1,
+  "fields": {
+    "question": "خرید خودرو در مناطق آزاد چه شرایطی دارد؟",
+    "answer": "برای خرید خودرو در مناطق آزاد، ابتدا باید شرایط خودرو، نوع پلاک، محدوده مجاز تردد و قوانین مربوط به واردات و نقل‌وانتقال آن بررسی شود. شرایط هر خودرو ممکن است بر اساس منطقه آزاد و مقررات جاری متفاوت باشد.",
+    "category": "buying",
+    "is_published": true,
+    "sort_order": 0,
+    "created_at": "2026-09-19T18:34:51.876Z",
+    "updated_at": "2026-09-19T18:34:51.876Z"
+  }
+},
+{
+  "model": "content.frequentlyaskedquestion",
+  "pk": 2,
+  "fields": {
+    "question": "آیا خودروهای پلاک منطقه آزاد می‌توانند در سراسر کشور تردد کنند؟",
+    "answer": "خودروهای دارای پلاک مناطق آزاد تابع مقررات تردد تعیین‌شده برای همان منطقه هستند و امکان تردد آن‌ها در سرزمین اصلی به شرایط و مجوزهای قانونی بستگی دارد. پیش از خرید، محدوده و شرایط تردد خودرو را بررسی کنید.",
+    "category": "free_zone",
+    "is_published": true,
+    "sort_order": 0,
+    "created_at": "2026-09-19T18:35:26.669Z",
+    "updated_at": "2026-09-19T18:35:51.653Z"
+  }
+},
+{
+  "model": "content.frequentlyaskedquestion",
+  "pk": 3,
+  "fields": {
+    "question": "هنگام خرید خودروی منطقه آزاد به چه نکاتی توجه کنیم؟",
+    "answer": "پیش از خرید، وضعیت سند و مالکیت، نوع پلاک، مدل و مشخصات فنی خودرو، سابقه تصادف و سرویس‌ها، وضعیت بیمه و عوارض و همچنین شرایط نقل‌وانتقال و تردد خودرو را بررسی کنید.",
+    "category": "buying",
+    "is_published": true,
+    "sort_order": 0,
+    "created_at": "2026-09-19T18:35:47.935Z",
+    "updated_at": "2026-09-19T18:35:47.935Z"
+  }
+},
+{
+  "model": "content.frequentlyaskedquestion",
+  "pk": 4,
+  "fields": {
+    "question": "چگونه می‌توانم خودروی منطقه آزاد خود را برای فروش ثبت کنم؟",
+    "answer": "برای فروش خودرو، اطلاعات خودرو شامل برند، مدل، سال تولید، کارکرد، منطقه آزاد، وضعیت فنی، قیمت و تصاویر خودرو را ثبت کنید. پس از بررسی اطلاعات و تأیید آگهی، خودرو برای خریداران نمایش داده می‌شود.",
+    "category": "selling",
+    "is_published": true,
+    "sort_order": 0,
+    "created_at": "2026-09-19T18:36:48.265Z",
+    "updated_at": "2026-09-19T18:36:53.659Z"
+  }
+},
+{
+  "model": "content.frequentlyaskedquestion",
+  "pk": 5,
+  "fields": {
+    "question": "آیا می‌توان خودروهای موجود در مناطق آزاد را با یکدیگر مقایسه کرد؟",
+    "answer": "بله، می‌توانید خودروها را بر اساس عواملی مانند برند، مدل، سال تولید، کارکرد، قیمت، مشخصات فنی و منطقه محل خودرو با یکدیگر مقایسه کنید تا انتخاب مناسب‌تری داشته باشید.",
+    "category": "services",
+    "is_published": true,
+    "sort_order": 0,
+    "created_at": "2026-09-19T18:37:11.812Z",
+    "updated_at": "2026-09-19T18:37:54.980Z"
+  }
+},
+{
+  "model": "content.frequentlyaskedquestion",
+  "pk": 6,
+  "fields": {
+    "question": "قیمت خودروهای مناطق آزاد بر چه اساسی تعیین می‌شود؟",
+    "answer": "قیمت خودرو به عواملی مانند برند و مدل، سال تولید، میزان کارکرد، وضعیت فنی و بدنه، امکانات خودرو، شرایط بازار و محل عرضه بستگی دارد. قیمت اعلام‌شده در آگهی ممکن است با توجه به شرایط بازار تغییر کند.",
+    "category": "buying",
+    "is_published": true,
+    "sort_order": 0,
+    "created_at": "2026-09-19T18:37:34.477Z",
+    "updated_at": "2026-09-19T18:37:34.477Z"
+  }
+},
+{
+  "model": "content.article",
+  "pk": 1,
+  "fields": {
+    "title": "راهنمای خرید خودرو در مناطق آزاد؛ نکات مهم قبل از معامله",
+    "slug": "selling-guide",
+    "summary": "خرید خودرو در مناطق آزاد می‌تواند گزینه‌ای جذاب برای افرادی باشد که به دنبال خودروهای متنوع با شرایط متفاوت از بازار سرزمین اصلی هستند. در این راهنما، مهم‌ترین نکاتی که باید پیش از خرید خودروی منطقه آزاد بررسی کنید، از وضعیت سند و پلاک تا شرایط تردد، قیمت و سلامت خودرو را بررسی می‌کنیم.",
+    "content": "قبل از خرید خودروی منطقه آزاد چه مواردی را بررسی کنیم؟\r\n\r\nپیش از پرداخت وجه یا امضای قرارداد، بهتر است اطلاعات خودرو و مدارک آن را به‌صورت کامل بررسی کنید. مهم‌ترین موارد عبارت‌اند از:\r\n\r\nبرند و مدل خودرو\r\nسال تولید\r\nمیزان کارکرد\r\nوضعیت فنی موتور و گیربکس\r\nوضعیت بدنه و شاسی\r\nسابقه تصادف و تعمیرات\r\nوضعیت سند و مالکیت\r\nنوع و وضعیت پلاک\r\nبیمه و عوارض مربوط به خودرو\r\nشرایط نقل‌وانتقال\r\nمحدوده مجاز تردد\r\nاهمیت بررسی وضعیت فنی خودرو\r\n\r\nقیمت پایین‌تر یک خودرو نباید تنها معیار خرید باشد. بررسی موتور، گیربکس، سیستم تعلیق، ترمزها، لاستیک‌ها و تجهیزات برقی می‌تواند از هزینه‌های سنگین بعدی جلوگیری کند.\r\n\r\nاگر خودرو کارکرد بالایی دارد، بررسی سوابق سرویس و تعمیرات آن اهمیت بیشتری پیدا می‌کند. همچنین بهتر است پیش از معامله، خودرو توسط یک کارشناس فنی مستقل بررسی شود.\r\n\r\nشرایط تردد خودروهای مناطق آزاد\r\n\r\nیکی از مهم‌ترین موضوعات در خرید این خودروها، شرایط تردد است. خودروهای دارای پلاک منطقه آزاد تابع مقررات مربوط به همان منطقه هستند و محدوده و شرایط تردد آن‌ها می‌تواند با خودروهای پلاک سرزمین اصلی متفاوت باشد.\r\n\r\nبنابراین قبل از خرید، فقط به مدل و قیمت خودرو توجه نکنید و حتماً شرایط قانونی تردد همان خودرو را بررسی کنید.\r\n\r\nمدارک و وضعیت مالکیت خودرو\r\n\r\nبررسی مدارک خودرو یکی از مراحل مهم معامله است. خریدار باید مطمئن شود مشخصات مالک، خودرو و مدارک ارائه‌شده با یکدیگر مطابقت دارند.\r\n\r\nهمچنین پیش از پرداخت وجه، شرایط قانونی نقل‌وانتقال خودرو و وجود هرگونه محدودیت یا بدهی مربوط به آن باید بررسی شود.\r\n\r\nقیمت خودروی منطقه آزاد چگونه تعیین می‌شود؟\r\n\r\nقیمت خودروهای مناطق آزاد به عوامل مختلفی بستگی دارد و نمی‌توان تنها بر اساس مدل خودرو درباره ارزش آن تصمیم گرفت.\r\n\r\nمهم‌ترین عوامل مؤثر بر قیمت عبارت‌اند از:\r\n\r\nمدل و سال تولید\r\nبرند خودرو\r\nمیزان کارکرد\r\nوضعیت فنی\r\nسلامت بدنه\r\nامکانات و آپشن‌ها\r\nوضعیت بازار\r\nمحل عرضه خودرو\r\nشرایط پلاک و تردد\r\n\r\nبه همین دلیل بهتر است قبل از خرید، چند آگهی مشابه را بررسی کنید و قیمت خودروهای هم‌مدل با شرایط نزدیک را با یکدیگر مقایسه کنید.\r\n\r\nخرید خودرو از نمایشگاه یا فروشنده شخصی؟\r\n\r\nخرید از نمایشگاه می‌تواند برای بعضی خریداران فرایند بررسی و معامله را ساده‌تر کند، اما در هر دو حالت باید مدارک و وضعیت واقعی خودرو بررسی شود.\r\n\r\nدر معامله با فروشنده شخصی نیز بهتر است مشخصات خودرو، مالکیت، شرایط انتقال و وضعیت فنی خودرو پیش از پرداخت وجه بررسی شود.\r\n\r\nاشتباهات رایج هنگام خرید خودرو در مناطق آزاد\r\n\r\nبرخی خریداران تنها به ظاهر خودرو و قیمت آن توجه می‌کنند و جزئیات مهم معامله را نادیده می‌گیرند. از جمله اشتباهات رایج می‌توان به موارد زیر اشاره کرد:\r\n\r\nبررسی نکردن وضعیت فنی خودرو\r\nتوجه نکردن به سابقه تصادف\r\nبررسی نکردن مدارک مالکیت\r\nنادیده گرفتن شرایط تردد\r\nمقایسه نکردن قیمت خودروهای مشابه\r\nپرداخت وجه پیش از بررسی کامل مدارک\r\nاعتماد صرف به اطلاعات درج‌شده در آگهی\r\nجمع‌بندی\r\n\r\nخرید خودروی منطقه آزاد می‌تواند انتخاب مناسبی برای برخی خریداران باشد، اما یک معامله مطمئن نیازمند بررسی هم‌زمان قیمت، سلامت فنی، مدارک، وضعیت مالکیت و شرایط تردد خودرو است.\r\n\r\nقبل از نهایی کردن معامله، خودرو را کارشناسی کنید، مدارک آن را بررسی کنید و از شرایط قانونی نقل‌وانتقال و تردد آن مطمئن شوید. مقایسه چند خودروی مشابه نیز می‌تواند دید دقیق‌تری نسبت به قیمت بازار در اختیار شما قرار دهد.",
+    "category": "buying_guide",
+    "author": "تیم تحریریه آزادگذر",
+    "read_time": "8 دقیقه",
+    "cover_image": "content/article-covers/f631f6dd6e1543a181b93a140229970c.webp",
+    "meta_title": "راهنمای خرید خودرو در مناطق آزاد؛ نکات مهم قبل از معامله",
+    "meta_description": "راهنمای کامل خرید خودرو در مناطق آزاد؛ بررسی قیمت، مدارک، وضعیت فنی، پلاک، شرایط تردد و نکات مهمی که قبل از معامله باید بدانید.",
+    "is_published": true,
+    "published_at": "2026-09-19T19:10:37Z",
+    "view_count": 1,
+    "sort_order": 0,
+    "created_at": "2026-09-19T19:10:40.052Z",
+    "updated_at": "2026-09-19T19:10:40.052Z"
+  }
+},
+{
+  "model": "content.aboutpage",
+  "pk": 1,
+  "fields": {
+    "site_key": "main",
+    "hero_title": "درباره ما | مرجع خرید و فروش خودروهای مناطق آزاد",
+    "intro": "ما با هدف ایجاد بستری ساده، شفاف و قابل اعتماد برای خرید و فروش خودروهای مناطق آزاد فعالیت می‌کنیم. در این پلتفرم تلاش می‌کنیم آگهی‌های خودرو را با اطلاعات کاربردی در اختیار کاربران قرار دهیم تا خریداران بتوانند خودروهای مختلف را بررسی و مقایسه کنند و فروشندگان نیز خودروهای خود را به جامعه‌ای از خریداران معرفی کنند.",
+    "hero_image": "content/about/hero/bc91a7e500904bcebfd8be7a9ef07d9a.webp",
+    "why_title": "مأموریت ما",
+    "mission_title": "ساده‌تر کردن مسیر خرید و فروش خودرو",
+    "mission_text": "مأموریت ما ایجاد یک فضای آنلاین ساده و کاربردی برای معرفی، جست‌وجو و مقایسه خودروهای مناطق آزاد است. تلاش می‌کنیم اطلاعات آگهی‌ها را به شکلی شفاف ارائه کنیم تا کاربران بتوانند با آگاهی بیشتری خودرو موردنظر خود را پیدا کنند و فروشندگان نیز بتوانند آگهی خود را در اختیار مخاطبان مرتبط قرار دهند.",
+    "vision_title": "چشم‌انداز ما",
+    "vision_text": "هدف ما تبدیل شدن به یکی از مراجع شناخته‌شده در حوزه خرید و فروش خودروهای مناطق آزاد و ایجاد تجربه‌ای سریع، شفاف و کاربرمحور برای خریداران و فروشندگان است.",
+    "values_title": "ارزش‌های ما",
+    "values_text": "شفافیت در ارائه اطلاعات، احترام به کاربران، سهولت استفاده، توجه به نیاز بازار و ارائه تجربه‌ای مطمئن از مهم‌ترین ارزش‌های ما هستند. ما تلاش می‌کنیم کیفیت اطلاعات و تجربه کاربری را در مسیر توسعه پلتفرم به‌صورت مستمر بهبود دهیم.",
+    "team_title": "تیم ما",
+    "trust_title": "مزیت‌های آزاد گذر",
+    "show_statistics": true,
+    "show_team": true,
+    "show_trust_items": true,
+    "meta_title": "درباره ما | خرید و فروش خودروهای مناطق آزاد",
+    "meta_description": "با ما بیشتر آشنا شوید؛ پلتفرمی برای جست‌وجو، معرفی و خرید و فروش خودروهای مناطق آزاد با تمرکز بر ارائه اطلاعات شفاف و تجربه کاربری ساده.",
+    "is_published": true,
+    "created_at": "2026-09-19T19:55:15.106Z",
+    "updated_at": "2026-09-19T19:55:15.106Z"
+  }
+},
+{
+  "model": "content.teammember",
+  "pk": 1,
+  "fields": {
+    "about_page": 1,
+    "name": "مهدی فرید",
+    "role": "مدیر فروش",
+    "photo": "content/about/team/f96950180220424bb98868247ab91ce4.webp",
+    "description": "مدیر فروش تیم آزاد گذر با 20سال سابقه کاری",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "content.abouttrustitem",
+  "pk": 1,
+  "fields": {
+    "about_page": 1,
+    "title": "جست‌وجوی آسان",
+    "description": "خودروهای مختلف را بر اساس اطلاعات موردنیاز خود پیدا و بررسی کنید.",
+    "icon": "support",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "content.abouttrustitem",
+  "pk": 2,
+  "fields": {
+    "about_page": 1,
+    "title": "دسترسی به آگهی‌های متنوع",
+    "description": "مجموعه‌ای از آگهی‌های خودروهای مناطق آزاد را در یک پلتفرم دنبال کنید.",
+    "icon": "verified",
+    "is_active": true,
+    "sort_order": 0
+  }
+},
+{
+  "model": "service_requests.servicerequest",
+  "pk": 1,
+  "fields": {
+    "public_id": "ed1827ec-07f4-4d9a-a2c0-c1b5a8669b23",
+    "requester": [
+      "+989133939394"
+    ],
+    "listing": null,
+    "assigned_expert": null,
+    "service_type": "inspection",
+    "contact_name": "رضا غفاری",
+    "contact_phone": "+989133939394",
+    "vehicle_type": "سواری",
+    "details": "ggggg",
+    "status": "reviewing",
+    "priority": "normal",
+    "scheduled_for": null,
+    "admin_note": "",
+    "expert_note": "",
+    "completed_at": null,
+    "created_at": "2026-09-11T19:42:09.287Z",
+    "updated_at": "2026-09-18T18:09:59.787Z"
+  }
+},
+{
+  "model": "service_requests.servicerequestevent",
+  "pk": 1,
+  "fields": {
+    "service_request": 1,
+    "actor": [
+      "+989133939394"
+    ],
+    "from_status": "",
+    "to_status": "new",
+    "note": "Service request created.",
+    "created_at": "2026-09-11T19:42:09.298Z"
+  }
+},
+{
+  "model": "service_requests.servicerequestevent",
+  "pk": 34,
+  "fields": {
+    "service_request": 1,
+    "actor": [
+      "kamyar"
+    ],
+    "from_status": "new",
+    "to_status": "reviewing",
+    "note": "",
+    "created_at": "2026-09-18T18:09:59.797Z"
+  }
+}
+]
