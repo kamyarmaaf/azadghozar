@@ -281,6 +281,11 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+# SMS.ir V2 verification templates (secrets must remain server-side).
+SMSIR_API_KEY = os.getenv("SMSIR_API_KEY", "")
+SMSIR_TEMPLATE_ID = os.getenv("SMSIR_TEMPLATE_ID", "")
+SMSIR_CODE_PARAMETER = os.getenv("SMSIR_CODE_PARAMETER", "code")
+
 OTP_CONSOLE_MODE = os.getenv(
     "OTP_CONSOLE_MODE",
     "0",

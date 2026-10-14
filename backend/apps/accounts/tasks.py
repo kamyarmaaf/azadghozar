@@ -27,10 +27,9 @@ def send_otp_sms_now(
         )
         return
 
-    # The real SMS provider will be called here later.
-    raise RuntimeError(
-        "SMS provider is not configured."
-    )
+    from apps.accounts.services.smsir import send_verification_sms
+
+    send_verification_sms(phone_number=phone_number, code=code)
 
 
 @shared_task(
